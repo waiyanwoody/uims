@@ -43,7 +43,7 @@ export function StudentSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-primary text-white z-30 transition-transform duration-300 md:relative md:translate-x-0 ${
+        className={`fixed left-0 top-0 min-h-screen w-64 bg-primary text-white z-30 transition-transform duration-300 md:relative md:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
