@@ -194,49 +194,65 @@ export default function SupervisorDashboard() {
                       ></div>
                     ))
                   : topStudents.map((student, idx) => (
-                      <div
+                      <Link
                         key={student.id}
-                        className={`group p-4 rounded-lg border-2 transition-all hover:shadow-md cursor-pointer animate-slideInUp ${getStatusColor(student.status)}`}
+                        href={`/supervisor/students/${student.id}`}
+                        className={`group block p-4 rounded-lg border-2 transition-all hover:shadow-md animate-slideInUp ${getStatusColor(student.status)}`}
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold shadow-sm">
                             {student.name.charAt(0)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-bold text-foreground">
+                              <h3 className="font-bold text-foreground truncate">
                                 {student.name}
                               </h3>
-                              <span className="text-xs font-semibold opacity-70">
+                              <span className="text-[10px] font-bold opacity-60 flex-shrink-0 uppercase tracking-tighter">
                                 {student.startDate}
                               </span>
                             </div>
-                            <p className="text-sm font-medium text-foreground/80">
-                              {student.internship} • {student.company}
-                            </p>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm font-medium text-foreground/80">
+                              <div className="flex items-center gap-1.5 min-w-[140px]">
+                                <Briefcase className="w-3.5 h-3.5 text-primary" />
+                                <span className="truncate">
+                                  {student.internship}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 align-middle">
+                                <TrendingUp className="w-3.5 h-3.5 text-accent" />
+                                <span className="truncate">
+                                  {student.company}
+                                </span>
+                              </div>
+                            </div>
 
                             {/* Progress Bar */}
-                            <div className="mt-2 space-y-1">
-                              <div className="flex justify-between items-center text-xs">
+                            <div className="mt-4 space-y-1.5">
+                              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
                                 <span className="text-foreground/60">
-                                  Progress
+                                  Current Progress
                                 </span>
-                                <span className="font-semibold text-primary">
+                                <span className="text-primary flex items-center gap-1">
+                                  <Zap className="w-3 h-3 fill-primary" />
                                   {student.progress}%
                                 </span>
                               </div>
-                              <div className="w-full h-2 bg-background/50 rounded-full overflow-hidden">
+                              <div className="w-full h-1.5 bg-background/50 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                                  className="h-full bg-gradient-to-r from-primary via-primary to-accent rounded-full transition-all duration-700 ease-out"
                                   style={{ width: `${student.progress}%` }}
                                 ></div>
                               </div>
                             </div>
                           </div>
-                          <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                          <div className="h-full flex items-center">
+                            <ArrowRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0" />
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
               </div>
             </Card>
