@@ -1,0 +1,5 @@
+/* Helper Text */
+    Demo Credentials:
+    Student: john.student@university.edu / password123
+    HR: hr@techcorp.com / password123
+    Supervisor: prof.supervisor@university.edu / password123
