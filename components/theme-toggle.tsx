@@ -15,7 +15,12 @@ export default function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="outline" size="icon" disabled className="rounded-full">
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled
+        className="h-8 w-8 rounded-lg opacity-0"
+      >
         <Sun className="w-4 h-4" />
       </Button>
     );
@@ -23,10 +28,10 @@ export default function ThemeToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-full"
+      className="h-8 w-8 rounded-lg text-white hover:bg-white/10 hover:text-white border-none"
       title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >
       {theme === "dark" ? (

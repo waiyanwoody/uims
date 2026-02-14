@@ -50,8 +50,8 @@ export default function InternshipMonitoring() {
   const [reportsData, setReportsData] = useState([
     {
       id: 1,
-      student: "Sarah Johnson",
-      company: "Tech Corp",
+      student: "Alex Johnson",
+      company: "Google",
       position: "Frontend Developer",
       weekNumber: 8,
       startDate: "2024-03-04",
@@ -61,13 +61,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Implemented new navigation component and fixed several UI bugs in the dashboard. Started working on the API integration for the profile page.",
-      attachmentName: "weekly_report_sarah_w8.pdf",
+      attachmentName: "weekly_report_alex_w8.pdf",
     },
     {
       id: 2,
-      student: "Michael Chen",
-      company: "CloudTech",
-      position: "Cloud Engineer Intern",
+      student: "Sarah Chen",
+      company: "Meta",
+      position: "Backend Developer",
       weekNumber: 7,
       startDate: "2024-02-26",
       endDate: "2024-03-01",
@@ -76,28 +76,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Assisted in setting up CI/CD pipelines for the staging environment. Monitored server logs and optimized AWS resource allocation.",
-      attachmentName: "Michael_Report_W7.docx",
-    },
-    {
-      id: 3,
-      student: "Emma Davis",
-      company: "DataCorp",
-      position: "Data Analyst",
-      weekNumber: 7,
-      startDate: "2024-02-26",
-      endDate: "2024-03-01",
-      submittedDate: "2024-03-01",
-      submissionTime: "18:00",
-      status: "reviewed",
-      description:
-        "Performed cleanup on the customer dataset. Created visualizations for the quarterly sales report.",
-      attachmentName: "Emma_W7_Data.pdf",
+      attachmentName: "Sarah_Report_W7.docx",
     },
     {
       id: 4,
-      student: "James Wilson",
-      company: "Tech Corp",
-      position: "Backend Developer",
+      student: "Michael Rodriguez",
+      company: "Amazon",
+      position: "UI/UX Designer",
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
@@ -106,13 +91,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Refactored the authentication service to use JWT. Optimized query performance for the analytics dashboard.",
-      attachmentName: "James_Weekly_8.pdf",
+      attachmentName: "Michael_Weekly_8.pdf",
     },
     {
       id: 5,
-      student: "David Martinez",
-      company: "CloudTech",
-      position: "DevOps Intern",
+      student: "Emily Wilson",
+      company: "Microsoft",
+      position: "Software Engineer",
       weekNumber: 6,
       startDate: "2024-02-19",
       endDate: "2024-02-23",
@@ -121,28 +106,13 @@ export default function InternshipMonitoring() {
       status: "reviewed",
       description:
         "Configured Docker containers for the new microservice. Updated Kubernetes manifest files.",
-      attachmentName: "David_M_W6.zip",
-    },
-    {
-      id: 6,
-      student: "Lisa Anderson",
-      company: "InnoSoft",
-      position: "UI/UX Designer",
-      weekNumber: 5,
-      startDate: "2024-02-12",
-      endDate: "2024-02-16",
-      submittedDate: "2024-02-16",
-      submissionTime: "16:00",
-      status: "reviewed",
-      description:
-        "Designed wireframes for the mobile application. Conducted user interviews and gathered feedback on prototypes.",
-      attachmentName: "LisaUX_W5.pdf",
+      attachmentName: "Emily_W6.zip",
     },
     {
       id: 7,
-      student: "Rachel Green",
-      company: "AdAgency",
-      position: "Marketing Intern",
+      student: "David Kim",
+      company: "Apple",
+      position: "Mobile Developer",
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
@@ -151,28 +121,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Prepared social media content for the upcoming product launch. Analyzed campaign performance metrics.",
-      attachmentName: "Rachel_Marketing_W8.pdf",
-    },
-    {
-      id: 8,
-      student: "Ross Geller",
-      company: "Museum",
-      position: "Curator Intern",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-08",
-      submissionTime: "17:00",
-      status: "pending",
-      description:
-        "Assisted in the documentation of new artifacts. Researched historical context for the Paleontology exhibit.",
-      attachmentName: "Ross_Museum_Report.pdf",
+      attachmentName: "David_Mobile_W8.pdf",
     },
     {
       id: 9,
-      student: "Joey Tribbiani",
-      company: "Studio 54",
-      position: "Acting Intern",
+      student: "Jessica Lee",
+      company: "Netflix",
+      position: "Data Scientist",
       weekNumber: 7,
       startDate: "2024-02-26",
       endDate: "2024-03-01",
@@ -181,13 +136,13 @@ export default function InternshipMonitoring() {
       status: "reviewed",
       description:
         "Attended rehearsals for the new play. Assisted the stage manager with equipment setup.",
-      attachmentName: "Joey_W7.png",
+      attachmentName: "Jessica_W7.png",
     },
     {
       id: 10,
-      student: "Chandler Bing",
-      company: "Statistical Analysis",
-      position: "Data Processor",
+      student: "Thor Odinson",
+      company: "Tesla",
+      position: "QA Engineer",
       weekNumber: 7,
       startDate: "2024-02-26",
       endDate: "2024-03-01",
@@ -196,13 +151,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Compiled quarterly transposition data. Performed data entry and verification tasks.",
-      attachmentName: "Chandler_W7_Data.xlsx",
+      attachmentName: "Thor_W7_Data.xlsx",
     },
     {
       id: 11,
-      student: "Monica Geller",
-      company: "Fine Dining",
-      position: "Chef Intern",
+      student: "Wanda Maximoff",
+      company: "Adobe",
+      position: "Security Intern",
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
@@ -211,28 +166,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Managed the appetizer station during dinner service. Assisted in creating the new seasonal menu.",
-      attachmentName: "Monica_Kitchen_W8.pdf",
-    },
-    {
-      id: 12,
-      student: "Phoebe Buffay",
-      company: "Central Perk",
-      position: "Music Intern",
-      weekNumber: 6,
-      startDate: "2024-02-19",
-      endDate: "2024-02-23",
-      submittedDate: "2024-02-23",
-      submissionTime: "14:20",
-      status: "reviewed",
-      description:
-        "Performed daily musical sets. Coordinated with the events manager for weekend performances.",
-      attachmentName: "Phoebe_W6_Music.mp3",
+      attachmentName: "Wanda_Sec_W8.pdf",
     },
     {
       id: 13,
-      student: "William Smith",
-      company: "Tech Corp",
-      position: "Fullstack Intern",
+      student: "Nick Fury",
+      company: "Twitter",
+      position: "Systems Architect",
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
@@ -241,13 +181,13 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Developed the user registration workflow. Implemented unit tests for the backend controllers.",
-      attachmentName: "Will_Summary_W8.pdf",
+      attachmentName: "Nick_Summary_W8.pdf",
     },
     {
       id: 14,
-      student: "John Doe",
-      company: "CloudTech",
-      position: "Network Intern",
+      student: "Vision",
+      company: "Intel",
+      position: "AI Specialist",
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
@@ -256,7 +196,7 @@ export default function InternshipMonitoring() {
       status: "pending",
       description:
         "Troubleshot network connectivity issues in the main office. Assisted in hardware upgrades for the server room.",
-      attachmentName: "JohnD_W8.pdf",
+      attachmentName: "Vision_AI_W8.pdf",
     },
     {
       id: 15,
@@ -460,7 +400,7 @@ export default function InternshipMonitoring() {
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap justify-center">
             {Array.from({ length: totalPages }).map((_, i) => (
               <Button
                 key={i}

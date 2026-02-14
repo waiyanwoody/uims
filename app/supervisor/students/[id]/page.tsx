@@ -109,6 +109,222 @@ export default function StudentProfile() {
       address: "303 Server Farm, Network City",
       skills: ["Linux", "Kubernetes", "Shell Scripting", "Azure"],
     },
+    7: {
+      name: "Rachel Green",
+      studentNumber: "2021MK001",
+      email: "rachel@uni.edu",
+      major: "Marketing",
+      assignedInternship: "Social Media - AdAgency",
+      address: "New York, NY",
+      skills: ["Marketing", "Content Writing", "Social Media"],
+    },
+    8: {
+      name: "Ross Geller",
+      studentNumber: "2021HS001",
+      email: "ross@uni.edu",
+      major: "History",
+      assignedInternship: "Researcher - Museum",
+      address: "New York, NY",
+      skills: ["Paleontology", "Research", "Archiving"],
+    },
+    9: {
+      name: "Joey Tribbiani",
+      studentNumber: "2021AR001",
+      email: "joey@uni.edu",
+      major: "Arts",
+      assignedInternship: "Actor - Studio",
+      address: "New York, NY",
+      skills: ["Acting", "Performance", "Casting"],
+    },
+    10: {
+      name: "Chandler Bing",
+      studentNumber: "2021FN001",
+      email: "chandler@uni.edu",
+      major: "Finance",
+      assignedInternship: "Data Transmuter - Corp",
+      address: "New York, NY",
+      skills: ["Analysis", "Reporting", "Excel"],
+    },
+    11: {
+      name: "Monica Geller",
+      studentNumber: "2021CU001",
+      email: "monica@uni.edu",
+      major: "Culinary",
+      assignedInternship: "Chef - Restaurant",
+      address: "New York, NY",
+      skills: ["Cooking", "Kitchen Management"],
+    },
+    12: {
+      name: "Phoebe Buffay",
+      studentNumber: "2021MU001",
+      email: "phoebe@uni.edu",
+      major: "Music",
+      assignedInternship: "Musician - Central Perk",
+      address: "New York, NY",
+      skills: ["Songwriting", "Guitar", "Performance"],
+    },
+    13: {
+      name: "William Smith",
+      studentNumber: "2021CS013",
+      email: "william@uni.edu",
+      major: "CS",
+      assignedInternship: "Fullstack - Tech Corp",
+      address: "Philadelphia, PA",
+      skills: ["MERN Stack", "Firebase"],
+    },
+    14: {
+      name: "John Doe",
+      studentNumber: "2021IT014",
+      email: "john@uni.edu",
+      major: "IT",
+      assignedInternship: "Network - CloudTech",
+      address: "Los Angeles, CA",
+      skills: ["Cisco", "Routing", "Switching"],
+    },
+    15: {
+      name: "Jane Roe",
+      studentNumber: "2021BA015",
+      email: "jane@uni.edu",
+      major: "BA",
+      assignedInternship: "Analyst - DataCorp",
+      address: "Chicago, IL",
+      skills: ["PowerBI", "Tableau", "Strategy"],
+    },
+    16: {
+      name: "Bob Builder",
+      studentNumber: "2021CS016",
+      email: "bob@uni.edu",
+      major: "CS",
+      assignedInternship: "QA - InnoSoft",
+      address: "Houston, TX",
+      skills: ["Selenium", "Cypress", "Appium"],
+    },
+    17: {
+      name: "Alice Wong",
+      studentNumber: "2021CS017",
+      email: "alice@uni.edu",
+      major: "CS",
+      assignedInternship: "Software Eng - Google",
+      address: "Mountain View, CA",
+      skills: ["Go", "Kubernetes", "C++"],
+    },
+    18: {
+      name: "Bob Martinez",
+      studentNumber: "2021BA018",
+      email: "bob.m@uni.edu",
+      major: "BA",
+      assignedInternship: "Product Manager - Apple",
+      address: "Cupertino, CA",
+      skills: ["Product Strategy", "Agile"],
+    },
+    19: {
+      name: "Carol Davis",
+      studentNumber: "2021DS019",
+      email: "carol@uni.edu",
+      major: "DS",
+      assignedInternship: "Data Science - Meta",
+      address: "Menlo Park, CA",
+      skills: ["PyTorch", "NLP"],
+    },
+    20: {
+      name: "Carl Davis",
+      studentNumber: "2021DS020",
+      email: "carl@uni.edu",
+      major: "DS",
+      assignedInternship: "Data Science - Huawei",
+      address: "Shenzhen, China",
+      skills: ["5G Tech", "Big Data"],
+    },
+    21: {
+      name: "Diana Prince",
+      studentNumber: "2021CS021",
+      email: "diana@uni.edu",
+      major: "CS",
+      assignedInternship: "Security - Amazon",
+      address: "Seattle, WA",
+      skills: ["Cybersecurity", "IAM"],
+    },
+    22: {
+      name: "Peter Parker",
+      studentNumber: "2021CS022",
+      email: "peter@uni.edu",
+      major: "CS",
+      assignedInternship: "Photographer - Daily Bugle",
+      address: "Queens, NY",
+      skills: ["Photography", "Web Design"],
+    },
+    23: {
+      name: "Bruce Wayne",
+      studentNumber: "2021FN023",
+      email: "bruce@uni.edu",
+      major: "Finance",
+      assignedInternship: "CEO Assistant - Wayne Ent",
+      address: "Gotham, NJ",
+      skills: ["Corporate Finance", "Management"],
+    },
+    24: {
+      name: "Clark Kent",
+      studentNumber: "2021JU024",
+      email: "clark@uni.edu",
+      major: "Journalism",
+      assignedInternship: "Reporter - Daily Planet",
+      address: "Metropolis, NY",
+      skills: ["Writing", "Investigation"],
+    },
+    25: {
+      name: "Barry Allen",
+      studentNumber: "2021FO025",
+      email: "barry@uni.edu",
+      major: "Forensics",
+      assignedInternship: "Lab Tech - CCPD",
+      address: "Central City, MO",
+      skills: ["Chemistry", "Evidence Analysis"],
+    },
+    26: {
+      name: "Arthur Curry",
+      studentNumber: "2021MB026",
+      email: "arthur@uni.edu",
+      major: "Marine Bio",
+      assignedInternship: "Researcher - Aquarium",
+      address: "Amnesty Bay, ME",
+      skills: ["Marine Ecology", "Marine Biology"],
+    },
+    27: {
+      name: "Tony Stark",
+      studentNumber: "2021EN027",
+      email: "tony@uni.edu",
+      major: "Engineering",
+      assignedInternship: "Pending assignment",
+      address: "Malibu, CA",
+      skills: ["Mechanical Eng", "AI"],
+    },
+    28: {
+      name: "Steve Rogers",
+      studentNumber: "2021HS028",
+      email: "steve@uni.edu",
+      major: "History",
+      assignedInternship: "Pending assignment",
+      address: "Brooklyn, NY",
+      skills: ["Leadership", "History"],
+    },
+    29: {
+      name: "Natasha Romanoff",
+      studentNumber: "2021BA029",
+      email: "natasha@uni.edu",
+      major: "BA",
+      assignedInternship: "Pending assignment",
+      address: "Moscow, Russia",
+      skills: ["Intelligence", "Strategy"],
+    },
+    30: {
+      name: "Thor Odinson",
+      studentNumber: "2021AS030",
+      email: "thor@uni.edu",
+      major: "Astro",
+      assignedInternship: "Pending assignment",
+      address: "Asgard",
+      skills: ["Astrophysics", "Meteorology"],
+    },
   };
 
   const studentInfo: Student = studentsDB[id] || studentsDB[1]; // Fallback to Sarah if ID not found
@@ -122,92 +338,54 @@ export default function StudentProfile() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  const [weeklyReports, setWeeklyReports] = useState([
-    {
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      status: "pending",
-      description:
-        "Working on implementing the new dashboard design and integrating the student profile APIs.",
-      attachmentName: "report_w8_sarah.pdf",
-      feedback: null,
-    },
-    {
-      weekNumber: 7,
-      startDate: "2024-02-26",
-      endDate: "2024-03-01",
-      status: "reviewed",
-      description:
-        "Completed the authentication module and started the initial setup for the supervisor module.",
-      attachmentName: "report_w7_sarah.pdf",
-      feedback:
-        "Great progress on the authentication module. Keep up the good work on the supervisor implementation!",
-    },
-    {
-      weekNumber: 6,
-      startDate: "2024-02-19",
-      endDate: "2024-02-23",
-      status: "reviewed",
-      description:
-        "Fixed various bugs reported in the beta testing phase. Optimized the database queries for better performance.",
-      attachmentName: "report_w6_sarah.pdf",
-      feedback:
-        "Significant improvement in page load times after your optimizations. Well done.",
-    },
-    {
-      weekNumber: 5,
-      startDate: "2024-02-12",
-      endDate: "2024-02-16",
-      status: "reviewed",
-      description:
-        "Drafted the documentation for the API and finalized the UI wireframes for the mobile application.",
-      attachmentName: "report_w5_sarah.pdf",
-      feedback:
-        "Documentation is clear. The UI wireframes meet all the requirements.",
-    },
-    {
-      weekNumber: 4,
-      startDate: "2024-02-05",
-      endDate: "2024-02-09",
-      status: "reviewed",
-      description:
-        "Conducted user research and gathered requirements for the upcoming features. Prepared the initial project roadmap.",
-      attachmentName: "report_w4_sarah.pdf",
-      feedback:
-        "Project roadmap looks realistic. Research data is very helpful.",
-    },
-    {
-      weekNumber: 3,
-      startDate: "2024-01-29",
-      endDate: "2024-02-02",
-      status: "reviewed",
-      description:
-        "Explored different tech stacks and set up the development environment. Created the initial project repository.",
-      attachmentName: "report_w3_sarah.pdf",
-      feedback: "Good choice on the tech stack. Environment setup is solid.",
-    },
-    {
-      weekNumber: 2,
-      startDate: "2024-01-22",
-      endDate: "2024-01-26",
-      status: "reviewed",
-      description:
-        "Onboarding and initial orientation at the company. Met with the team and discussed project goals.",
-      attachmentName: "report_w2_sarah.pdf",
-      feedback: "Welcome to the team! Glad to see you've integrated well.",
-    },
-    {
-      weekNumber: 1,
-      startDate: "2024-01-15",
-      endDate: "2024-01-19",
-      status: "reviewed",
-      description:
-        "Company introduction and setting up the basic tools for communication and project management.",
-      attachmentName: "report_w1_sarah.pdf",
-      feedback: "Tools are all set. Ready for the next week's tasks.",
-    },
-  ]);
+  // Only active students have reports
+  const hasReports =
+    studentInfo.assignedInternship !== "Pending assignment" &&
+    ![
+      "Bruce Wayne",
+      "Clark Kent",
+      "Barry Allen",
+      "Arthur Curry",
+      "Peter Parker",
+    ].includes(studentInfo.name);
+
+  const [weeklyReports, setWeeklyReports] = useState(
+    hasReports
+      ? [
+          {
+            weekNumber: 8,
+            startDate: "2024-03-04",
+            endDate: "2024-03-08",
+            status: "pending",
+            description: `Working on implementing the new features for ${studentInfo.assignedInternship.split(" - ")[1]}.`,
+            attachmentName: `report_w8_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
+            feedback: null,
+          },
+          {
+            weekNumber: 7,
+            startDate: "2024-02-26",
+            endDate: "2024-03-01",
+            status: "reviewed",
+            description:
+              "Completed the initial project setup and started working on the core modules.",
+            attachmentName: `report_w7_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
+            feedback:
+              "Good start on the project. The implementation follows the required standards.",
+          },
+          {
+            weekNumber: 6,
+            startDate: "2024-02-19",
+            endDate: "2024-02-23",
+            status: "reviewed",
+            description:
+              "Refining the UI components and improving overall system responsiveness.",
+            attachmentName: `report_w6_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
+            feedback:
+              "UI looks clean. Keep focusing on the performance aspects.",
+          },
+        ]
+      : [],
+  );
 
   const totalPages = Math.ceil(weeklyReports.length / reportsPerPage);
   const indexOfLastReport = currentPage * reportsPerPage;
@@ -371,18 +549,26 @@ export default function StudentProfile() {
                 <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4 text-primary" />
-                      <h3 className="text-sm font-bold text-foreground">
+                      <Target
+                        className={`w-4 h-4 ${hasReports ? "text-primary" : "text-muted-foreground"}`}
+                      />
+                      <h3
+                        className={`text-sm font-bold ${hasReports ? "text-foreground" : "text-muted-foreground"}`}
+                      >
                         Progression Point
                       </h3>
                     </div>
-                    <span className="text-xs font-bold text-primary">65%</span>
+                    <span
+                      className={`text-xs font-bold ${hasReports ? "text-primary" : "text-muted-foreground"}`}
+                    >
+                      {hasReports ? "65%" : "0%"}
+                    </span>
                   </div>
                   <div className="space-y-2">
                     <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary rounded-full"
-                        style={{ width: "65%" }}
+                        className={`h-full ${hasReports ? "bg-primary" : "bg-muted-foreground/30"} rounded-full transition-all duration-1000`}
+                        style={{ width: hasReports ? "65%" : "0%" }}
                       ></div>
                     </div>
                     <div className="flex justify-between items-center text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
@@ -410,45 +596,61 @@ export default function StudentProfile() {
               </div>
 
               <div className="grid grid-cols-1 gap-3">
-                {currentReports.map((report, idx) => (
-                  <div
-                    key={report.weekNumber}
-                    onClick={() => handleReportClick(report)}
-                    className="group flex items-center justify-between p-3 sm:p-4 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all cursor-pointer animate-slideInUp"
-                    style={{ animationDelay: `${idx * 50}ms` }}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-background flex flex-col items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-300">
-                        <span className="text-[8px] sm:text-[10px] uppercase font-bold opacity-60">
-                          Week
-                        </span>
-                        <span className="text-base sm:text-lg font-bold leading-tight">
-                          0{report.weekNumber}
-                        </span>
+                {currentReports.length > 0 ? (
+                  currentReports.map((report, idx) => (
+                    <div
+                      key={report.weekNumber}
+                      onClick={() => handleReportClick(report)}
+                      className="group flex items-center justify-between p-3 sm:p-4 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all cursor-pointer animate-slideInUp"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-background flex flex-col items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-300">
+                          <span className="text-[8px] sm:text-[10px] uppercase font-bold opacity-60">
+                            Week
+                          </span>
+                          <span className="text-base sm:text-lg font-bold leading-tight">
+                            0{report.weekNumber}
+                          </span>
+                        </div>
+
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <p className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {report.startDate} — {report.endDate}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
+                            <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                            <span>Report submitted</span>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="space-y-0.5 sm:space-y-1">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-                          <p className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {report.startDate} — {report.endDate}
-                          </p>
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        <div className="hidden xs:block">
+                          {getStatusBadge(report.status)}
                         </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
-                          <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                          <span>Report submitted</span>
-                        </div>
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 sm:gap-4">
-                      <div className="hidden xs:block">
-                        {getStatusBadge(report.status)}
-                      </div>
-                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  ))
+                ) : (
+                  <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-muted-foreground/30" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-foreground">
+                        No Reports Found
+                      </p>
+                      <p className="text-[11px] text-muted-foreground max-w-[200px]">
+                        This student hasn't submitted any weekly reports yet.
+                      </p>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
 
               {/* Pagination Controls */}

@@ -67,18 +67,18 @@ export default function SupervisorDashboard() {
           textColor: "text-emerald-600",
         },
         {
-          icon: CheckCircle,
-          label: "Approved",
-          value: dashboardData.stats.approved,
-          href: "/supervisor/approvals",
+          icon: Clock,
+          label: "Interviewing",
+          value: dashboardData.stats.interviewing,
+          href: "/supervisor/students",
           color: "from-purple-500/20",
           textColor: "text-purple-600",
         },
         {
           icon: AlertCircle,
-          label: "Pending Approval",
-          value: dashboardData.stats.pendingApproval,
-          href: "/supervisor/approvals",
+          label: "No Internship",
+          value: dashboardData.stats.noInternship,
+          href: "/supervisor/students",
           color: "from-amber-500/20",
           textColor: "text-amber-600",
         },
@@ -355,55 +355,62 @@ export default function SupervisorDashboard() {
                 Pending Actions
               </h3>
               <div className="space-y-2">
-                {[
-                  {
-                    action: "Review 2 new internships",
-                    priority: "high",
-                    icon: AlertCircle,
-                  },
-                  {
-                    action: "Approve 1 application",
-                    priority: "medium",
-                    icon: CheckCircle,
-                  },
-                  {
-                    action: "Follow-up with 3 students",
-                    priority: "low",
-                    icon: Users,
-                  },
-                ].map((item, idx) => {
-                  const Icon = item.icon;
-                  const colors =
-                    item.priority === "high"
-                      ? "border-red-200 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10"
-                      : item.priority === "medium"
-                        ? "border-amber-200 dark:border-amber-900/20 bg-amber-50/50 dark:bg-amber-900/10"
-                        : "border-blue-200 dark:border-blue-900/20 bg-blue-50/50 dark:bg-blue-900/10";
-
-                  const iconColor =
-                    item.priority === "high"
-                      ? "text-red-600 dark:text-red-400"
-                      : item.priority === "medium"
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-blue-600 dark:text-blue-400";
-
-                  return (
+                {isLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
                     <div
-                      key={idx}
-                      className={`p-3 rounded-lg border ${colors} hover:shadow-md transition-all animate-slideInUp`}
-                      style={{ animationDelay: `${idx * 50}ms` }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon
-                          className={`w-4 h-4 flex-shrink-0 ${iconColor}`}
-                        />
-                        <span className="text-sm font-medium text-foreground">
-                          {item.action}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+                      key={i}
+                      className="h-12 bg-secondary rounded animate-shimmer"
+                    ></div>
+                  ))
+                ) : dashboardData?.pendingActions?.length > 0 ? (
+                  dashboardData.pendingActions.map((item, idx) => {
+                    const colors =
+                      item.priority === "high"
+                        ? "border-red-200 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800"
+                        : item.priority === "medium"
+                          ? "border-amber-200 dark:border-amber-900/20 bg-amber-50/50 dark:bg-amber-900/10 hover:border-amber-300 dark:hover:border-amber-800"
+                          : "border-blue-200 dark:border-blue-900/20 bg-blue-50/50 dark:bg-blue-900/10 hover:border-blue-300 dark:hover:border-blue-800";
+
+                    const iconColor =
+                      item.priority === "high"
+                        ? "text-red-600 dark:text-red-400"
+                        : item.priority === "medium"
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-blue-600 dark:text-blue-400";
+
+                    const Icon =
+                      item.priority === "high"
+                        ? AlertCircle
+                        : item.priority === "medium"
+                          ? CheckCircle
+                          : Users;
+
+                    return (
+                      <Link key={idx} href={item.href}>
+                        <div
+                          className={`p-3 rounded-lg border ${colors} hover:shadow-md transition-all animate-slideInUp group cursor-pointer mb-2`}
+                          style={{ animationDelay: `${idx * 50}ms` }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Icon
+                                className={`w-4 h-4 flex-shrink-0 ${iconColor}`}
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {item.action}
+                              </span>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground italic text-center py-4">
+                    No pending actions
+                  </p>
+                )}
               </div>
             </Card>
 
