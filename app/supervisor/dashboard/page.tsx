@@ -93,11 +93,11 @@ export default function SupervisorDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-blue-50 border-blue-200 text-blue-700";
+        return "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/20 text-blue-700 dark:text-blue-400";
       case "completing":
-        return "bg-emerald-50 border-emerald-200 text-emerald-700";
+        return "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/20 text-emerald-700 dark:text-emerald-400";
       case "pending":
-        return "bg-amber-50 border-amber-200 text-amber-700";
+        return "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/20 text-amber-700 dark:text-amber-400";
       default:
         return "bg-secondary border-border text-foreground";
     }
@@ -106,7 +106,7 @@ export default function SupervisorDashboard() {
   const getDepartmentStats = dashboardData?.departments || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-secondary/20 p-6 md:p-8">
+    <div className="p-6 md:p-8 space-y-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-4 animate-fadeIn">
@@ -135,7 +135,7 @@ export default function SupervisorDashboard() {
                   return (
                     <Link href={stat.href} key={index}>
                       <Card
-                        className={`relative p-6 border border-border hover:border-primary/40 transition-all duration-300 bg-gradient-to-br ${stat.color} to-transparent overflow-hidden group cursor-pointer animate-slideInUp h-full`}
+                        className="relative p-6 border border-border hover:border-primary/40 transition-all duration-300 bg-card overflow-hidden group cursor-pointer animate-slideInUp h-full"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
@@ -258,7 +258,7 @@ export default function SupervisorDashboard() {
             </Card>
 
             {/* Department Overview */}
-            <Card className="p-6 border-border bg-gradient-to-br from-primary/5 via-transparent to-accent/5 animate-slideInLeft">
+            <Card className="p-6 border-border bg-card animate-slideInLeft">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
                 Department Overview
@@ -267,7 +267,7 @@ export default function SupervisorDashboard() {
                 {getDepartmentStats.map((dept, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-lg bg-white/50 hover:bg-white/70 transition-colors animate-slideInUp"
+                    className="p-3 rounded-lg bg-secondary/40 dark:bg-white/5 hover:bg-secondary/60 dark:hover:bg-white/10 transition-colors animate-slideInUp"
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -281,7 +281,7 @@ export default function SupervisorDashboard() {
                     <div className="flex gap-2 text-xs">
                       <div className="flex-1">
                         <p className="text-muted-foreground mb-1">Active</p>
-                        <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-blue-200 dark:bg-blue-900/30 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-500"
                             style={{
@@ -292,7 +292,7 @@ export default function SupervisorDashboard() {
                       </div>
                       <div className="flex-1">
                         <p className="text-muted-foreground mb-1">Completed</p>
-                        <div className="w-full h-2 bg-emerald-200 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-emerald-200 dark:bg-emerald-900/30 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-emerald-500"
                             style={{
@@ -311,9 +311,9 @@ export default function SupervisorDashboard() {
           {/* Right Sidebar */}
           <div className="space-y-6">
             {/* Performance Summary */}
-            <Card className="p-6 border-border bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 animate-slideInRight">
+            <Card className="p-6 border-border bg-card animate-slideInRight">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-emerald-600" />
+                <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Performance
               </h3>
               <div className="space-y-3">
@@ -321,22 +321,22 @@ export default function SupervisorDashboard() {
                   {
                     metric: "Avg Performance",
                     value: "8.5/10",
-                    color: "text-emerald-600",
+                    color: "text-emerald-600 dark:text-emerald-400",
                   },
                   {
                     metric: "Completion Rate",
                     value: "87%",
-                    color: "text-blue-600",
+                    color: "text-blue-600 dark:text-blue-400",
                   },
                   {
                     metric: "Satisfaction",
                     value: "92%",
-                    color: "text-purple-600",
+                    color: "text-purple-600 dark:text-purple-400",
                   },
                 ].map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center p-2 bg-white/50 rounded-lg animate-slideInRight"
+                    className="flex justify-between items-center p-2 bg-white/40 dark:bg-white/5 rounded-lg animate-slideInRight"
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
                     <p className="text-sm text-foreground">{item.metric}</p>
@@ -375,10 +375,17 @@ export default function SupervisorDashboard() {
                   const Icon = item.icon;
                   const colors =
                     item.priority === "high"
-                      ? "border-red-200 bg-red-50"
+                      ? "border-red-200 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10"
                       : item.priority === "medium"
-                        ? "border-amber-200 bg-amber-50"
-                        : "border-blue-200 bg-blue-50";
+                        ? "border-amber-200 dark:border-amber-900/20 bg-amber-50/50 dark:bg-amber-900/10"
+                        : "border-blue-200 dark:border-blue-900/20 bg-blue-50/50 dark:bg-blue-900/10";
+
+                  const iconColor =
+                    item.priority === "high"
+                      ? "text-red-600 dark:text-red-400"
+                      : item.priority === "medium"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-blue-600 dark:text-blue-400";
 
                   return (
                     <div
@@ -387,7 +394,9 @@ export default function SupervisorDashboard() {
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <Icon
+                          className={`w-4 h-4 flex-shrink-0 ${iconColor}`}
+                        />
                         <span className="text-sm font-medium text-foreground">
                           {item.action}
                         </span>

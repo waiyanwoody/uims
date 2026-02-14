@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   User,
   Mail,
@@ -19,9 +22,22 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
+  Target,
+  Download,
+  Building2,
+  MessageSquare,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface Student {
   name: string;
@@ -97,59 +113,101 @@ export default function StudentProfile() {
 
   const studentInfo: Student = studentsDB[id] || studentsDB[1]; // Fallback to Sarah if ID not found
 
+  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const reportsPerPage = 5;
 
-  const weeklyReports = [
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
+  const [weeklyReports, setWeeklyReports] = useState([
     {
       weekNumber: 8,
       startDate: "2024-03-04",
       endDate: "2024-03-08",
       status: "pending",
+      description:
+        "Working on implementing the new dashboard design and integrating the student profile APIs.",
+      attachmentName: "report_w8_sarah.pdf",
+      feedback: null,
     },
     {
       weekNumber: 7,
       startDate: "2024-02-26",
       endDate: "2024-03-01",
       status: "reviewed",
+      description:
+        "Completed the authentication module and started the initial setup for the supervisor module.",
+      attachmentName: "report_w7_sarah.pdf",
+      feedback:
+        "Great progress on the authentication module. Keep up the good work on the supervisor implementation!",
     },
     {
       weekNumber: 6,
       startDate: "2024-02-19",
       endDate: "2024-02-23",
       status: "reviewed",
+      description:
+        "Fixed various bugs reported in the beta testing phase. Optimized the database queries for better performance.",
+      attachmentName: "report_w6_sarah.pdf",
+      feedback:
+        "Significant improvement in page load times after your optimizations. Well done.",
     },
     {
       weekNumber: 5,
       startDate: "2024-02-12",
       endDate: "2024-02-16",
       status: "reviewed",
+      description:
+        "Drafted the documentation for the API and finalized the UI wireframes for the mobile application.",
+      attachmentName: "report_w5_sarah.pdf",
+      feedback:
+        "Documentation is clear. The UI wireframes meet all the requirements.",
     },
     {
       weekNumber: 4,
       startDate: "2024-02-05",
       endDate: "2024-02-09",
       status: "reviewed",
+      description:
+        "Conducted user research and gathered requirements for the upcoming features. Prepared the initial project roadmap.",
+      attachmentName: "report_w4_sarah.pdf",
+      feedback:
+        "Project roadmap looks realistic. Research data is very helpful.",
     },
     {
       weekNumber: 3,
       startDate: "2024-01-29",
       endDate: "2024-02-02",
       status: "reviewed",
+      description:
+        "Explored different tech stacks and set up the development environment. Created the initial project repository.",
+      attachmentName: "report_w3_sarah.pdf",
+      feedback: "Good choice on the tech stack. Environment setup is solid.",
     },
     {
       weekNumber: 2,
       startDate: "2024-01-22",
       endDate: "2024-01-26",
       status: "reviewed",
+      description:
+        "Onboarding and initial orientation at the company. Met with the team and discussed project goals.",
+      attachmentName: "report_w2_sarah.pdf",
+      feedback: "Welcome to the team! Glad to see you've integrated well.",
     },
     {
       weekNumber: 1,
       startDate: "2024-01-15",
       endDate: "2024-01-19",
       status: "reviewed",
+      description:
+        "Company introduction and setting up the basic tools for communication and project management.",
+      attachmentName: "report_w1_sarah.pdf",
+      feedback: "Tools are all set. Ready for the next week's tasks.",
     },
-  ];
+  ]);
 
   const totalPages = Math.ceil(weeklyReports.length / reportsPerPage);
   const indexOfLastReport = currentPage * reportsPerPage;
@@ -159,17 +217,42 @@ export default function StudentProfile() {
     indexOfLastReport,
   );
 
+  const handleReportClick = (report: any) => {
+    setSelectedReport(report);
+    setIsDialogOpen(true);
+  };
+
+  const handleFinishReviewed = () => {
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleConfirmReview = () => {
+    if (selectedReport) {
+      setWeeklyReports((prev) =>
+        prev.map((r) =>
+          r.weekNumber === selectedReport.weekNumber
+            ? { ...r, status: "reviewed", feedback }
+            : r,
+        ),
+      );
+    }
+    setIsConfirmDialogOpen(false);
+    setIsDialogOpen(false);
+    setSelectedReport(null);
+    setFeedback("");
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "reviewed":
         return (
-          <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-1">
+          <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" /> Reviewed
           </Badge>
         );
       case "pending":
         return (
-          <Badge className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+          <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 flex items-center gap-1">
             <Clock className="w-3 h-3" /> Pending
           </Badge>
         );
@@ -179,7 +262,7 @@ export default function StudentProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-secondary/20 p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-8">
         {/* Header/Navigation */}
         <div className="flex items-center justify-between animate-fadeIn">
@@ -284,6 +367,30 @@ export default function StudentProfile() {
                     ))}
                   </div>
                 </div>
+
+                <div className="pt-4 border-t border-border">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-bold text-foreground">
+                        Progression Point
+                      </h3>
+                    </div>
+                    <span className="text-xs font-bold text-primary">65%</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: "65%" }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between items-center text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
+                      <span>Week 01</span>
+                      <span>Week 12</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Card>
           </div>
@@ -306,7 +413,8 @@ export default function StudentProfile() {
                 {currentReports.map((report, idx) => (
                   <div
                     key={report.weekNumber}
-                    className="group flex items-center justify-between p-3 sm:p-4 rounded-xl border border-border/50 bg-secondary/10 hover:bg-white hover:border-primary/20 hover:shadow-md transition-all cursor-pointer animate-slideInUp"
+                    onClick={() => handleReportClick(report)}
+                    className="group flex items-center justify-between p-3 sm:p-4 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all cursor-pointer animate-slideInUp"
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
                     <div className="flex items-center gap-3 sm:gap-4">
@@ -393,6 +501,200 @@ export default function StudentProfile() {
           </div>
         </div>
       </div>
+
+      {/* Report Detail Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="w-[92%] max-w-xl bg-card border-border px-6 md:px-8 rounded-2xl animate-in fade-in zoom-in duration-200">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              {selectedReport?.status === "pending"
+                ? "Weekly Report Review"
+                : `Week ${selectedReport?.weekNumber} Report`}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-[10px] font-medium tracking-tight">
+              Period: {selectedReport?.startDate} — {selectedReport?.endDate}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedReport && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3 pb-3 border-b border-border/50">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <User className="w-3.5 h-3.5 text-muted-foreground" />
+                    <p className="text-xs font-semibold text-foreground truncate">
+                      {studentInfo.name}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    <p className="text-[11px] font-medium text-foreground truncate">
+                      {studentInfo.assignedInternship.includes(" - ")
+                        ? studentInfo.assignedInternship.split(" - ")[1]
+                        : studentInfo.assignedInternship}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
+                    <p className="text-[11px] font-medium text-foreground truncate">
+                      {studentInfo.assignedInternship.includes(" - ")
+                        ? studentInfo.assignedInternship.split(" - ")[0]
+                        : "Intern"}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                    <p className="text-[11px] font-medium text-foreground">
+                      Week 0{selectedReport.weekNumber}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
+                  <MessageSquare className="w-3 h-3" />
+                  Summary
+                </p>
+                <div className="p-3 rounded-xl bg-secondary/20 border border-border/50">
+                  <p className="text-xs leading-relaxed text-foreground/90 italic">
+                    "{selectedReport.description}"
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-2 rounded-xl border border-border bg-secondary/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-foreground truncate max-w-[150px]">
+                      {selectedReport.attachmentName}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground font-medium">
+                      PDF • 2.4 MB
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-6 w-6 border-border hover:bg-primary hover:text-white transition-colors"
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
+              </div>
+
+              {selectedReport.status === "reviewed" &&
+                selectedReport.feedback && (
+                  <div className="space-y-1.5 animate-fadeIn">
+                    <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Feedback
+                    </p>
+                    <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                      <p className="text-[11px] leading-relaxed text-foreground/90 font-medium">
+                        {selectedReport.feedback}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+              <div className="flex items-center justify-between pt-2">
+                <Badge
+                  variant="outline"
+                  className={`${
+                    selectedReport.status === "reviewed"
+                      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                  } font-bold uppercase tracking-widest text-[9px] px-1.5 py-0`}
+                >
+                  {selectedReport.status}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 pt-2 border-t border-border/50">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDialogOpen(false)}
+              className="h-8 font-bold text-[10px] uppercase tracking-wider gap-2 flex-1 sm:flex-none"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Close
+            </Button>
+            {selectedReport?.status === "pending" && (
+              <Button
+                onClick={handleFinishReviewed}
+                className="h-8 font-bold text-[10px] uppercase tracking-wider gap-2 shadow-lg shadow-primary/20 flex-1 sm:flex-none"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Finish Review
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation & Feedback Dialog */}
+      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <DialogContent className="w-[90%] max-w-md bg-card border-border px-6 md:px-8 rounded-2xl animate-in fade-in zoom-in duration-200">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">
+              Final Confirmation
+            </DialogTitle>
+            <DialogDescription className="text-sm">
+              Please provide feedback for{" "}
+              <span className="text-foreground font-bold">
+                {studentInfo.name}
+              </span>{" "}
+              before completing the review.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="feedback"
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+              >
+                Supervisor Feedback
+              </Label>
+              <Textarea
+                id="feedback"
+                placeholder="Write your feedback or comments here..."
+                className="min-h-[120px] bg-secondary/10 border-border focus-visible:ring-primary/20 text-sm"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => setIsConfirmDialogOpen(false)}
+              className="font-bold text-xs uppercase tracking-tight"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmReview}
+              className="bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-tight"
+            >
+              Confirm Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -143,7 +143,7 @@ export default function AssignedStudents() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-secondary/20 p-6 md:p-8">
+    <div className="p-6 md:p-8 space-y-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="animate-fadeIn">
           <h1 className="text-3xl font-bold text-foreground lowercase first-letter:uppercase">
@@ -159,7 +159,7 @@ export default function AssignedStudents() {
             <Link
               key={student.id}
               href={`/supervisor/students/${student.id}`}
-              className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-3 rounded-xl border border-border/50 bg-secondary/10 hover:bg-white hover:border-primary/20 hover:shadow-md active:scale-[0.98] active:bg-white transition-all duration-300 animate-slideInUp"
+              className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md active:scale-[0.98] transition-all duration-300 animate-slideInUp"
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               <div className="flex items-center gap-4">
@@ -205,12 +205,12 @@ export default function AssignedStudents() {
                 {/* Status and Action - perfectly centered */}
                 <div className="flex items-center gap-3 sm:gap-6">
                   {student.status === "active" ? (
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
+                    <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
                       <CheckCircle2 className="w-3 h-3" />
                       Active
                     </Badge>
                   ) : (
-                    <Badge className="bg-amber-50 text-amber-700 border-amber-200 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
+                    <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
                       <Clock className="w-3 h-3" />
                       Pending
                     </Badge>
