@@ -137,44 +137,7 @@ export default function CompanyDashboard() {
                 </Link>
               </div>
 
-              <div className="space-y-3">
-                {recentApplications.map((app) => (
-                  <div
-                    key={app.id}
-                    className={`group p-4 rounded-lg border-2 transition-all hover:shadow-md cursor-pointer ${getStatusColor(app.status)}`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
-                        {app.student.charAt(0)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-bold text-foreground">{app.student}</h3>
-                          <span className="text-xs font-semibold opacity-70">{app.appliedDate}</span>
-                        </div>
-                        <p className="text-sm font-medium text-foreground/80">{app.position}</p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-foreground/60">
-                          <span className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            {app.email}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            {Array.from({ length: app.stars }).map((_, i) => (
-                              <span key={i} className="text-amber-500">★</span>
-                            ))}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-background/50">
-                          {app.status}
-                        </span>
-                        <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
             </Card>
 
             {/* Metrics Overview */}
