@@ -1,34 +1,38 @@
-import React from "react"
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import React from "react";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 
-import './globals.css'
-import { Providers } from './providers'
+import "./globals.css";
+import { Providers } from "./providers";
+import { ThemeProvider } from "@/components/theme-provider";
 
-const _geist = Geist({ subsets: ['latin'] })
-const _geistMono = Geist_Mono({ subsets: ['latin'] })
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'UIMS - University Internship Management System',
-  description: 'Connect students with companies. Streamline internship applications, approvals, and tracking in one unified platform.',
-  generator: 'v0.app',
+  title: "UIMS - University Internship Management System",
+  description:
+    "Connect students with companies. Streamline internship applications, approvals, and tracking in one unified platform.",
+  generator: "v0.app",
   viewport: {
-    width: 'device-width',
+    width: "device-width",
     initialScale: 1,
     maximumScale: 1,
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <Providers>{children}</Providers>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Providers>{children}</Providers>
+        </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

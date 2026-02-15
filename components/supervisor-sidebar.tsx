@@ -1,32 +1,33 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Users,
-  Briefcase,
   CheckCircle,
   Settings,
   LogOut,
   Menu,
   X,
-  GraduationCap
-} from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+  GraduationCap,
+  FileText,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/theme-toggle";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/supervisor/dashboard' },
-  { icon: Users, label: 'Assigned Students', href: '/supervisor/students' },
-  { icon: Briefcase, label: 'Internship Monitoring', href: '/supervisor/monitoring' },
-  { icon: CheckCircle, label: 'Approvals', href: '/supervisor/approvals' },
-  { icon: Settings, label: 'Settings', href: '/supervisor/settings' },
-]
+  { icon: LayoutDashboard, label: "Dashboard", href: "/supervisor/dashboard" },
+  { icon: Users, label: "Assigned Students", href: "/supervisor/students" },
+  { icon: FileText, label: "Weekly Reports", href: "/supervisor/monitoring" },
+  { icon: CheckCircle, label: "Approvals", href: "/supervisor/approvals" },
+  { icon: Settings, label: "Settings", href: "/supervisor/settings" },
+];
 
 export function SupervisorSidebar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -40,29 +41,32 @@ export function SupervisorSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-primary text-white z-30 transition-transform duration-300 md:relative md:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed left-0 top-0 min-h-screen w-64 bg-primary text-white z-30 transition-transform duration-300 md:relative md:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-white/10 flex items-center gap-2">
-          <GraduationCap className="w-6 h-6" />
-          <span className="font-bold text-lg">UIMS</span>
+        {/* Logo & Theme Toggle */}
+        <div className="p-6 border-b border-white/10 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-6 h-6" />
+            <span className="font-bold text-lg">UIMS</span>
+          </div>
+          <ThemeToggle />
         </div>
 
         {/* Navigation Menu */}
         <nav className="p-4 space-y-1">
           {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
             return (
               <Link key={item.href} href={item.href}>
                 <Button
-                  variant={isActive ? 'default' : 'ghost'}
+                  variant={isActive ? "default" : "ghost"}
                   className={`w-full justify-start gap-3 ${
                     isActive
-                      ? 'bg-white/20 hover:bg-white/30 text-white'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? "bg-white/20 hover:bg-white/30 text-white"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -70,7 +74,7 @@ export function SupervisorSidebar() {
                   <span>{item.label}</span>
                 </Button>
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -94,5 +98,5 @@ export function SupervisorSidebar() {
         />
       )}
     </>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import React from "react"
-import { GraduationCap } from 'lucide-react'
+import React from "react";
+import { GraduationCap } from "lucide-react";
 
 export default function AuthLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-primary/80 flex flex-col">
@@ -18,9 +18,7 @@ export default function AuthLayout({
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          {children}
-        </div>
+        <div className="w-full max-w-md">{children}</div>
       </div>
 
       {/* Footer */}
@@ -28,5 +26,5 @@ export default function AuthLayout({
         <p>&copy; 2024 University Internship Management System</p>
       </div>
     </div>
-  )
+  );
 }
