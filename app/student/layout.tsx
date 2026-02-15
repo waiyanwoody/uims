@@ -15,7 +15,7 @@ export default function StudentLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <StudentSidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto md:ml-64">
         {children}
       </main>
     </div>
