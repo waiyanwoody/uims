@@ -5,102 +5,182 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Search, Filter, MapPin, Clock, DollarSign, Briefcase } from 'lucide-react'
+import { Search, MapPin, Clock, DollarSign, Briefcase } from 'lucide-react'
+import { ApplyModal } from '@/components/apply-modal'
 
 export default function BrowseInternships() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
+  const [selectedInternship, setSelectedInternship] = useState<any>(null)
 
   const categories = ['All', 'Engineering', 'Design', 'Business', 'Marketing', 'Data Science']
+
+  // Sample student data
+  const students = {
+    id: 1,
+    name: 'John Doe',
+    email: 'john.doe@university.edu',
+    student_number: 'STU2024001',
+    major: 'Computer Science',
+    gender: 'MALE' as const,
+    created_at: new Date('2024-01-15'),
+    profile: {
+      id: 1,
+      student_id: 1,
+      profile_image_url: '',
+      address: '123 University Ave, City, State 12345',
+      bio: 'Passionate computer science student interested in full-stack development',
+      github_url: 'https://github.com/johndoe',
+      linkedin_url: 'https://linkedin.com/in/johndoe',
+      date_of_birth: new Date('2002-05-15')
+    }
+  }
 
   const internships = [
     {
       id: 1,
+      company_id: 1,
       title: 'Frontend Developer Internship',
-      company: 'Tech Corp',
       category: 'Engineering',
-      location: 'San Francisco, CA',
-      duration: '3 months',
-      stipend: '$5,000/month',
-      deadline: '2024-03-15',
-      status: 'OPEN',
       description: 'We are looking for talented frontend developers to join our team.',
-      requirements: ['React', 'TypeScript', 'Tailwind CSS']
+      requirements: '["React", "TypeScript", "Tailwind CSS"]',
+      status: 'OPEN' as const,
+      slots: 5,
+      deadline: new Date('2024-03-15'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 1,
+        name: 'Tech Corp',
+        location: 'San Francisco, CA',
+        industry: 'Technology',
+        contact_email: 'hr@techcorp.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     },
     {
       id: 2,
+      company_id: 2,
       title: 'Data Science Internship',
-      company: 'Data Solutions Inc.',
       category: 'Data Science',
-      location: 'New York, NY',
-      duration: '4 months',
-      stipend: '$6,000/month',
-      deadline: '2024-02-28',
-      status: 'OPEN',
       description: 'Join our data science team and work on real-world projects.',
-      requirements: ['Python', 'Machine Learning', 'SQL']
+      requirements: '["Python", "Machine Learning", "SQL"]',
+      status: 'OPEN' as const,
+      slots: 3,
+      deadline: new Date('2024-02-28'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 2,
+        name: 'Data Solutions Inc.',
+        location: 'New York, NY',
+        industry: 'Data Analytics',
+        contact_email: 'careers@datasolutions.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     },
     {
       id: 3,
+      company_id: 3,
       title: 'UX Design Internship',
-      company: 'Design Studio',
       category: 'Design',
-      location: 'Los Angeles, CA',
-      duration: '3 months',
-      stipend: '$4,500/month',
-      deadline: '2024-02-20',
-      status: 'CLOSED',
       description: 'Create beautiful and functional user experiences.',
-      requirements: ['Figma', 'UI/UX', 'Prototyping']
+      requirements: '["Figma", "UI/UX", "Prototyping"]',
+      status: 'CLOSED' as const,
+      slots: 2,
+      deadline: new Date('2024-02-20'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 3,
+        name: 'Design Studio',
+        location: 'Los Angeles, CA',
+        industry: 'Design',
+        contact_email: 'jobs@designstudio.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     },
     {
       id: 4,
+      company_id: 4,
       title: 'Backend Developer Internship',
-      company: 'CloudTech',
       category: 'Engineering',
-      location: 'Seattle, WA',
-      duration: '4 months',
-      stipend: '$5,500/month',
-      deadline: '2024-03-10',
-      status: 'OPEN',
       description: 'Build scalable backend systems using modern technologies.',
-      requirements: ['Node.js', 'PostgreSQL', 'Docker']
+      requirements: '["Node.js", "PostgreSQL", "Docker"]',
+      status: 'OPEN' as const,
+      slots: 4,
+      deadline: new Date('2024-03-10'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 4,
+        name: 'CloudTech',
+        location: 'Seattle, WA',
+        industry: 'Cloud Computing',
+        contact_email: 'recruiting@cloudtech.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     },
     {
       id: 5,
+      company_id: 5,
       title: 'Product Manager Internship',
-      company: 'InnovateCo',
       category: 'Business',
-      location: 'Boston, MA',
-      duration: '3 months',
-      stipend: '$5,000/month',
-      deadline: '2024-03-05',
-      status: 'OPEN',
       description: 'Help shape the future of our product strategy.',
-      requirements: ['Communication', 'Analytics', 'Leadership']
+      requirements: '["Communication", "Analytics", "Leadership"]',
+      status: 'OPEN' as const,
+      slots: 2,
+      deadline: new Date('2024-03-05'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 5,
+        name: 'InnovateCo',
+        location: 'Boston, MA',
+        industry: 'Product Development',
+        contact_email: 'hr@innovateco.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     },
     {
       id: 6,
+      company_id: 6,
       title: 'Marketing Specialist Internship',
-      company: 'Brand Agency',
       category: 'Marketing',
-      location: 'Chicago, IL',
-      duration: '2 months',
-      stipend: '$3,500/month',
-      deadline: '2024-03-20',
-      status: 'PENDING',
       description: 'Execute marketing campaigns and support brand development.',
-      requirements: ['Social Media', 'Content Creation', 'Analytics']
+      requirements: '["Social Media", "Content Creation", "Analytics"]',
+      status: 'PENDING' as const,
+      slots: 3,
+      deadline: new Date('2024-03-20'),
+      created_at: new Date('2024-01-01'),
+      company: {
+        id: 6,
+        name: 'Brand Agency',
+        location: 'Chicago, IL',
+        industry: 'Marketing',
+        contact_email: 'careers@brandagency.com',
+        status: 'ACTIVE' as const,
+        created_at: new Date('2023-01-01')
+      }
     }
   ]
 
   const filteredInternships = internships.filter(internship => {
     const matchesSearch = internship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         internship.company.toLowerCase().includes(searchQuery.toLowerCase())
+                         internship.company.name.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || 
                            internship.category.toLowerCase() === selectedCategory.toLowerCase()
     return matchesSearch && matchesCategory
   })
+
+  const parseRequirements = (requirements: string): string[] => {
+    try {
+      return JSON.parse(requirements)
+    } catch {
+      return requirements.split(',').map((r) => r.trim())
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -113,6 +193,11 @@ export default function BrowseInternships() {
       default:
         return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  const handleApplyClick = (internship: any) => {
+    setSelectedInternship(internship)
+    setIsApplyModalOpen(true)
   }
 
   return (
@@ -176,22 +261,22 @@ export default function BrowseInternships() {
                     {internship.status}
                   </Badge>
                 </div>
-                <p className="text-sm font-medium text-accent">{internship.company}</p>
+                <p className="text-sm font-medium text-accent">{internship.company.name}</p>
               </div>
 
               {/* Details */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4" />
-                  {internship.location}
+                  {internship.company.location}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4" />
-                  {internship.duration}
+                  3 months
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <DollarSign className="w-4 h-4" />
-                  {internship.stipend}
+                  $5,000/month
                 </div>
               </div>
 
@@ -204,7 +289,7 @@ export default function BrowseInternships() {
               <div className="space-y-2">
                 <p className="text-xs font-medium text-foreground">Key Requirements:</p>
                 <div className="flex flex-wrap gap-1">
-                  {internship.requirements.slice(0, 2).map((req, idx) => (
+                  {parseRequirements(internship.requirements).slice(0, 2).map((req, idx) => (
                     <Badge
                       key={idx}
                       variant="secondary"
@@ -213,12 +298,12 @@ export default function BrowseInternships() {
                       {req}
                     </Badge>
                   ))}
-                  {internship.requirements.length > 2 && (
+                  {parseRequirements(internship.requirements).length > 2 && (
                     <Badge
                       variant="secondary"
                       className="text-xs bg-secondary/70 text-foreground"
                     >
-                      +{internship.requirements.length - 2}
+                      +{parseRequirements(internship.requirements).length - 2}
                     </Badge>
                   )}
                 </div>
@@ -234,8 +319,13 @@ export default function BrowseInternships() {
             <Button
               className="w-full mt-6 bg-primary hover:bg-primary/90"
               disabled={internship.status === 'CLOSED'}
+              onClick={() => handleApplyClick(internship)}
             >
-              {internship.status === 'CLOSED' ? 'Applications Closed' : 'Apply Now'}
+              {internship.status === 'CLOSED' 
+                ? 'Applications Closed' 
+                : internship.status === 'PENDING'
+                ? 'Under Review'
+                : 'Apply Now'}
             </Button>
           </Card>
         ))}
@@ -248,6 +338,19 @@ export default function BrowseInternships() {
           <h3 className="text-lg font-semibold text-foreground mb-2">No internships found</h3>
           <p className="text-muted-foreground">Try adjusting your search or filters</p>
         </Card>
+      )}
+
+      {/* Apply Modal with Sample Data */}
+      {selectedInternship && (
+        <ApplyModal
+          isOpen={isApplyModalOpen}
+          onClose={() => {
+            setIsApplyModalOpen(false)
+            setSelectedInternship(null)
+          }}
+          internship={selectedInternship}
+          student={students}
+        />
       )}
     </div>
   )
