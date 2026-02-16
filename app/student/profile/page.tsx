@@ -7,12 +7,24 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Plus, X } from 'lucide-react'
-import Image from 'next/image'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Plus, X, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function StudentProfile() {
   const [skills, setSkills] = useState(['React', 'TypeScript', 'Node.js', 'Tailwind CSS'])
   const [newSkill, setNewSkill] = useState('')
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  
   const [profileData, setProfileData] = useState({
     name: 'John Doe',
     email: 'john@university.edu',
@@ -28,15 +40,80 @@ export default function StudentProfile() {
     setProfileData(prev => ({ ...prev, [field]: value }))
   }
 
-  const addSkill = () => {
-    if (newSkill.trim() && !skills.includes(newSkill)) {
-      setSkills([...skills, newSkill])
-      setNewSkill('')
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload an image file')
+        setTimeout(() => setError(null), 3000)
+        return
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB')
+        setTimeout(() => setError(null), 3000)
+        return
+      }
+
+      // Read and display image
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string)
+        setSuccess('Profile picture uploaded successfully!')
+        setTimeout(() => setSuccess(null), 3000)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
-  const removeSkill = (skill: string) => {
-    setSkills(skills.filter(s => s !== skill))
+  const addSkill = () => {
+    if (!newSkill.trim()) {
+      setError('Please enter a skill name')
+      return
+    }
+
+    // Check if skill already exists
+    if (skills.some(skill => skill.toLowerCase() === newSkill.trim().toLowerCase())) {
+      setError('This skill already exists')
+      return
+    }
+
+    // Add skill to list
+    setSkills([...skills, newSkill.trim()])
+    setNewSkill('')
+    setError(null)
+    setIsAddSkillModalOpen(false)
+    setSuccess('Skill added successfully!')
+    setTimeout(() => setSuccess(null), 3000)
+  }
+
+  const removeSkill = (skillToRemove: string) => {
+    setSkills(skills.filter(s => s !== skillToRemove))
+    setError('Skill removed successfully!')
+    setTimeout(() => setError(null), 3000)
+  }
+
+  const handleSaveChanges = () => {
+    setSuccess('Profile changes saved successfully!')
+    setTimeout(() => setSuccess(null), 3000)
+  }
+
+  // Skill color variants
+  const skillColors = [
+    'bg-blue-100 text-blue-700 border-blue-300',
+    'bg-green-100 text-green-700 border-green-300',
+    'bg-purple-100 text-purple-700 border-purple-300',
+    'bg-orange-100 text-orange-700 border-orange-300',
+    'bg-pink-100 text-pink-700 border-pink-300',
+    'bg-indigo-100 text-indigo-700 border-indigo-300',
+    'bg-cyan-100 text-cyan-700 border-cyan-300',
+    'bg-teal-100 text-teal-700 border-teal-300',
+  ]
+
+  const getSkillColor = (index: number) => {
+    return skillColors[index % skillColors.length]
   }
 
   return (
@@ -52,14 +129,40 @@ export default function StudentProfile() {
         <Card className="p-8 border border-border">
           <h2 className="text-xl font-bold text-foreground mb-6">Profile Picture</h2>
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-border flex items-center justify-center">
-              <div className="text-4xl">👤</div>
+            <div className="w-24 h-24 rounded-lg border border-border overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
+              {profileImage ? (
+                <img 
+                  src={profileImage} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-4xl">
+                  👤
+                </div>
+              )}
             </div>
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">Upload a new profile picture</p>
-              <Button type="button" variant="outline" className="border-border bg-transparent">
+              <input
+                type="file"
+                id="profile-upload"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="border-border bg-transparent gap-2"
+                onClick={() => document.getElementById('profile-upload')?.click()}
+              >
+                <Upload className="w-4 h-4" />
                 Choose File
               </Button>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG or GIF • Max 5MB
+              </p>
             </div>
           </div>
         </Card>
@@ -156,58 +259,162 @@ export default function StudentProfile() {
 
         {/* Skills */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Skills & Expertise</h2>
-          <div className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-foreground">Skills & Expertise</h2>
+            <Button
+              type="button"
+              onClick={() => setIsAddSkillModalOpen(true)}
+              className="gap-2 bg-primary hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4" />
+              Add Skill
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
             {/* Skills Display */}
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <Badge
-                  key={skill}
-                  className="bg-accent/10 text-accent border border-accent/30 px-3 py-2 flex items-center gap-2"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => removeSkill(skill)}
-                    className="hover:text-accent/60"
+            {skills.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill, index) => (
+                  <Badge
+                    key={index}
+                    className={`${getSkillColor(index)} px-4 py-2 flex items-center gap-2 border font-medium`}
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-
-            {/* Add Skill Input */}
-            <div className="flex gap-2">
-              <Input
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                placeholder="Add a new skill..."
-                className="bg-secondary/50 border-border"
-              />
-              <Button
-                type="button"
-                onClick={addSkill}
-                className="gap-2 bg-primary hover:bg-primary/90"
-              >
-                <Plus className="w-4 h-4" />
-                Add
-              </Button>
-            </div>
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(skill)}
+                      className="hover:opacity-60 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                <p className="text-sm text-muted-foreground mb-4">No skills added yet</p>
+                <Button
+                  type="button"
+                  onClick={() => setIsAddSkillModalOpen(true)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Your First Skill
+                </Button>
+              </div>
+            )}
+            
+            <p className="text-xs text-muted-foreground">
+              💡 Add your technical and soft skills to showcase your expertise to potential employers
+            </p>
           </div>
         </Card>
 
         {/* Save Button */}
         <div className="flex justify-end gap-3">
-          <Button variant="outline" className="border-border bg-transparent">
+          <Button type="button" variant="outline" className="border-border bg-transparent">
             Cancel
           </Button>
-          <Button className="bg-primary hover:bg-primary/90">
+          <Button 
+            type="button" 
+            className="bg-primary hover:bg-primary/90"
+            onClick={handleSaveChanges}
+          >
             Save Changes
           </Button>
         </div>
       </form>
+
+      {/* Add Skill Modal */}
+      <Dialog open={isAddSkillModalOpen} onOpenChange={setIsAddSkillModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Skill</DialogTitle>
+            <DialogDescription>
+              Enter a skill to add to your profile
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Skill Name Input */}
+            <div className="space-y-2">
+              <Label htmlFor="skillName">
+                Skill Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="skillName"
+                placeholder="e.g., React, Python, Leadership..."
+                value={newSkill}
+                onChange={(e) => {
+                  setNewSkill(e.target.value)
+                  setError(null)
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addSkill()
+                  }
+                }}
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the name of the skill you want to add
+              </p>
+            </div>
+
+            {/* Error Message in Modal */}
+            {error && isAddSkillModalOpen && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsAddSkillModalOpen(false)
+                setNewSkill('')
+                setError(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={addSkill}
+              disabled={!newSkill.trim()}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Skill
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bottom-Left Notifications */}
+      {success && (
+        <div className="fixed bottom-6 left-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+            <p className="text-sm font-medium">{success}</p>
+          </div>
+        </div>
+      )}
+
+      {error && !isAddSkillModalOpen && (
+        <div className="fixed bottom-6 left-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
