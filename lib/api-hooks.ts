@@ -243,6 +243,126 @@ export const useInternships = () => {
   });
 };
 
+// Company Approval Hook
+export const useCompanyApprovals = () => {
+  return useQuery({
+    queryKey: ["company-approvals"],
+    queryFn: async () => {
+      await delay(600);
+      return [
+        {
+          id: 1,
+          name: "Stark Industries",
+          industry: "Advanced Research",
+          location: "New York, USA",
+          contact_email: "hr@starkindustries.com",
+          status: "PENDING",
+          logo: "S",
+        },
+        {
+          id: 2,
+          name: "Wayne Enterprises",
+          industry: "Technology & Defense",
+          location: "Gotham City",
+          contact_email: "contact@wayne.com",
+          status: "PENDING",
+          logo: "W",
+        },
+        {
+          id: 3,
+          name: "Oscorp",
+          industry: "Biotechnology",
+          location: "New York, USA",
+          contact_email: "career@oscorp.com",
+          status: "PENDING",
+          logo: "O",
+        },
+        {
+          id: 4,
+          name: "Pied Piper",
+          industry: "Data Compression",
+          location: "Palo Alto, CA",
+          contact_email: "richard@piedpiper.com",
+          status: "PENDING",
+          logo: "P",
+        },
+        {
+          id: 5,
+          name: "LexCorp",
+          industry: "Diversified Conglomerate",
+          location: "Metropolis",
+          contact_email: "admin@lexcorp.com",
+          status: "PENDING",
+          logo: "L",
+        },
+        {
+          id: 6,
+          name: "Hooli",
+          industry: "Cloud Computing",
+          location: "Mountain View, CA",
+          contact_email: "recruitment@hooli.com",
+          status: "PENDING",
+          logo: "H",
+        },
+        {
+          id: 7,
+          name: "Gringotts",
+          industry: "Financial Services",
+          location: "Diagon Alley",
+          contact_email: "vaults@gringotts.com",
+          status: "PENDING",
+          logo: "G",
+        },
+        {
+          id: 8,
+          name: "Cyberdyne Systems",
+          industry: "Robotics",
+          location: "Sunnyvale, CA",
+          contact_email: "skynet@cyberdyne.com",
+          status: "PENDING",
+          logo: "C",
+        },
+        {
+          id: 9,
+          name: "Umbrella Corp",
+          industry: "Pharmaceuticals",
+          location: "Racoon City",
+          contact_email: "research@umbrella.com",
+          status: "PENDING",
+          logo: "U",
+        },
+        {
+          id: 10,
+          name: "Aperture Science",
+          industry: "Experimental Physics",
+          location: "Cleveland, Ohio",
+          contact_email: "glados@aperture.com",
+          status: "PENDING",
+          logo: "A",
+        },
+        {
+          id: 11,
+          name: "Vought International",
+          industry: "Entertainment & Security",
+          location: "New York City",
+          contact_email: "super@vought.com",
+          status: "PENDING",
+          logo: "V",
+        },
+        {
+          id: 12,
+          name: "Nakamura Trading",
+          industry: "Trading & Logistics",
+          location: "Tokyo, Japan",
+          contact_email: "hiro@nakamura.jp",
+          status: "PENDING",
+          logo: "N",
+        },
+      ];
+    },
+  });
+};
+
 // Student Profile Data
 export const useStudentProfile = () => {
   return useQuery({
