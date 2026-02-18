@@ -12,6 +12,7 @@ import {
   X,
   GraduationCap,
   FileText,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,6 +23,7 @@ const menuItems = [
   { icon: Users, label: "Assigned Students", href: "/supervisor/students" },
   { icon: FileText, label: "Weekly Reports", href: "/supervisor/monitoring" },
   { icon: CheckCircle, label: "Approvals", href: "/supervisor/approvals" },
+  { icon: Building2, label: "Companies", href: "/supervisor/companies" },
   { icon: Settings, label: "Settings", href: "/supervisor/settings" },
 ];
 

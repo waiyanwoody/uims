@@ -96,7 +96,7 @@ export default function LoginPage() {
           </div>
 
           {/* Role Selection */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <Label className="text-sm font-medium text-foreground">
               Select Your Role
             </Label>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,7 +137,7 @@ export default function LoginPage() {
                   placeholder={mockCredentials[selectedRole].email}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border focus:border-primary"
+                  className="pl-10 bg-background border-border focus:border-primary"
                   required
                 />
               </div>
@@ -167,7 +167,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border focus:border-primary"
+                  className="pl-10 bg-background border-border focus:border-primary"
                   required
                 />
               </div>

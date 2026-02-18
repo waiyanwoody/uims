@@ -490,27 +490,56 @@ export default function InternshipMonitoring() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-2 rounded-xl border border-border bg-secondary/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-red-500" />
+              <div
+                className="flex items-center justify-between p-2.5 rounded-xl border border-border/60 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/30 transition-all cursor-pointer group/file"
+                onClick={() =>
+                  window.open(
+                    `/files/${selectedReport.attachmentName}`,
+                    "_blank",
+                  )
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-red-500/10 flex items-center justify-center group-hover/file:scale-110 transition-transform">
+                    <FileText className="w-4.5 h-4.5 text-red-500" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold text-foreground truncate max-w-[150px]">
+                    <p className="text-[11px] font-bold text-foreground truncate max-w-[180px]">
                       {selectedReport.attachmentName}
                     </p>
-                    <p className="text-[9px] text-muted-foreground font-medium">
+                    <p className="text-[9px] text-muted-foreground font-medium flex items-center gap-1.5">
                       PDF • 2.4 MB
+                      <span className="w-1 h-1 rounded-full bg-muted-foreground/30"></span>
+                      <span className="text-primary/70 font-bold">
+                        Click to view
+                      </span>
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-6 w-6 border-border hover:bg-primary hover:text-white transition-colors"
-                >
-                  <Download className="w-3 h-3" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Browser default for PDF download if href has download attribute
+                      const link = document.createElement("a");
+                      link.href = `/files/${selectedReport.attachmentName}`;
+                      link.download = selectedReport.attachmentName;
+                      link.click();
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-2">
