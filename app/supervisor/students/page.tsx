@@ -29,6 +29,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { useSupervisorStudents } from "@/lib/supervisor/hooks";
+import { Loader2 } from "lucide-react";
+
 export default function AssignedStudents() {
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,297 +39,29 @@ export default function AssignedStudents() {
   const [statusFilter, setStatusFilter] = useState("all");
   const studentsPerPage = isMobile ? 5 : 10;
 
-  const students = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      email: "sarah@uni.edu",
-      major: "CS",
-      role: "Frontend Dev",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      email: "michael@uni.edu",
-      major: "CS",
-      role: "Backend Dev",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Emma Davis",
-      email: "emma@uni.edu",
-      major: "Data Science",
-      role: "Data Science",
-      company: "DataCorp",
-      status: "interviewing",
-    },
-    {
-      id: 4,
-      name: "James Wilson",
-      email: "james@uni.edu",
-      major: "CS",
-      role: "Frontend Dev",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 5,
-      name: "Lisa Anderson",
-      email: "lisa@uni.edu",
-      major: "CS",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 6,
-      name: "David Martinez",
-      email: "david@uni.edu",
-      major: "IT",
-      role: "DevOps",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 7,
-      name: "Rachel Green",
-      email: "rachel@uni.edu",
-      major: "Marketing",
-      role: "Social Media",
-      company: "AdAgency",
-      status: "active",
-    },
-    {
-      id: 8,
-      name: "Ross Geller",
-      email: "ross@uni.edu",
-      major: "History",
-      role: "Researcher",
-      company: "Museum",
-      status: "interviewing",
-    },
-    {
-      id: 9,
-      name: "Joey Tribbiani",
-      email: "joey@uni.edu",
-      major: "Arts",
-      role: "Actor",
-      company: "Studio",
-      status: "active",
-    },
-    {
-      id: 10,
-      name: "Chandler Bing",
-      email: "chandler@uni.edu",
-      major: "Finance",
-      role: "Data Transmuter",
-      company: "Corp",
-      status: "active",
-    },
-    {
-      id: 11,
-      name: "Monica Geller",
-      email: "monica@uni.edu",
-      major: "Culinary",
-      role: "Chef",
-      company: "Restaurant",
-      status: "active",
-    },
-    {
-      id: 12,
-      name: "Phoebe Buffay",
-      email: "phoebe@uni.edu",
-      major: "Music",
-      role: "Musician",
-      company: "Central Perk",
-      status: "interviewing",
-    },
-    {
-      id: 13,
-      name: "William Smith",
-      email: "william@uni.edu",
-      major: "CS",
-      role: "Fullstack",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 14,
-      name: "John Doe",
-      email: "john@uni.edu",
-      major: "IT",
-      role: "Network",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 15,
-      name: "Jane Roe",
-      email: "jane@uni.edu",
-      major: "BA",
-      role: "Analyst",
-      company: "DataCorp",
-      status: "active",
-    },
-    {
-      id: 16,
-      name: "Bob Builder",
-      email: "bob@uni.edu",
-      major: "CS",
-      role: "QA",
-      company: "InnoSoft",
-      status: "active",
-    },
-    {
-      id: 17,
-      name: "Alice Wong",
-      email: "alice@uni.edu",
-      major: "CS",
-      role: "Software Eng",
-      company: "Google",
-      status: "active",
-    },
-    {
-      id: 18,
-      name: "Bob Martinez",
-      email: "bob.m@uni.edu",
-      major: "BA",
-      role: "Product Manager",
-      company: "Apple",
-      status: "active",
-    },
-    {
-      id: 19,
-      name: "Carol Davis",
-      email: "carol@uni.edu",
-      major: "DS",
-      role: "Data Science",
-      company: "Meta",
-      status: "active",
-    },
-    {
-      id: 20,
-      name: "Carl Davis",
-      email: "carl@uni.edu",
-      major: "DS",
-      role: "Data Science",
-      company: "Huawei",
-      status: "active",
-    },
-    {
-      id: 21,
-      name: "Diana Prince",
-      email: "diana@uni.edu",
-      major: "CS",
-      role: "Security",
-      company: "Amazon",
-      status: "active",
-    },
-    {
-      id: 22,
-      name: "Peter Parker",
-      email: "peter@uni.edu",
-      major: "CS",
-      role: "Photographer",
-      company: "Daily Bugle",
-      status: "interviewing",
-    },
-    {
-      id: 23,
-      name: "Bruce Wayne",
-      email: "bruce@uni.edu",
-      major: "Finance",
-      role: "CEO Assistant",
-      company: "Wayne Ent",
-      status: "interviewing",
-    },
-    {
-      id: 24,
-      name: "Clark Kent",
-      email: "clark@uni.edu",
-      major: "Journalism",
-      role: "Reporter",
-      company: "Daily Planet",
-      status: "interviewing",
-    },
-    {
-      id: 25,
-      name: "Barry Allen",
-      email: "barry@uni.edu",
-      major: "Forensics",
-      role: "Lab Tech",
-      company: "CCPD",
-      status: "interviewing",
-    },
-    {
-      id: 26,
-      name: "Arthur Curry",
-      email: "arthur@uni.edu",
-      major: "Marine Bio",
-      role: "Researcher",
-      company: "Aquarium",
-      status: "interviewing",
-    },
-    {
-      id: 27,
-      name: "Tony Stark",
-      email: "tony@uni.edu",
-      major: "Engineering",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 28,
-      name: "Steve Rogers",
-      email: "steve@uni.edu",
-      major: "History",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 29,
-      name: "Natasha Romanoff",
-      email: "natasha@uni.edu",
-      major: "BA",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 30,
-      name: "Thor Odinson",
-      email: "thor@uni.edu",
-      major: "Astro",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-  ];
+  const { data, isLoading } = useSupervisorStudents(currentPage, studentsPerPage);
+  
+  const students = data?.data || [];
+  const totalElements = data?.totalElements || 0;
+  const totalPages = data?.totalPages || 0;
 
-  const filteredStudents = students.filter((student) => {
+  // Filter students if necessary (though ideally the backend handles this)
+  const filteredStudents = students.filter((student: any) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || student.status === statusFilter;
-    return matchesSearch && matchesStatus;
+      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+    // Note: Documentation doesn't show status/company/role in StudentResponse,
+    // so filtering by these might not work with real data yet.
+    return matchesSearch;
   });
 
-  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = filteredStudents.slice(
-    indexOfFirstStudent,
-    indexOfLastStudent,
-  );
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -381,10 +116,10 @@ export default function AssignedStudents() {
 
         <div className="grid grid-cols-1 gap-3">
           {filteredStudents.length > 0 ? (
-            currentStudents.map((student, idx) => (
+            filteredStudents.map((student: any, idx: number) => (
               <Link
-                key={student.id}
-                href={`/supervisor/students/${student.id}`}
+                key={student.id || student.studentNumber}
+                href={`/supervisor/students/${student.id || student.studentNumber}`}
                 className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md active:scale-[0.98] transition-all duration-300 animate-slideInUp"
                 style={{ animationDelay: `${idx * 40}ms` }}
               >
@@ -417,13 +152,13 @@ export default function AssignedStudents() {
                     <div className="flex items-center gap-2 sm:w-[160px] flex-shrink-0">
                       <Briefcase className="w-3.5 h-3.5 text-primary opacity-60 flex-shrink-0" />
                       <span className="text-xs font-semibold text-foreground truncate">
-                        {student.role}
+                        {student.role || "Student"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 sm:w-[140px] flex-shrink-0">
                       <TrendingUp className="w-3.5 h-3.5 text-accent opacity-60 flex-shrink-0" />
                       <span className="text-xs font-medium text-muted-foreground truncate">
-                        {student.company}
+                        {student.company || "N/A"}
                       </span>
                     </div>
                   </div>
@@ -435,15 +170,10 @@ export default function AssignedStudents() {
                         <CheckCircle2 className="w-3 h-3" />
                         Active
                       </Badge>
-                    ) : student.status === "interviewing" ? (
-                      <Badge className="bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
-                        <Clock className="w-3 h-3" />
-                        Interviewing
-                      </Badge>
                     ) : (
                       <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
                         <AlertCircle className="w-3 h-3" />
-                        No Internship
+                        {student.status || "Pending"}
                       </Badge>
                     )}
 

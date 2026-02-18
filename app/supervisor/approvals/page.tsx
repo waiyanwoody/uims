@@ -35,56 +35,46 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { useApplications } from "@/lib/supervisor/hooks";
+import { Loader2 } from "lucide-react";
+
 export default function CompanyApprovals() {
-  const { data: initialCompanies, isLoading } = useCompanyApprovals();
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCompany, setSelectedCompany] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  // Initialize companies state once data is loaded
-  React.useEffect(() => {
-    if (initialCompanies) {
-      setCompanies(initialCompanies);
-    }
-  }, [initialCompanies]);
-
   const itemsPerPage = isMobile ? 5 : 10;
 
-  const filteredCompanies = useMemo(() => {
-    return companies.filter(
-      (company: any) =>
-        company.status === "PENDING" &&
-        (company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.industry.toLowerCase().includes(searchQuery.toLowerCase())),
+  const { data: applicationsData, isLoading } = useApplications(currentPage, itemsPerPage);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const applications = applicationsData?.data || [];
+  const totalElements = applicationsData?.totalElements || 0;
+  const totalPages = applicationsData?.totalPages || 0;
+
+  const filteredApplications = useMemo(() => {
+    return applications.filter(
+      (app: any) =>
+        (app.studentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          app.internshipTitle?.toLowerCase().includes(searchQuery.toLowerCase())),
     );
-  }, [companies, searchQuery]);
+  }, [applications, searchQuery]);
 
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
-
-  const currentItems = useMemo(() => {
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return filteredCompanies.slice(indexOfFirstItem, indexOfLastItem);
-  }, [filteredCompanies, currentPage, itemsPerPage]);
-
-  const handleStatusChange = (id: number, newStatus: "ACTIVE" | "PENDING") => {
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
-    );
+  const handleStatusChange = (id: number, newStatus: string) => {
+    // Note: The documentation (API_Documentation.txt) currently lacks a status update endpoint.
+    // This will only update the UI state locally for now.
+    console.info(`Status change requested for application ${id} to ${newStatus}. Endpoint missing in documentation.`);
   };
 
-  const handleCardClick = (company: any) => {
-    setSelectedCompany(company);
+  const handleCardClick = (application: any) => {
+    setSelectedApplication(application);
     setIsModalOpen(true);
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loader2 className="animate-spin h-12 w-12 text-primary" />
       </div>
     );
   }
@@ -94,17 +84,16 @@ export default function CompanyApprovals() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Company Registration Approvals
+            Student Application Approvals
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Review and validate company registrations. Only ACTIVE companies can
-            post internship opportunities.
+            Review and validate student internship applications.
           </p>
         </div>
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search companies..."
+            placeholder="Search applications..."
             className="pl-9 h-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -115,72 +104,63 @@ export default function CompanyApprovals() {
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <Clock className="w-4 h-4 text-amber-500" />
-          <h2 className="text-base font-bold">Pending Requests</h2>
+          <h2 className="text-base font-bold">Pending Applications</h2>
           <Badge variant="outline" className="ml-2 font-bold h-5 text-[10px]">
-            {filteredCompanies.filter((c) => c.status === "PENDING").length}
+            {filteredApplications.filter((a: any) => a.status === "PENDING").length}
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {currentItems.length > 0 ? (
-            currentItems.map((company) => (
+          {filteredApplications.length > 0 ? (
+            filteredApplications.map((app: any) => (
               <Card
-                key={company.id}
-                onClick={() => handleCardClick(company)}
+                key={app.id}
+                onClick={() => handleCardClick(app)}
                 className="group relative flex flex-col md:flex-row md:items-center justify-between p-3.5 sm:p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 animate-slideInUp cursor-pointer"
               >
                 <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                  {/* Left Section: Logo and Basic Info */}
                   <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shadow-sm font-bold text-lg uppercase flex-shrink-0">
-                    {company.logo}
+                    {app.studentName?.charAt(0) || "S"}
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                      {company.name}
+                      {app.studentName || `Student #${app.studentId}`}
                     </h3>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-1.5 align-middle text-primary font-bold uppercase tracking-wider">
-                        <Building2 className="w-3" />
-                        {company.industry}
+                        <Briefcase className="w-3" />
+                        {app.internshipTitle || `Internship #${app.internshipId}`}
                       </div>
                       <div className="flex items-center gap-1.5 align-middle font-medium">
-                        <MapPin className="w-3" />
-                        {company.location}
+                        <Calendar className="w-3" />
+                        {app.appliedDate || "Recently"}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Section: Contact and Status */}
                 <div className="mt-4 md:mt-0 flex items-center justify-between md:justify-end gap-4 md:gap-12 w-full md:w-auto px-1 sm:px-4">
-                  <div className="hidden lg:flex flex-col items-end">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-[11px] font-medium text-muted-foreground truncate max-w-[180px]">
-                        {company.contact_email}
-                      </span>
-                    </div>
-                  </div>
-
                   <div className="flex items-center gap-3 sm:gap-6 justify-end ml-auto">
                     <Badge
                       className={
-                        company.status === "ACTIVE"
+                        app.status === "APPROVED"
                           ? "bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
-                          : "bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
+                          : app.status === "REJECTED"
+                            ? "bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
+                            : "bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
                       }
                       variant="outline"
                     >
-                      {company.status}
+                      {app.status || "PENDING"}
                     </Badge>
 
                     <div className="flex gap-2">
-                      {company.status === "PENDING" ? (
+                      {(!app.status || app.status === "PENDING") && (
                         <>
                           <Button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(company.id, "ACTIVE");
+                              handleStatusChange(app.id, "APPROVED");
                             }}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-none h-8 px-4 text-xs rounded-lg"
                             size="sm"
@@ -194,28 +174,13 @@ export default function CompanyApprovals() {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setCompanies((prev) =>
-                                prev.filter((c) => c.id !== company.id),
-                              );
+                              handleStatusChange(app.id, "REJECTED");
                             }}
                           >
                             <XCircle className="w-3.5 h-3.5 mr-1.5" />
                             Decline
                           </Button>
                         </>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(company.id, "PENDING");
-                          }}
-                          className="font-bold text-amber-600 border-amber-200 h-8 px-4 text-xs rounded-lg"
-                          size="sm"
-                        >
-                          <Clock className="w-3.5 h-3.5 mr-1.5" />
-                          Mark Pending
-                        </Button>
                       )}
                     </div>
                   </div>

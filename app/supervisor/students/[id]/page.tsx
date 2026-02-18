@@ -49,285 +49,14 @@ interface Student {
   skills: string[];
 }
 
+import { useStudentProfile } from "@/lib/supervisor/hooks";
+import { Loader2 } from "lucide-react";
+
 export default function StudentProfile() {
   const params = useParams();
   const id = Number(params.id);
 
-  // Mock database of students to match the list in /students/page.tsx
-  const studentsDB: Record<number, Student> = {
-    1: {
-      name: "Sarah Johnson",
-      studentNumber: "2021CS001",
-      email: "sarah@uni.edu",
-      major: "CS",
-      assignedInternship: "Frontend Dev - Tech Corp",
-      address: "123 University Ave, Tech City",
-      skills: ["React", "TypeScript", "Tailwind CSS", "UI/UX Design"],
-    },
-    2: {
-      name: "Michael Chen",
-      studentNumber: "2021CS042",
-      email: "michael@uni.edu",
-      major: "CS",
-      assignedInternship: "Backend Dev - CloudTech",
-      address: "456 Silicon Valley, Innovation Way",
-      skills: ["Node.js", "PostgreSQL", "AWS", "Docker"],
-    },
-    3: {
-      name: "Emma Davis",
-      studentNumber: "2021DS012",
-      email: "emma@uni.edu",
-      major: "Data Science",
-      assignedInternship: "Data Science - DataCorp",
-      address: "789 Analytics Blvd, Data Center",
-      skills: ["Python", "R", "SQL", "Machine Learning"],
-    },
-    4: {
-      name: "James Wilson",
-      studentNumber: "2021CS088",
-      email: "james@uni.edu",
-      major: "CS",
-      assignedInternship: "Frontend Dev - Tech Corp",
-      address: "101 Web Street, Browser Town",
-      skills: ["Vue.js", "Javascript", "SCSS", "Jest"],
-    },
-    5: {
-      name: "Lisa Anderson",
-      studentNumber: "2021CS055",
-      email: "lisa@uni.edu",
-      major: "CS",
-      assignedInternship: "Pending assignment",
-      address: "202 Waiting Cir, Student Plaza",
-      skills: ["Java", "C++", "Algorithms"],
-    },
-    6: {
-      name: "David Martinez",
-      studentNumber: "2021IT023",
-      email: "david@uni.edu",
-      major: "IT",
-      assignedInternship: "DevOps - CloudTech",
-      address: "303 Server Farm, Network City",
-      skills: ["Linux", "Kubernetes", "Shell Scripting", "Azure"],
-    },
-    7: {
-      name: "Rachel Green",
-      studentNumber: "2021MK001",
-      email: "rachel@uni.edu",
-      major: "Marketing",
-      assignedInternship: "Social Media - AdAgency",
-      address: "New York, NY",
-      skills: ["Marketing", "Content Writing", "Social Media"],
-    },
-    8: {
-      name: "Ross Geller",
-      studentNumber: "2021HS001",
-      email: "ross@uni.edu",
-      major: "History",
-      assignedInternship: "Researcher - Museum",
-      address: "New York, NY",
-      skills: ["Paleontology", "Research", "Archiving"],
-    },
-    9: {
-      name: "Joey Tribbiani",
-      studentNumber: "2021AR001",
-      email: "joey@uni.edu",
-      major: "Arts",
-      assignedInternship: "Actor - Studio",
-      address: "New York, NY",
-      skills: ["Acting", "Performance", "Casting"],
-    },
-    10: {
-      name: "Chandler Bing",
-      studentNumber: "2021FN001",
-      email: "chandler@uni.edu",
-      major: "Finance",
-      assignedInternship: "Data Transmuter - Corp",
-      address: "New York, NY",
-      skills: ["Analysis", "Reporting", "Excel"],
-    },
-    11: {
-      name: "Monica Geller",
-      studentNumber: "2021CU001",
-      email: "monica@uni.edu",
-      major: "Culinary",
-      assignedInternship: "Chef - Restaurant",
-      address: "New York, NY",
-      skills: ["Cooking", "Kitchen Management"],
-    },
-    12: {
-      name: "Phoebe Buffay",
-      studentNumber: "2021MU001",
-      email: "phoebe@uni.edu",
-      major: "Music",
-      assignedInternship: "Musician - Central Perk",
-      address: "New York, NY",
-      skills: ["Songwriting", "Guitar", "Performance"],
-    },
-    13: {
-      name: "William Smith",
-      studentNumber: "2021CS013",
-      email: "william@uni.edu",
-      major: "CS",
-      assignedInternship: "Fullstack - Tech Corp",
-      address: "Philadelphia, PA",
-      skills: ["MERN Stack", "Firebase"],
-    },
-    14: {
-      name: "John Doe",
-      studentNumber: "2021IT014",
-      email: "john@uni.edu",
-      major: "IT",
-      assignedInternship: "Network - CloudTech",
-      address: "Los Angeles, CA",
-      skills: ["Cisco", "Routing", "Switching"],
-    },
-    15: {
-      name: "Jane Roe",
-      studentNumber: "2021BA015",
-      email: "jane@uni.edu",
-      major: "BA",
-      assignedInternship: "Analyst - DataCorp",
-      address: "Chicago, IL",
-      skills: ["PowerBI", "Tableau", "Strategy"],
-    },
-    16: {
-      name: "Bob Builder",
-      studentNumber: "2021CS016",
-      email: "bob@uni.edu",
-      major: "CS",
-      assignedInternship: "QA - InnoSoft",
-      address: "Houston, TX",
-      skills: ["Selenium", "Cypress", "Appium"],
-    },
-    17: {
-      name: "Alice Wong",
-      studentNumber: "2021CS017",
-      email: "alice@uni.edu",
-      major: "CS",
-      assignedInternship: "Software Eng - Google",
-      address: "Mountain View, CA",
-      skills: ["Go", "Kubernetes", "C++"],
-    },
-    18: {
-      name: "Bob Martinez",
-      studentNumber: "2021BA018",
-      email: "bob.m@uni.edu",
-      major: "BA",
-      assignedInternship: "Product Manager - Apple",
-      address: "Cupertino, CA",
-      skills: ["Product Strategy", "Agile"],
-    },
-    19: {
-      name: "Carol Davis",
-      studentNumber: "2021DS019",
-      email: "carol@uni.edu",
-      major: "DS",
-      assignedInternship: "Data Science - Meta",
-      address: "Menlo Park, CA",
-      skills: ["PyTorch", "NLP"],
-    },
-    20: {
-      name: "Carl Davis",
-      studentNumber: "2021DS020",
-      email: "carl@uni.edu",
-      major: "DS",
-      assignedInternship: "Data Science - Huawei",
-      address: "Shenzhen, China",
-      skills: ["5G Tech", "Big Data"],
-    },
-    21: {
-      name: "Diana Prince",
-      studentNumber: "2021CS021",
-      email: "diana@uni.edu",
-      major: "CS",
-      assignedInternship: "Security - Amazon",
-      address: "Seattle, WA",
-      skills: ["Cybersecurity", "IAM"],
-    },
-    22: {
-      name: "Peter Parker",
-      studentNumber: "2021CS022",
-      email: "peter@uni.edu",
-      major: "CS",
-      assignedInternship: "Photographer - Daily Bugle",
-      address: "Queens, NY",
-      skills: ["Photography", "Web Design"],
-    },
-    23: {
-      name: "Bruce Wayne",
-      studentNumber: "2021FN023",
-      email: "bruce@uni.edu",
-      major: "Finance",
-      assignedInternship: "CEO Assistant - Wayne Ent",
-      address: "Gotham, NJ",
-      skills: ["Corporate Finance", "Management"],
-    },
-    24: {
-      name: "Clark Kent",
-      studentNumber: "2021JU024",
-      email: "clark@uni.edu",
-      major: "Journalism",
-      assignedInternship: "Reporter - Daily Planet",
-      address: "Metropolis, NY",
-      skills: ["Writing", "Investigation"],
-    },
-    25: {
-      name: "Barry Allen",
-      studentNumber: "2021FO025",
-      email: "barry@uni.edu",
-      major: "Forensics",
-      assignedInternship: "Lab Tech - CCPD",
-      address: "Central City, MO",
-      skills: ["Chemistry", "Evidence Analysis"],
-    },
-    26: {
-      name: "Arthur Curry",
-      studentNumber: "2021MB026",
-      email: "arthur@uni.edu",
-      major: "Marine Bio",
-      assignedInternship: "Researcher - Aquarium",
-      address: "Amnesty Bay, ME",
-      skills: ["Marine Ecology", "Marine Biology"],
-    },
-    27: {
-      name: "Tony Stark",
-      studentNumber: "2021EN027",
-      email: "tony@uni.edu",
-      major: "Engineering",
-      assignedInternship: "Pending assignment",
-      address: "Malibu, CA",
-      skills: ["Mechanical Eng", "AI"],
-    },
-    28: {
-      name: "Steve Rogers",
-      studentNumber: "2021HS028",
-      email: "steve@uni.edu",
-      major: "History",
-      assignedInternship: "Pending assignment",
-      address: "Brooklyn, NY",
-      skills: ["Leadership", "History"],
-    },
-    29: {
-      name: "Natasha Romanoff",
-      studentNumber: "2021BA029",
-      email: "natasha@uni.edu",
-      major: "BA",
-      assignedInternship: "Pending assignment",
-      address: "Moscow, Russia",
-      skills: ["Intelligence", "Strategy"],
-    },
-    30: {
-      name: "Thor Odinson",
-      studentNumber: "2021AS030",
-      email: "thor@uni.edu",
-      major: "Astro",
-      assignedInternship: "Pending assignment",
-      address: "Asgard",
-      skills: ["Astrophysics", "Meteorology"],
-    },
-  };
-
-  const studentInfo: Student = studentsDB[id] || studentsDB[1]; // Fallback to Sarah if ID not found
+  const { data: studentProfile, isLoading, error } = useStudentProfile(id);
 
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
@@ -338,54 +67,42 @@ export default function StudentProfile() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  // Only active students have reports
-  const hasReports =
-    studentInfo.assignedInternship !== "Pending assignment" &&
-    ![
-      "Bruce Wayne",
-      "Clark Kent",
-      "Barry Allen",
-      "Arthur Curry",
-      "Peter Parker",
-    ].includes(studentInfo.name);
+  // Map backend profile data to frontend structure
+  const studentInfo = {
+    name: studentProfile?.name || "Student",
+    studentNumber: studentProfile?.studentNumber || "N/A",
+    email: studentProfile?.email || "N/A",
+    major: studentProfile?.major || "N/A",
+    assignedInternship: studentProfile?.internship || "Pending assignment",
+    address: studentProfile?.address || "N/A",
+    skills: studentProfile?.skills || [],
+    bio: studentProfile?.bio || "",
+  };
 
-  const [weeklyReports, setWeeklyReports] = useState(
-    hasReports
-      ? [
-          {
-            weekNumber: 8,
-            startDate: "2024-03-04",
-            endDate: "2024-03-08",
-            status: "pending",
-            description: `Working on implementing the new features for ${studentInfo.assignedInternship.split(" - ")[1]}.`,
-            attachmentName: `report_w8_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
-            feedback: null,
-          },
-          {
-            weekNumber: 7,
-            startDate: "2024-02-26",
-            endDate: "2024-03-01",
-            status: "reviewed",
-            description:
-              "Completed the initial project setup and started working on the core modules.",
-            attachmentName: `report_w7_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
-            feedback:
-              "Good start on the project. The implementation follows the required standards.",
-          },
-          {
-            weekNumber: 6,
-            startDate: "2024-02-19",
-            endDate: "2024-02-23",
-            status: "reviewed",
-            description:
-              "Refining the UI components and improving overall system responsiveness.",
-            attachmentName: `report_w6_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
-            feedback:
-              "UI looks clean. Keep focusing on the performance aspects.",
-          },
-        ]
-      : [],
-  );
+  // Note: Weekly reports are not in the current documentation, 
+  // so we'll keep them as an empty list for now until the endpoint is added.
+  const [weeklyReports, setWeeklyReports] = useState<any[]>([]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <h2 className="text-xl font-bold">Error loading student profile</h2>
+        <p className="text-muted-foreground">The student may not exist or the server is unreachable.</p>
+        <Link href="/supervisor/students">
+          <Button>Back to Students</Button>
+        </Link>
+      </div>
+    );
+  }
 
   const totalPages = Math.ceil(weeklyReports.length / reportsPerPage);
   const indexOfLastReport = currentPage * reportsPerPage;
@@ -533,7 +250,7 @@ export default function StudentProfile() {
                       Skills & Expertise
                     </h3>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  {/* <div className="flex flex-wrap gap-2">
                     {studentInfo.skills.map((skill, index) => (
                       <Badge
                         key={index}
@@ -543,10 +260,10 @@ export default function StudentProfile() {
                         {skill}
                       </Badge>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
 
-                <div className="pt-4 border-t border-border">
+                {/* <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Target
@@ -576,7 +293,7 @@ export default function StudentProfile() {
                       <span>Week 12</span>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </Card>
           </div>
