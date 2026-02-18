@@ -122,7 +122,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setStudentData({ ...studentData, name: e.target.value })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                           email: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -167,7 +167,7 @@ export default function RegisterPage() {
                         university: e.target.value,
                       })
                     }
-                    className="bg-secondary/50"
+                    className="bg-background"
                     required
                   />
                 </div>
@@ -184,7 +184,7 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setStudentData({ ...studentData, major: e.target.value })
                     }
-                    className="bg-secondary/50"
+                    className="bg-background"
                     required
                   />
                 </div>
@@ -209,7 +209,7 @@ export default function RegisterPage() {
                           password: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -233,7 +233,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -291,7 +291,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, name: e.target.value })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -311,7 +311,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, companyName: e.target.value })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -332,7 +332,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, email: e.target.value })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -350,7 +350,7 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setHrData({ ...hrData, phone: e.target.value })
                     }
-                    className="bg-secondary/50"
+                    className="bg-background"
                     required
                   />
                 </div>
@@ -372,7 +372,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, password: e.target.value })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -396,7 +396,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -457,7 +457,7 @@ export default function RegisterPage() {
                           name: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -481,7 +481,7 @@ export default function RegisterPage() {
                           email: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -502,7 +502,7 @@ export default function RegisterPage() {
                         university: e.target.value,
                       })
                     }
-                    className="bg-secondary/50"
+                    className="bg-background"
                     required
                   />
                 </div>
@@ -522,7 +522,7 @@ export default function RegisterPage() {
                         department: e.target.value,
                       })
                     }
-                    className="bg-secondary/50"
+                    className="bg-background"
                     required
                   />
                 </div>
@@ -547,7 +547,7 @@ export default function RegisterPage() {
                           password: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
@@ -571,7 +571,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-secondary/50"
+                      className="pl-10 bg-background"
                       required
                     />
                   </div>
