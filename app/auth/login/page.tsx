@@ -85,8 +85,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-5xl">
-      {/* Right Side - Form */}
+    <div className="w-full max-w-md">
       <Card className="p-8 shadow-xl border-primary/10">
         <div className="space-y-6">
           {/* Header */}
