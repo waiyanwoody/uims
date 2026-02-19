@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary/80 flex flex-col">
+    <div className="min-h-screen auth-gradient flex flex-col">
       {/* Header */}
       <div className="p-6 flex items-center justify-center">
         <div className="flex items-center gap-2 text-white">
@@ -18,7 +18,7 @@ export default function AuthLayout({
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">{children}</div>
+        <div className="w-full flex justify-center">{children}</div>
       </div>
 
       {/* Footer */}

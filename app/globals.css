@@ -141,6 +141,16 @@ body {
   .transition-smooth {
     @apply transition-all duration-300 ease-out;
   }
+
+  .auth-gradient {
+    background: radial-gradient(circle at 50% 40%, hsl(192 70% 85%) 0%, transparent 60%),
+      linear-gradient(to bottom right, hsl(192 60% 50%), hsl(192 70% 40%));
+  }
+
+  .dark .auth-gradient {
+    background: radial-gradient(circle at 50% 30%, hsl(186 95% 45% / 0.15) 0%, transparent 60%),
+      hsl(0 0% 9%);
+  }
 }
 
 @layer base {
