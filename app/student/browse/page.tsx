@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Search, MapPin, Clock, DollarSign, Briefcase } from 'lucide-react'
+import { Search, MapPin, Clock, DollarSign, Briefcase, Users } from 'lucide-react'
 import { ApplyModal } from '@/components/apply-modal'
 
 export default function BrowseInternships() {
@@ -13,11 +13,12 @@ export default function BrowseInternships() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [selectedInternship, setSelectedInternship] = useState<any>(null)
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<number>>(new Set())
 
   const categories = ['All', 'Engineering', 'Design', 'Business', 'Marketing', 'Data Science']
 
   // Sample student data
-  const students = {
+  const sampleStudent = {
     id: 1,
     name: 'John Doe',
     email: 'john.doe@university.edu',
@@ -43,7 +44,7 @@ export default function BrowseInternships() {
       company_id: 1,
       title: 'Frontend Developer Internship',
       category: 'Engineering',
-      description: 'We are looking for talented frontend developers to join our team.',
+      description: 'We are seeking a passionate Frontend Developer intern to join our dynamic team. You will work on building responsive web applications. This is an excellent opportunity to gain hands-on experience while working on real-world projects.',
       requirements: '["React", "TypeScript", "Tailwind CSS"]',
       status: 'OPEN' as const,
       slots: 5,
@@ -64,7 +65,7 @@ export default function BrowseInternships() {
       company_id: 2,
       title: 'Data Science Internship',
       category: 'Data Science',
-      description: 'Join our data science team and work on real-world projects.',
+      description: 'Join our data science team and work on cutting-edge machine learning projects. You will analyze large datasets, build predictive models, and contribute to data-driven decision making.',
       requirements: '["Python", "Machine Learning", "SQL"]',
       status: 'OPEN' as const,
       slots: 3,
@@ -85,7 +86,7 @@ export default function BrowseInternships() {
       company_id: 3,
       title: 'UX Design Internship',
       category: 'Design',
-      description: 'Create beautiful and functional user experiences.',
+      description: 'Create beautiful and functional user experiences for our products. Work with designers and developers to craft intuitive interfaces. Learn industry-standard tools like Figma and participate in user research sessions to understand customer needs.',
       requirements: '["Figma", "UI/UX", "Prototyping"]',
       status: 'CLOSED' as const,
       slots: 2,
@@ -106,7 +107,7 @@ export default function BrowseInternships() {
       company_id: 4,
       title: 'Backend Developer Internship',
       category: 'Engineering',
-      description: 'Build scalable backend systems using modern technologies.',
+      description: 'Build scalable backend systems using modern technologies. Work on API development, database optimization, and microservices architecture.',
       requirements: '["Node.js", "PostgreSQL", "Docker"]',
       status: 'OPEN' as const,
       slots: 4,
@@ -127,7 +128,7 @@ export default function BrowseInternships() {
       company_id: 5,
       title: 'Product Manager Internship',
       category: 'Business',
-      description: 'Help shape the future of our product strategy.',
+      description: 'Help shape the future of our products by working closely with engineering and design teams.',
       requirements: '["Communication", "Analytics", "Leadership"]',
       status: 'OPEN' as const,
       slots: 2,
@@ -148,7 +149,7 @@ export default function BrowseInternships() {
       company_id: 6,
       title: 'Marketing Specialist Internship',
       category: 'Marketing',
-      description: 'Execute marketing campaigns and support brand development.',
+      description: 'Execute marketing campaigns and support brand development. Analyze campaign performance metrics and create engaging social media content.',
       requirements: '["Social Media", "Content Creation", "Analytics"]',
       status: 'PENDING' as const,
       slots: 3,
@@ -168,9 +169,9 @@ export default function BrowseInternships() {
 
   const filteredInternships = internships.filter(internship => {
     const matchesSearch = internship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         internship.company.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || 
-                           internship.category.toLowerCase() === selectedCategory.toLowerCase()
+      internship.company.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' ||
+      internship.category.toLowerCase() === selectedCategory.toLowerCase()
     return matchesSearch && matchesCategory
   })
 
@@ -198,6 +199,16 @@ export default function BrowseInternships() {
   const handleApplyClick = (internship: any) => {
     setSelectedInternship(internship)
     setIsApplyModalOpen(true)
+  }
+
+  const toggleDescription = (id: number) => {
+    const newExpanded = new Set(expandedDescriptions)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedDescriptions(newExpanded)
   }
 
   return (
@@ -228,8 +239,8 @@ export default function BrowseInternships() {
               variant={selectedCategory === category.toLowerCase() ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedCategory(category.toLowerCase())}
-              className={selectedCategory === category.toLowerCase() 
-                ? 'bg-primary hover:bg-primary/90' 
+              className={selectedCategory === category.toLowerCase()
+                ? 'bg-primary hover:bg-primary/90'
                 : 'border-border hover:bg-secondary'}
             >
               {category}
@@ -244,15 +255,18 @@ export default function BrowseInternships() {
       </div>
 
       {/* Internship Cards Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredInternships.map((internship) => (
-          <Card
-            key={internship.id}
-            className="p-6 border border-border hover:shadow-lg hover:border-accent/50 transition-all duration-300 flex flex-col h-full"
-          >
-            <div className="space-y-4 flex-1">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        {filteredInternships.map((internship) => {
+          const isExpanded = expandedDescriptions.has(internship.id)
+          const shouldShowSeeMore = internship.description.length > 150
+
+          return (
+            <Card
+              key={internship.id}
+              className="p-6 border border-border hover:shadow-lg hover:border-accent/50 transition-all duration-300 flex flex-col h-full"
+            >
               {/* Header */}
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-lg font-semibold text-foreground leading-tight">
                     {internship.title}
@@ -265,28 +279,44 @@ export default function BrowseInternships() {
               </div>
 
               {/* Details */}
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
                   {internship.company.location}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 flex-shrink-0" />
                   3 months
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign className="w-4 h-4 flex-shrink-0" />
                   $5,000/month
+                </div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Users className="w-4 h-4 flex-shrink-0 text-primary" />
+                  {internship.slots} {internship.slots === 1 ? 'position' : 'positions'} available
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {internship.description}
-              </p>
+              <div className="mb-4 flex-grow">
+                <p className={`text-sm text-muted-foreground leading-relaxed ${!isExpanded ? 'line-clamp-3' : ''}`}>
+                  {internship.description}
+                </p>
+                {shouldShowSeeMore && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => toggleDescription(internship.id)}
+                    className="h-auto p-0 text-primary text-sm font-medium mt-1"
+                  >
+                    {isExpanded ? 'See less' : 'See more'}
+                  </Button>
+                )}
+              </div>
 
               {/* Requirements */}
-              <div className="space-y-2">
+              <div className="space-y-2 mb-4">
                 <p className="text-xs font-medium text-foreground">Key Requirements:</p>
                 <div className="flex flex-wrap gap-1">
                   {parseRequirements(internship.requirements).slice(0, 2).map((req, idx) => (
@@ -310,25 +340,25 @@ export default function BrowseInternships() {
               </div>
 
               {/* Deadline */}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mb-4">
                 Deadline: {new Date(internship.deadline).toLocaleDateString()}
               </p>
-            </div>
 
-            {/* Apply Button */}
-            <Button
-              className="w-full mt-6 bg-primary hover:bg-primary/90"
-              disabled={internship.status === 'CLOSED'}
-              onClick={() => handleApplyClick(internship)}
-            >
-              {internship.status === 'CLOSED' 
-                ? 'Applications Closed' 
-                : internship.status === 'PENDING'
-                ? 'Under Review'
-                : 'Apply Now'}
-            </Button>
-          </Card>
-        ))}
+              {/* Apply Button */}
+              <Button
+                className="w-full bg-primary hover:bg-primary/90 mt-auto"
+                disabled={internship.status === 'CLOSED' || internship.status === 'PENDING'}
+                onClick={() => handleApplyClick(internship)}
+              >
+                {internship.status === 'CLOSED'
+                  ? 'Applications Closed'
+                  : internship.status === 'PENDING'
+                    ? 'Under Review'
+                    : 'Apply Now'}
+              </Button>
+            </Card>
+          )
+        })}
       </div>
 
       {/* No Results */}
@@ -349,7 +379,7 @@ export default function BrowseInternships() {
             setSelectedInternship(null)
           }}
           internship={selectedInternship}
-          student={students}
+          student={sampleStudent}
         />
       )}
     </div>
