@@ -361,7 +361,7 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
                   <FileText className="w-4 h-4 mr-2" />
                   Select from My CVs
                 </Button>
-                <Button
+                {/* <Button
                   type="button"
                   variant={useFileUpload ? "default" : "outline"}
                   size="sm"
@@ -374,7 +374,7 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
                 >
                   <Paperclip className="w-4 h-4 mr-2" />
                   Attach New File
-                </Button>
+                </Button> */}
               </div>
 
               {/* Select from My CVs */}
