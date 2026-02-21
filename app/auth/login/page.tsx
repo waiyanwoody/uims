@@ -6,13 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<
     "student" | "hr" | "supervisor"
@@ -85,38 +86,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full mx-auto max-w-lg">
+      {/* Right Side - Form */}
       <Card className="p-8 shadow-xl border-primary/10">
         <div className="space-y-6">
           {/* Header */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
             <p className="text-muted-foreground">Sign in to your account</p>
           </div>
-
-          {/* Role Selection */}
-          {/* <div className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">
-              Select Your Role
-            </Label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["student", "hr", "supervisor"] as const).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => setSelectedRole(role)}
-                  className={`py-2 px-3 rounded-lg font-medium text-sm transition-all border ${
-                    selectedRole === role
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card text-foreground border-border hover:border-primary/30"
-                  }`}
-                >
-                  {role === "hr"
-                    ? "HR"
-                    : role.charAt(0).toUpperCase() + role.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div> */}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,20 +133,32 @@ export default function LoginPage() {
                   href="/auth/forgot-password"
                   className="text-primary hover:text-primary/80 transition-colors text-sm"
                 >
-                  Forgot?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-background border-border focus:border-primary"
+                  className="pl-10 pr-10 bg-background border-border focus:border-primary"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 

@@ -7,12 +7,126 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
-import { Mail, Lock, User, Building2, GraduationCap } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  Building2,
+  GraduationCap,
+  Eye,
+  EyeOff,
+  MapPin,
+  ScrollText,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+const TermsContent = () => (
+  <div className="space-y-6">
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          1
+        </span>
+        General Usage
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        UIMS provides a platform for academic-to-professional transition. By
+        using the service, you represent that you are affiliated with a
+        recognized institution and provide truthful information.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          2
+        </span>
+        Data Privacy
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        Personal and academic data is stored securely. Students' data is only
+        shared with potential employers upon application. Employers agree to
+        handle student data with strict confidentiality.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          3
+        </span>
+        Professionalism
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        All users (Students, HR, Supervisors) must maintain professional
+        standards. Harassment, deceptive listings, or falsification of
+        evaluations may lead to permanent account suspension.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          4
+        </span>
+        Liability
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        UIMS is an educational facilitation tool. Successful placement depends
+        on the interview process and academic requirements, not solely on
+        platform usage.
+      </p>
+    </section>
+  </div>
+);
+
+const TermsDialog = () => (
+  <Dialog>
+    <DialogTrigger asChild>
+      <button
+        type="button"
+        className="text-primary hover:underline font-medium focus:outline-none"
+      >
+        Terms and Conditions
+      </button>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[550px] max-h-[90vh]">
+      <DialogHeader>
+        <div className="flex items-center gap-2 text-primary mb-1">
+          <ScrollText className="w-5 h-5" />
+          <span className="font-bold text-sm tracking-widest">UIMS</span>
+        </div>
+        <DialogTitle className="text-2xl">Terms of Service</DialogTitle>
+        <DialogDescription>
+          Please review the agreement before proceeding with registration.
+        </DialogDescription>
+      </DialogHeader>
+      <ScrollArea className="max-h-[50vh] pr-4 mt-4">
+        <TermsContent />
+      </ScrollArea>
+      <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4 sm:justify-between items-center sm:items-end">
+        <p className="text-[10px] text-muted-foreground">
+          Last updated: February 2026
+        </p>
+        <Link href="/terms" className="text-xs text-primary hover:underline">
+          View full full legal document &rarr;
+        </Link>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [studentData, setStudentData] = useState({
     name: "",
@@ -28,6 +142,7 @@ export default function RegisterPage() {
     companyName: "",
     email: "",
     phone: "",
+    address: "",
     password: "",
     confirmPassword: "",
   });
@@ -69,50 +184,37 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <Card className="p-8 shadow-xl border-primary/10">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            Create Your Account
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Join the UIMS platform and manage internships
+          <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
+          <p className="text-muted-foreground mt-1">
+            Join the university internship portal
           </p>
         </div>
+
         <Tabs defaultValue="student" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="student" className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4" />
-              <span className="hidden sm:inline">Student</span>
+              <span>Student</span>
             </TabsTrigger>
             <TabsTrigger value="hr" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
-              <span className="hidden sm:inline">HR</span>
+              <span>HR</span>
             </TabsTrigger>
             <TabsTrigger value="supervisor" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Supervisor</span>
+              <span>Supervisor</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Student Registration */}
-          <TabsContent value="student" className="space-y-6">
-            <div className="space-y-2 mb-6">
-              <h2 className="text-2xl font-bold text-foreground">
-                Student Registration
-              </h2>
-              <p className="text-muted-foreground">
-                Create your account to browse and apply for internships
-              </p>
-            </div>
-
+          <TabsContent value="student">
             <form onSubmit={handleStudentSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-name" className="text-sm font-medium">
-                    Full Name
-                  </Label>
+                  <Label htmlFor="s-name">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -122,17 +224,13 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setStudentData({ ...studentData, name: e.target.value })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-email" className="text-sm font-medium">
-                    Email
-                  </Label>
+                  <Label htmlFor="s-email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -146,17 +244,13 @@ export default function RegisterPage() {
                           email: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* University */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-uni" className="text-sm font-medium">
-                    University
-                  </Label>
+                  <Label htmlFor="s-uni">University</Label>
                   <Input
                     id="s-uni"
                     placeholder="Stanford University"
@@ -167,16 +261,11 @@ export default function RegisterPage() {
                         university: e.target.value,
                       })
                     }
-                    className="bg-background"
                     required
                   />
                 </div>
-
-                {/* Major */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-major" className="text-sm font-medium">
-                    Major
-                  </Label>
+                  <Label htmlFor="s-major">Major</Label>
                   <Input
                     id="s-major"
                     placeholder="Computer Science"
@@ -184,23 +273,16 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setStudentData({ ...studentData, major: e.target.value })
                     }
-                    className="bg-background"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-password" className="text-sm font-medium">
-                    Password
-                  </Label>
+                  <Label htmlFor="s-password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="s-password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={studentData.password}
                       onChange={(e) =>
@@ -209,22 +291,29 @@ export default function RegisterPage() {
                           password: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
-
-                {/* Confirm Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="s-confirm" className="text-sm font-medium">
-                    Confirm Password
-                  </Label>
+                  <Label htmlFor="s-confirm">Confirm Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="s-confirm"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={studentData.confirmPassword}
                       onChange={(e) =>
@@ -233,55 +322,47 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm pt-2">
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-border"
                   required
                 />
                 <span className="text-muted-foreground">
-                  I agree to the{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>
+                  I agree to the <TermsDialog />
                 </span>
               </label>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating Account..." : "Create Student Account"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Register as Student"}
               </Button>
             </form>
           </TabsContent>
 
           {/* HR Registration */}
-          <TabsContent value="hr" className="space-y-6">
-            <div className="space-y-2 mb-6">
-              <h2 className="text-2xl font-bold text-foreground">
-                HR Registration
-              </h2>
-              <p className="text-muted-foreground">
-                Register your company to post internship opportunities
-              </p>
-            </div>
-
+          <TabsContent value="hr">
             <form onSubmit={handleHRSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="hr-name" className="text-sm font-medium">
-                    Full Name
-                  </Label>
+                  <Label htmlFor="hr-name">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -291,17 +372,13 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, name: e.target.value })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* Company Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="hr-company" className="text-sm font-medium">
-                    Company Name
-                  </Label>
+                  <Label htmlFor="hr-company">Company</Label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -311,17 +388,13 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, companyName: e.target.value })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="hr-email" className="text-sm font-medium">
-                    Company Email
-                  </Label>
+                  <Label htmlFor="hr-email">Work Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -332,17 +405,13 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, email: e.target.value })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* Phone */}
                 <div className="space-y-2">
-                  <Label htmlFor="hr-phone" className="text-sm font-medium">
-                    Phone
-                  </Label>
+                  <Label htmlFor="hr-phone">Phone</Label>
                   <Input
                     id="hr-phone"
                     placeholder="+1 (555) 123-4567"
@@ -350,44 +419,60 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setHrData({ ...hrData, phone: e.target.value })
                     }
-                    className="bg-background"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Password */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="hr-address">Company Address</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-address"
+                      placeholder="Enter company headquarters address"
+                      value={hrData.address}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, address: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="hr-password" className="text-sm font-medium">
-                    Password
-                  </Label>
+                  <Label htmlFor="hr-password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="hr-password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={hrData.password}
                       onChange={(e) =>
                         setHrData({ ...hrData, password: e.target.value })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
-
-                {/* Confirm Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="hr-confirm" className="text-sm font-medium">
-                    Confirm Password
-                  </Label>
+                  <Label htmlFor="hr-confirm">Confirm Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="hr-confirm"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={hrData.confirmPassword}
                       onChange={(e) =>
@@ -396,55 +481,47 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm pt-2">
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-border"
                   required
                 />
                 <span className="text-muted-foreground">
-                  I agree to the{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>
+                  I agree to the <TermsDialog />
                 </span>
               </label>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating Account..." : "Register Company"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Registering..." : "Register as Company"}
               </Button>
             </form>
           </TabsContent>
 
           {/* Supervisor Registration */}
-          <TabsContent value="supervisor" className="space-y-6">
-            <div className="space-y-2 mb-6">
-              <h2 className="text-2xl font-bold text-foreground">
-                Supervisor Registration
-              </h2>
-              <p className="text-muted-foreground">
-                Register as a faculty supervisor to monitor students
-              </p>
-            </div>
-
+          <TabsContent value="supervisor">
             <form onSubmit={handleSupervisorSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-name" className="text-sm font-medium">
-                    Full Name
-                  </Label>
+                  <Label htmlFor="sup-name">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -457,17 +534,13 @@ export default function RegisterPage() {
                           name: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-email" className="text-sm font-medium">
-                    Email
-                  </Label>
+                  <Label htmlFor="sup-email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -481,17 +554,13 @@ export default function RegisterPage() {
                           email: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                {/* University */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-uni" className="text-sm font-medium">
-                    University
-                  </Label>
+                  <Label htmlFor="sup-uni">University</Label>
                   <Input
                     id="sup-uni"
                     placeholder="Stanford University"
@@ -502,16 +571,11 @@ export default function RegisterPage() {
                         university: e.target.value,
                       })
                     }
-                    className="bg-background"
                     required
                   />
                 </div>
-
-                {/* Department */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-dept" className="text-sm font-medium">
-                    Department
-                  </Label>
+                  <Label htmlFor="sup-dept">Department</Label>
                   <Input
                     id="sup-dept"
                     placeholder="Computer Science"
@@ -522,23 +586,16 @@ export default function RegisterPage() {
                         department: e.target.value,
                       })
                     }
-                    className="bg-background"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-password" className="text-sm font-medium">
-                    Password
-                  </Label>
+                  <Label htmlFor="sup-password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="sup-password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={supervisorData.password}
                       onChange={(e) =>
@@ -547,22 +604,29 @@ export default function RegisterPage() {
                           password: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
-
-                {/* Confirm Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="sup-confirm" className="text-sm font-medium">
-                    Confirm Password
-                  </Label>
+                  <Label htmlFor="sup-confirm">Confirm Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="sup-confirm"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={supervisorData.confirmPassword}
                       onChange={(e) =>
@@ -571,39 +635,42 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 bg-background"
+                      className="pl-10 pr-10"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm pt-2">
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-border"
                   required
                 />
                 <span className="text-muted-foreground">
-                  I agree to the{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>
+                  I agree to the <TermsDialog />
                 </span>
               </label>
 
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating Account..." : "Register as Supervisor"}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Register as Supervisor"}
               </Button>
             </form>
           </TabsContent>
         </Tabs>
 
-        {/* Login Link */}
         <div className="text-center pt-6 mt-6 border-t border-border">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
@@ -611,7 +678,7 @@ export default function RegisterPage() {
               href="/auth/login"
               className="text-primary hover:underline font-semibold"
             >
-              Sign in here
+              Sign in
             </Link>
           </p>
         </div>

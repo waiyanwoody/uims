@@ -166,7 +166,6 @@ export default function Home() {
             {/* Hero Visual */}
             <div className="hidden md:flex items-center justify-center relative w-full h-full min-h-[400px] lg:min-h-[500px]">
               <div className="relative w-full h-full aspect-[4/3] max-w-[800px] animate-fadeIn">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-[2rem] blur-3xl -z-10 animate-pulse" />
                 <Image
                   src="/Image/HeroSectionImg.png"
                   alt="UIMS Platform Preview"
@@ -254,7 +253,7 @@ export default function Home() {
       {/* Stats Section */}
       <section className="max-w-7xl mx-auto px-6 py-12 md:py-16">
         <FadeInSection>
-          <div className="bg-gradient-to-br from-primary/5 to-primary/0 border border-primary/10 rounded-3xl p-8 md:p-12">
+          <div className="bg-card border border-border rounded-3xl p-8 md:p-12">
             <div className="grid md:grid-cols-4 gap-8">
               {[
                 { number: "2M+", label: "Applications Processed" },
