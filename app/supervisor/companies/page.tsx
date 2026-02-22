@@ -35,7 +35,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 
-import { useInternships } from "@/lib/supervisor/hooks";
+import { useCompanies } from "@/lib/supervisor/hooks";
 import { Loader2 } from "lucide-react";
 
 export default function SupervisorCompaniesPage() {
@@ -43,19 +43,19 @@ export default function SupervisorCompaniesPage() {
   const isMobile = useIsMobile();
   const itemsPerPage = isMobile ? 5 : 10;
 
-  const { data: internshipsData, isLoading } = useInternships("OPEN", currentPage, itemsPerPage);
+  const { data: companiesData, isLoading } = useCompanies(currentPage, itemsPerPage);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const internships = internshipsData?.data || [];
-  const totalPages = internshipsData?.totalPages || 0;
+  const companies = companiesData?.data || [];
+  const totalPages = companiesData?.totalPages || 0;
 
-  const filteredInternships = useMemo(() => {
-    return internships.filter(
-      (internship: any) =>
-        (internship.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          internship.category?.toLowerCase().includes(searchQuery.toLowerCase())),
+  const filteredCompanies = useMemo(() => {
+    return companies.filter(
+      (company: any) =>
+        (company.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          company.category?.toLowerCase().includes(searchQuery.toLowerCase())),
     );
-  }, [internships, searchQuery]);
+  }, [companies, searchQuery]);
 
   if (isLoading) {
     return (
@@ -72,10 +72,10 @@ export default function SupervisorCompaniesPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fadeIn">
           <div>
             <h1 className="text-3xl font-bold text-foreground lowercase first-letter:uppercase">
-              Active internships
+              Active Companies
             </h1>
             <p className="text-muted-foreground mt-1 text-sm font-medium">
-              Monitor active internship opportunities from industry partners
+              Monitor active company opportunities from industry partners
             </p>
           </div>
 
@@ -95,37 +95,37 @@ export default function SupervisorCompaniesPage() {
           </div>
         </div>
 
-        {/* List of Internships */}
+        {/* List of Companies */}
         <div className="grid grid-cols-1 gap-3">
-          {filteredInternships.length > 0 ? (
-            filteredInternships.map((internship: any, index: number) => (
+          {filteredCompanies.length > 0 ? (
+            filteredCompanies.map((company: any, index: number) => (
               <Link
-                key={internship.id}
-                href={`/supervisor/companies/${internship.companyId || internship.id}`}
+                key={company.id}
+                href={`/supervisor/companies/${company.companyId || company.id}`}
                 className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md active:scale-[0.98] transition-all duration-300 animate-slideInUp"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shadow-sm font-bold text-lg uppercase flex-shrink-0">
-                    {internship.title?.charAt(0) || "I"}
+                    {company.name?.charAt(0) || "I"}
                   </div>
 
                   <div className="space-y-0.5 min-w-0">
                     <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                      {internship.title}
+                      {company.name}
                     </h3>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1.5 align-middle">
                         <Building2 className="w-3" />
-                        {internship.category}
+                        {company.category}
                       </span>
                       <span className="flex items-center gap-1.5 font-medium text-foreground/70 align-middle">
                         <MapPin className="w-3" />
-                        Slots: {internship.slots}
+                        Slots: {company.slots}
                       </span>
                       <span className="flex items-center gap-1.5 align-middle font-medium">
                         <Calendar className="w-3" />
-                        Deadline: {internship.deadline}
+                        Deadline: {company.deadline}
                       </span>
                     </div>
                   </div>
@@ -135,7 +135,7 @@ export default function SupervisorCompaniesPage() {
                   <div className="flex items-center gap-3 sm:gap-6 justify-end ml-auto">
                     <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider">
                       <CheckCircle2 className="w-3 h-3" />
-                      {internship.status}
+                      {company.status}
                     </Badge>
 
                     <div className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 whitespace-nowrap">

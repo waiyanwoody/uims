@@ -26,6 +26,15 @@ export const getApplications = async (page = 1, size = 10) => {
   return res.data.data;
 };
 
+export const getCompanies = async (page = 1, size = 10) => {
+  const res = await apiClient.get(`${PREFIX}/companies`, {
+    params: { page, size },
+  });
+  return res.data.data;
+};
+
+
+
 export const createSupervisor = async (payload: {
   name: string;
   email: string;

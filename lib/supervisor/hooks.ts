@@ -70,6 +70,12 @@ export const useInternships = (status?: string, page = 1, size = 10) =>
     queryFn: () => api.getInternships(status, page, size),
   });
 
+export const useCompanies = (page = 1, size = 10) =>
+  useQuery({
+    queryKey: ["companies",  page, size],
+    queryFn: () => api.getCompanies( page, size),
+  });
+
 export const useCreateSupervisor = () => {
   const queryClient = useQueryClient();
   return useMutation({
