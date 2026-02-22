@@ -397,8 +397,8 @@ export default function SupervisorDashboard() {
                       className="h-12 bg-secondary rounded animate-shimmer"
                     ></div>
                   ))
-                ) : dashboardData?.pendingActions?.length > 0 ? (
-                  dashboardData.pendingActions.map((item, idx) => {
+                ) : dashboardData!.pendingActions?.length > 0 ? (
+                  dashboardData?.pendingActions.map((item, idx) => {
                     const colors =
                       item.priority === "high"
                         ? "border-red-200 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800"

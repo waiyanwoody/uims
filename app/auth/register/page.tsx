@@ -12,11 +12,14 @@ import {
   Lock,
   User,
   Building2,
+  Briefcase,
   GraduationCap,
   Eye,
   EyeOff,
   MapPin,
   ScrollText,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -127,6 +130,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showHRSuccessDialog, setShowHRSuccessDialog] = useState(false);
 
   const [studentData, setStudentData] = useState({
     name: "",
@@ -140,6 +144,7 @@ export default function RegisterPage() {
   const [hrData, setHrData] = useState({
     name: "",
     companyName: "",
+    industry: "",
     email: "",
     phone: "",
     address: "",
@@ -169,7 +174,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
     setTimeout(() => {
-      router.push("/company/dashboard");
+      setShowHRSuccessDialog(true);
       setIsLoading(false);
     }, 800);
   };
@@ -394,6 +399,22 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="hr-industry">Industry</Label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-industry"
+                      placeholder="Technology, Finance, etc."
+                      value={hrData.industry}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, industry: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="hr-email">Work Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
@@ -422,7 +443,7 @@ export default function RegisterPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-2">
                   <Label htmlFor="hr-address">Company Address</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
@@ -683,6 +704,38 @@ export default function RegisterPage() {
           </p>
         </div>
       </Card>
+
+      {/* HR Registration Success Dialog */}
+      <Dialog open={showHRSuccessDialog} onOpenChange={setShowHRSuccessDialog}>
+        <DialogContent className="sm:max-w-[450px] p-8">
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              <Clock className="w-10 h-10 text-primary animate-pulse" />
+            </div>
+
+            <DialogHeader className="space-y-3 flex flex-col items-center">
+              <DialogTitle className="text-3xl font-bold tracking-tight text-foreground">
+                Registration Pending
+              </DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground leading-relaxed px-4">
+                Your HR account has been successfully registered. To maintain
+                platform security, a supervisor must review and approve your
+                application.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="w-full pt-4">
+              <Button
+                type="button"
+                className="w-full h-12 text-md font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                onClick={() => router.push("/auth/login")}
+              >
+                Return to Login
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
