@@ -13,6 +13,7 @@ import {
   GraduationCap,
   FileText,
   Building2,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,7 +22,12 @@ import ThemeToggle from "@/components/theme-toggle";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/supervisor/dashboard" },
   { icon: Users, label: "Assigned Students", href: "/supervisor/students" },
-  { icon: FileText, label: "Weekly Reports", href: "/supervisor/monitoring" },
+  {
+    icon: Briefcase,
+    label: "Internship Posts",
+    href: "/supervisor/internship-posts",
+  },
+  { icon: FileText, label: "Monthly Reports", href: "/supervisor/monitoring" },
   { icon: CheckCircle, label: "Approvals", href: "/supervisor/approvals" },
   { icon: Building2, label: "Companies", href: "/supervisor/companies" },
   { icon: Settings, label: "Settings", href: "/supervisor/settings" },

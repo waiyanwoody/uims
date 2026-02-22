@@ -12,11 +12,11 @@ import {
   TrendingUp,
   BarChart3,
   Target,
-  Award,
   Clock,
   Zap,
   BookOpen,
   Loader,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSupervisorDashboard } from "@/lib/api-hooks";
@@ -103,7 +103,32 @@ export default function SupervisorDashboard() {
     }
   };
 
-  const getDepartmentStats = dashboardData?.departments || [];
+  const trendingPosts = [
+    {
+      id: 1,
+      title: "Frontend Developer",
+      company: "Tech Corp",
+      category: "Engineering",
+      slots: 5,
+      deadline: "15 Mar",
+    },
+    {
+      id: 2,
+      title: "Data Science",
+      company: "Data Solutions Inc.",
+      category: "Data Science",
+      slots: 3,
+      deadline: "28 Feb",
+    },
+    {
+      id: 4,
+      title: "Backend Developer",
+      company: "CloudTech",
+      category: "Engineering",
+      slots: 4,
+      deadline: "10 Mar",
+    },
+  ];
 
   return (
     <div className="p-6 md:p-8 space-y-8">
@@ -257,50 +282,48 @@ export default function SupervisorDashboard() {
               </div>
             </Card>
 
-            {/* Department Overview */}
+            {/* Trending Internship Posts */}
             <Card className="p-6 border-border bg-card animate-slideInLeft">
-              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                Department Overview
-              </h3>
-              <div className="space-y-3">
-                {getDepartmentStats.map((dept, idx) => (
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-primary" />
+                  Trending Internship Posts
+                </h3>
+                <Link href="/supervisor/internship-posts">
+                  <Button variant="ghost" size="sm" className="text-xs h-8">
+                    View All
+                  </Button>
+                </Link>
+              </div>
+              <div className="space-y-4">
+                {trendingPosts.map((post, idx) => (
                   <div
-                    key={idx}
-                    className="p-3 rounded-lg bg-secondary/40 dark:bg-white/5 hover:bg-secondary/60 dark:hover:bg-white/10 transition-colors animate-slideInUp"
-                    style={{ animationDelay: `${idx * 50}ms` }}
+                    key={post.id}
+                    className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/10 hover:bg-secondary/20 transition-all group"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <p className="font-semibold text-foreground text-sm">
-                        {dept.dept}
-                      </p>
-                      <span className="text-xs font-bold text-primary">
-                        {dept.total} students
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground leading-tight">
+                          {post.title}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground font-medium">
+                          {post.company} • {post.category}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex gap-2 text-xs">
-                      <div className="flex-1">
-                        <p className="text-muted-foreground mb-1">Active</p>
-                        <div className="w-full h-2 bg-blue-200 dark:bg-blue-900/30 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500"
-                            style={{
-                              width: `${(dept.active / dept.total) * 100}%`,
-                            }}
-                          ></div>
-                        </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-1 justify-end">
+                        <Users className="w-3 h-3 text-primary" />
+                        <span className="text-xs font-bold text-foreground">
+                          {post.slots} slots
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-muted-foreground mb-1">Completed</p>
-                        <div className="w-full h-2 bg-emerald-200 dark:bg-emerald-900/30 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-500"
-                            style={{
-                              width: `${(dept.completed / dept.total) * 100}%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
+                        Ends: {post.deadline}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -310,39 +333,51 @@ export default function SupervisorDashboard() {
 
           {/* Right Sidebar */}
           <div className="space-y-6">
-            {/* Performance Summary */}
+            {/* Partner Companies Highlights */}
             <Card className="p-6 border-border bg-card animate-slideInRight">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                Performance
+                <Building2 className="w-5 h-5 text-primary" />
+                Active Partners
               </h3>
               <div className="space-y-3">
                 {[
                   {
-                    metric: "Avg Performance",
-                    value: "8.5/10",
-                    color: "text-emerald-600 dark:text-emerald-400",
+                    name: "Tech Corp",
+                    students: 8,
+                    rating: "4.8/5",
                   },
                   {
-                    metric: "Completion Rate",
-                    value: "87%",
-                    color: "text-blue-600 dark:text-blue-400",
+                    name: "CloudTech",
+                    students: 5,
+                    rating: "4.5/5",
                   },
                   {
-                    metric: "Satisfaction",
-                    value: "92%",
-                    color: "text-purple-600 dark:text-purple-400",
+                    name: "Data Solutions Inc.",
+                    students: 3,
+                    rating: "4.9/5",
                   },
-                ].map((item, idx) => (
+                ].map((company, idx) => (
                   <div
                     key={idx}
-                    className="flex justify-between items-center p-2 bg-white/40 dark:bg-white/5 rounded-lg animate-slideInRight"
+                    className="flex justify-between items-center p-3 bg-white/40 dark:bg-white/5 rounded-lg border border-border/50 animate-slideInRight"
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
-                    <p className="text-sm text-foreground">{item.metric}</p>
-                    <p className={`font-bold text-lg ${item.color}`}>
-                      {item.value}
-                    </p>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">
+                        {company.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase">
+                        {company.students} Assigned Students
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-black text-primary">
+                        {company.rating}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground font-bold italic">
+                        Highly Rated
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -362,8 +397,8 @@ export default function SupervisorDashboard() {
                       className="h-12 bg-secondary rounded animate-shimmer"
                     ></div>
                   ))
-                ) : dashboardData?.pendingActions?.length > 0 ? (
-                  dashboardData.pendingActions.map((item, idx) => {
+                ) : dashboardData!.pendingActions?.length > 0 ? (
+                  dashboardData?.pendingActions.map((item, idx) => {
                     const colors =
                       item.priority === "high"
                         ? "border-red-200 dark:border-red-900/20 bg-red-50/50 dark:bg-red-900/10 hover:border-red-300 dark:hover:border-red-800"

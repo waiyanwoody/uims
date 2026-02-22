@@ -186,7 +186,7 @@ export const useSupervisorDashboard = () => {
           },
           {
             id: 2,
-            action: "Review 8 weekly reports",
+            action: "Review 3 monthly reports",
             count: 8,
             priority: "medium",
             href: "/supervisor/monitoring",
