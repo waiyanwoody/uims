@@ -45,193 +45,81 @@ export default function InternshipMonitoring() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [marks, setMarks] = useState(0);
 
-  // Mock data for weekly reports with status
+  // Mock data for monthly reports with status: Pending (waiting HR), Verify (ready for supervisor), Review (done)
   const [reportsData, setReportsData] = useState([
     {
       id: 1,
       student: "Alex Johnson",
       company: "Google",
       position: "Frontend Developer",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-08",
+      month: "February",
+      submittedDate: "2024-03-01",
       submissionTime: "16:45",
-      status: "pending",
+      status: "Verify",
       description:
-        "Implemented new navigation component and fixed several UI bugs in the dashboard. Started working on the API integration for the profile page.",
-      attachmentName: "weekly_report_alex_w8.pdf",
+        "Completed the frontend integration of the new dashboard widgets. Focused on performance optimization and accessibility.",
+      attachmentName: "monthly_report_alex_feb.pdf",
     },
     {
       id: 2,
       student: "Sarah Chen",
       company: "Meta",
       position: "Backend Developer",
-      weekNumber: 7,
-      startDate: "2024-02-26",
-      endDate: "2024-03-01",
+      month: "February",
       submittedDate: "2024-03-01",
       submissionTime: "17:30",
-      status: "pending",
+      status: "Verify",
       description:
-        "Assisted in setting up CI/CD pipelines for the staging environment. Monitored server logs and optimized AWS resource allocation.",
-      attachmentName: "Sarah_Report_W7.docx",
+        "Managed database migrations for the user profile service. Implemented rate limiting for API endpoints.",
+      attachmentName: "Sarah_Report_Feb.docx",
     },
     {
-      id: 4,
+      id: 3,
       student: "Michael Rodriguez",
       company: "Amazon",
       position: "UI/UX Designer",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-09",
+      month: "February",
+      submittedDate: "2024-03-02",
       submissionTime: "09:15",
-      status: "pending",
+      status: "Verify",
       description:
-        "Refactored the authentication service to use JWT. Optimized query performance for the analytics dashboard.",
-      attachmentName: "Michael_Weekly_8.pdf",
+        "Redesigned the checkout workflow. Conducted user testing sessions and incorporated feedback into high-fidelity prototypes.",
+      attachmentName: "Michael_Monthly_Feb.pdf",
     },
     {
-      id: 5,
+      id: 4,
       student: "Emily Wilson",
       company: "Microsoft",
       position: "Software Engineer",
-      weekNumber: 6,
-      startDate: "2024-02-19",
-      endDate: "2024-02-23",
-      submittedDate: "2024-02-23",
+      month: "January",
+      submittedDate: "2024-02-01",
       submissionTime: "17:10",
-      status: "reviewed",
+      status: "Review",
       description:
-        "Configured Docker containers for the new microservice. Updated Kubernetes manifest files.",
-      attachmentName: "Emily_W6.zip",
+        "Set up the initial development environment and started exploring the microservices architecture.",
+      attachmentName: "Emily_Jan.zip",
+      marks: 85,
+      feedback: "Good initial progress, keep it up!",
     },
     {
-      id: 7,
-      student: "David Kim",
-      company: "Apple",
-      position: "Mobile Developer",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-08",
-      submissionTime: "15:30",
-      status: "pending",
-      description:
-        "Prepared social media content for the upcoming product launch. Analyzed campaign performance metrics.",
-      attachmentName: "David_Mobile_W8.pdf",
-    },
-    {
-      id: 9,
-      student: "Jessica Lee",
-      company: "Netflix",
-      position: "Data Scientist",
-      weekNumber: 7,
-      startDate: "2024-02-26",
-      endDate: "2024-03-01",
-      submittedDate: "2024-03-02",
-      submissionTime: "10:00",
-      status: "reviewed",
-      description:
-        "Attended rehearsals for the new play. Assisted the stage manager with equipment setup.",
-      attachmentName: "Jessica_W7.png",
-    },
-    {
-      id: 10,
+      id: 5,
       student: "Thor Odinson",
       company: "Tesla",
       position: "QA Engineer",
-      weekNumber: 7,
-      startDate: "2024-02-26",
-      endDate: "2024-03-01",
+      month: "February",
       submittedDate: "2024-03-01",
       submissionTime: "16:45",
-      status: "pending",
+      status: "Pending",
       description:
-        "Compiled quarterly transposition data. Performed data entry and verification tasks.",
-      attachmentName: "Thor_W7_Data.xlsx",
-    },
-    {
-      id: 11,
-      student: "Wanda Maximoff",
-      company: "Adobe",
-      position: "Security Intern",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-08",
-      submissionTime: "22:00",
-      status: "pending",
-      description:
-        "Managed the appetizer station during dinner service. Assisted in creating the new seasonal menu.",
-      attachmentName: "Wanda_Sec_W8.pdf",
-    },
-    {
-      id: 13,
-      student: "Nick Fury",
-      company: "Twitter",
-      position: "Systems Architect",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-09",
-      submissionTime: "11:00",
-      status: "pending",
-      description:
-        "Developed the user registration workflow. Implemented unit tests for the backend controllers.",
-      attachmentName: "Nick_Summary_W8.pdf",
-    },
-    {
-      id: 14,
-      student: "Vision",
-      company: "Intel",
-      position: "AI Specialist",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-09",
-      submissionTime: "12:30",
-      status: "pending",
-      description:
-        "Troubleshot network connectivity issues in the main office. Assisted in hardware upgrades for the server room.",
-      attachmentName: "Vision_AI_W8.pdf",
-    },
-    {
-      id: 15,
-      student: "Jane Roe",
-      company: "DataCorp",
-      position: "Business Analyst",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-09",
-      submissionTime: "14:15",
-      status: "pending",
-      description:
-        "Gathered requirements for the new reporting tool. Documented business processes for the operations department.",
-      attachmentName: "JaneRoe_W8.pdf",
-    },
-    {
-      id: 16,
-      student: "Bob Builder",
-      company: "InnoSoft",
-      position: "QA Tester",
-      weekNumber: 8,
-      startDate: "2024-03-04",
-      endDate: "2024-03-08",
-      submittedDate: "2024-03-09",
-      submissionTime: "16:00",
-      status: "pending",
-      description:
-        "Executing automated test scripts for the web application. Identifying and reporting bugs in Jira.",
-      attachmentName: "BobB_W8.pdf",
+        "Working on automotive testing procedures. Reports ready for HR verification.",
+      attachmentName: "Thor_Feb_Data.xlsx",
     },
   ]);
 
   const filteredReports = reportsData
-    .filter((report) => report.status === "pending")
+    .filter((report) => report.status === "Verify")
     .filter(
       (report) =>
         report.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -258,7 +146,7 @@ export default function InternshipMonitoring() {
       setReportsData((prev) =>
         prev.map((r) =>
           r.id === selectedReport.id
-            ? { ...r, status: "reviewed", feedback }
+            ? { ...r, status: "Review", feedback, marks }
             : r,
         ),
       );
@@ -267,6 +155,7 @@ export default function InternshipMonitoring() {
     setIsDetailDialogOpen(false);
     setSelectedReport(null);
     setFeedback("");
+    setMarks(0);
   };
 
   return (
@@ -275,10 +164,10 @@ export default function InternshipMonitoring() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            Weekly Reports
+            Monthly Reports
           </h1>
           <p className="text-muted-foreground text-xs font-medium">
-            Pending review:{" "}
+            Waiting for supervisor review:{" "}
             <span className="text-foreground font-bold">
               {filteredReports.length}
             </span>
@@ -313,20 +202,15 @@ export default function InternshipMonitoring() {
               <div className="p-3 sm:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    {/* Week Number - Smaller and simpler */}
+                    {/* Report Icon - Simpler */}
                     <div
                       className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center border transition-colors duration-300 ${
-                        report.status === "pending"
+                        report.status === "Verify"
                           ? "bg-primary/5 border-primary/10 group-hover:bg-primary group-hover:text-white"
                           : "bg-secondary/30 border-border group-hover:bg-secondary"
                       }`}
                     >
-                      <span className="text-[8px] uppercase font-bold opacity-60">
-                        Wk
-                      </span>
-                      <span className="text-sm font-bold leading-tight">
-                        {report.weekNumber}
-                      </span>
+                      <FileText className="w-5 h-5" />
                     </div>
 
                     <div className="space-y-0.5">
@@ -334,13 +218,16 @@ export default function InternshipMonitoring() {
                         {report.student}
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-muted-foreground">
+                        <span className="flex items-center gap-1 font-bold text-primary">
+                          MONTHLY REPORT
+                        </span>
                         <span className="flex items-center gap-1">
                           <TrendingUp className="w-3 h-3 text-accent" />
                           {report.company}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-primary" />
-                          {report.startDate} - {report.endDate}
+                          <CheckCircle2 className="w-3 h-3 text-primary" />
+                          {report.status}
                         </span>
                       </div>
                     </div>
@@ -434,7 +321,7 @@ export default function InternshipMonitoring() {
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              Weekly Report Review - Week {selectedReport?.weekNumber}
+              Monthly Report Review - {selectedReport?.month}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-[10px] font-medium tracking-tight">
               Submitted on {selectedReport?.submittedDate} at{" "}
@@ -472,7 +359,7 @@ export default function InternshipMonitoring() {
                   <div className="flex items-center gap-2.5 text-sm">
                     <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                     <p className="text-[11px] font-medium text-foreground">
-                      {selectedReport.startDate} — {selectedReport.endDate}
+                      {selectedReport.month} Report
                     </p>
                   </div>
                 </div>
@@ -481,7 +368,7 @@ export default function InternshipMonitoring() {
               <div className="space-y-1.5">
                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest flex items-center gap-2">
                   <MessageSquare className="w-3 h-3" />
-                  Weekly Summary
+                  Monthly Summary
                 </p>
                 <div className="p-3 rounded-xl bg-secondary/20 border border-border/50">
                   <p className="text-xs leading-relaxed text-foreground/90 italic">
@@ -581,7 +468,7 @@ export default function InternshipMonitoring() {
               Final Confirmation
             </DialogTitle>
             <DialogDescription className="text-sm">
-              Please provide feedback for{" "}
+              Please provide feedback and marks for{" "}
               <span className="text-foreground font-bold">
                 {selectedReport?.student}
               </span>{" "}
@@ -590,6 +477,36 @@ export default function InternshipMonitoring() {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="marks"
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+              >
+                Marks (0-50)
+              </Label>
+              <Input
+                id="marks"
+                type="text"
+                placeholder="0-50"
+                className="bg-secondary/10 border-border focus-visible:ring-primary/20 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                value={marks || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    setMarks(0);
+                    return;
+                  }
+                  const num = parseInt(val);
+                  if (!isNaN(num)) {
+                    // Limit the number to 0-50
+                    if (num >= 0 && num <= 50) {
+                      setMarks(num);
+                    }
+                  }
+                }}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label
                 htmlFor="feedback"
