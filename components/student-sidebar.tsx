@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   User,
@@ -12,24 +12,25 @@ import {
   LogOut,
   Menu,
   X,
-  GraduationCap
-} from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+  GraduationCap,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/theme-toggle";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/student/dashboard' },
-  { icon: User, label: 'My Profile', href: '/student/profile' },
-  { icon: Briefcase, label: 'My Expertise', href: '/student/expertise' },
-  { icon: ClipboardList, label: 'Browse Internships', href: '/student/browse' },
-  { icon: FileText, label: 'My Applications', href: '/student/applications' },
-  { icon: Briefcase, label: 'My CVs', href: '/student/cvs' },
-  { icon: Settings, label: 'Settings', href: '/student/settings' },
-]
+  { icon: LayoutDashboard, label: "Dashboard", href: "/student/dashboard" },
+  { icon: User, label: "My Profile", href: "/student/profile" },
+  { icon: ClipboardList, label: "Browse Internships", href: "/student/browse" },
+  { icon: FileText, label: "My Applications", href: "/student/applications" },
+  { icon: ClipboardList, label: "My Montly Reports", href: "/student/monitoring" },
+  { icon: Briefcase, label: "My CVs", href: "/student/cvs" },
+  { icon: Settings, label: "Settings", href: "/student/settings" },
+];
 
 export function StudentSidebar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -43,37 +44,38 @@ export function StudentSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-primary text-white z-30 transition-transform duration-300 md:relative md:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border z-30 transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-white/10 flex items-center gap-2">
-          <GraduationCap className="w-6 h-6" />
-          <span className="font-bold text-lg">UIMS</span>
+        {/* Logo & Theme Toggle */}
+        <div className="p-6 border-b border-sidebar-border flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-6 h-6" />
+            <span className="font-bold text-lg">UIMS</span>
+          </div>
+          <ThemeToggle />
         </div>
 
         {/* Navigation Menu */}
         <nav className="p-4 space-y-1">
           {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
             return (
               <Link key={item.href} href={item.href}>
                 <Button
-                  variant={isActive ? 'default' : 'ghost'}
-                  className={`w-full justify-start gap-3 ${
-                    isActive
-                      ? 'bg-white/20 hover:bg-white/30 text-white'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
+                  variant={isActive ? "default" : "ghost"}
+                  className={`w-full justify-start gap-3 ${isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
                 </Button>
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -81,7 +83,7 @@ export function StudentSidebar() {
         <div className="absolute bottom-6 left-4 right-4">
           <Button
             variant="outline"
-            className="w-full justify-start gap-3 border-white/20 text-white hover:bg-white/10 bg-transparent"
+            className="w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
@@ -97,5 +99,5 @@ export function StudentSidebar() {
         />
       )}
     </>
-  )
+  );
 }

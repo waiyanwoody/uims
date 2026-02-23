@@ -1,470 +1,741 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import Link from 'next/link'
-import { Mail, Lock, User, Building2, GraduationCap } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import {
+  Mail,
+  Lock,
+  User,
+  Building2,
+  Briefcase,
+  GraduationCap,
+  Eye,
+  EyeOff,
+  MapPin,
+  ScrollText,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+const TermsContent = () => (
+  <div className="space-y-6">
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          1
+        </span>
+        General Usage
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        UIMS provides a platform for academic-to-professional transition. By
+        using the service, you represent that you are affiliated with a
+        recognized institution and provide truthful information.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          2
+        </span>
+        Data Privacy
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        Personal and academic data is stored securely. Students' data is only
+        shared with potential employers upon application. Employers agree to
+        handle student data with strict confidentiality.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          3
+        </span>
+        Professionalism
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        All users (Students, HR, Supervisors) must maintain professional
+        standards. Harassment, deceptive listings, or falsification of
+        evaluations may lead to permanent account suspension.
+      </p>
+    </section>
+    <section>
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+          4
+        </span>
+        Liability
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        UIMS is an educational facilitation tool. Successful placement depends
+        on the interview process and academic requirements, not solely on
+        platform usage.
+      </p>
+    </section>
+  </div>
+);
+
+const TermsDialog = () => (
+  <Dialog>
+    <DialogTrigger asChild>
+      <button
+        type="button"
+        className="text-primary hover:underline font-medium focus:outline-none"
+      >
+        Terms and Conditions
+      </button>
+    </DialogTrigger>
+    <DialogContent className="sm:max-w-[550px] max-h-[90vh]">
+      <DialogHeader>
+        <div className="flex items-center gap-2 text-primary mb-1">
+          <ScrollText className="w-5 h-5" />
+          <span className="font-bold text-sm tracking-widest">UIMS</span>
+        </div>
+        <DialogTitle className="text-2xl">Terms of Service</DialogTitle>
+        <DialogDescription>
+          Please review the agreement before proceeding with registration.
+        </DialogDescription>
+      </DialogHeader>
+      <ScrollArea className="max-h-[50vh] pr-4 mt-4">
+        <TermsContent />
+      </ScrollArea>
+      <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4 sm:justify-between items-center sm:items-end">
+        <p className="text-[10px] text-muted-foreground">
+          Last updated: February 2026
+        </p>
+        <Link href="/terms" className="text-xs text-primary hover:underline">
+          View full full legal document &rarr;
+        </Link>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showHRSuccessDialog, setShowHRSuccessDialog] = useState(false);
 
   const [studentData, setStudentData] = useState({
-    name: '',
-    email: '',
-    university: '',
-    major: '',
-    password: '',
-    confirmPassword: ''
-  })
+    name: "",
+    email: "",
+    university: "",
+    major: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const [hrData, setHrData] = useState({
-    name: '',
-    companyName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  })
+    name: "",
+    companyName: "",
+    industry: "",
+    email: "",
+    phone: "",
+    address: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const [supervisorData, setSupervisorData] = useState({
-    name: '',
-    university: '',
-    department: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
+    name: "",
+    university: "",
+    department: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const handleStudentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     setTimeout(() => {
-      router.push('/student/dashboard')
-      setIsLoading(false)
-    }, 800)
-  }
+      router.push("/student/dashboard");
+      setIsLoading(false);
+    }, 800);
+  };
 
   const handleHRSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     setTimeout(() => {
-      router.push('/company/dashboard')
-      setIsLoading(false)
-    }, 800)
-  }
+      setShowHRSuccessDialog(true);
+      setIsLoading(false);
+    }, 800);
+  };
 
   const handleSupervisorSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     setTimeout(() => {
-      router.push('/supervisor/dashboard')
-      setIsLoading(false)
-    }, 800)
-  }
+      router.push("/supervisor/dashboard");
+      setIsLoading(false);
+    }, 800);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-card to-secondary/20 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="w-full">
+      <Card className="p-8 shadow-xl border-primary/10">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Create Your Account</h1>
-          <p className="text-lg text-muted-foreground">Join the UIMS platform and manage internships</p>
+          <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
+          <p className="text-muted-foreground mt-1">
+            Join the university internship portal
+          </p>
         </div>
 
-        <Card className="p-8 shadow-xl border-primary/10">
-          <Tabs defaultValue="student" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="student" className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                <span className="hidden sm:inline">Student</span>
-              </TabsTrigger>
-              <TabsTrigger value="hr" className="flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                <span className="hidden sm:inline">HR</span>
-              </TabsTrigger>
-              <TabsTrigger value="supervisor" className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Supervisor</span>
-              </TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="student" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="student" className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4" />
+              <span>Student</span>
+            </TabsTrigger>
+            <TabsTrigger value="hr" className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              <span>HR</span>
+            </TabsTrigger>
+            <TabsTrigger value="supervisor" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              <span>Supervisor</span>
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Student Registration */}
-            <TabsContent value="student" className="space-y-6">
-              <div className="space-y-2 mb-6">
-                <h2 className="text-2xl font-bold text-foreground">Student Registration</h2>
-                <p className="text-muted-foreground">Create your account to browse and apply for internships</p>
+          {/* Student Registration */}
+          <TabsContent value="student">
+            <form onSubmit={handleStudentSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="s-name">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="s-name"
+                      placeholder="John Doe"
+                      value={studentData.name}
+                      onChange={(e) =>
+                        setStudentData({ ...studentData, name: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="s-email"
+                      type="email"
+                      placeholder="john@university.edu"
+                      value={studentData.email}
+                      onChange={(e) =>
+                        setStudentData({
+                          ...studentData,
+                          email: e.target.value,
+                        })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-uni">University</Label>
+                  <Input
+                    id="s-uni"
+                    placeholder="Stanford University"
+                    value={studentData.university}
+                    onChange={(e) =>
+                      setStudentData({
+                        ...studentData,
+                        university: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-major">Major</Label>
+                  <Input
+                    id="s-major"
+                    placeholder="Computer Science"
+                    value={studentData.major}
+                    onChange={(e) =>
+                      setStudentData({ ...studentData, major: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="s-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={studentData.password}
+                      onChange={(e) =>
+                        setStudentData({
+                          ...studentData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-confirm">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="s-confirm"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={studentData.confirmPassword}
+                      onChange={(e) =>
+                        setStudentData({
+                          ...studentData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleStudentSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Full Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-name" className="text-sm font-medium">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="s-name"
-                        placeholder="John Doe"
-                        value={studentData.name}
-                        onChange={(e) => setStudentData({ ...studentData, name: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <label className="flex items-center gap-2 text-sm pt-2">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border"
+                  required
+                />
+                <span className="text-muted-foreground">
+                  I agree to the <TermsDialog />
+                </span>
+              </label>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-email" className="text-sm font-medium">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="s-email"
-                        type="email"
-                        placeholder="john@university.edu"
-                        value={studentData.email}
-                        onChange={(e) => setStudentData({ ...studentData, email: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Register as Student"}
+              </Button>
+            </form>
+          </TabsContent>
 
-                  {/* University */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-uni" className="text-sm font-medium">University</Label>
+          {/* HR Registration */}
+          <TabsContent value="hr">
+            <form onSubmit={handleHRSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="hr-name">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
-                      id="s-uni"
-                      placeholder="Stanford University"
-                      value={studentData.university}
-                      onChange={(e) => setStudentData({ ...studentData, university: e.target.value })}
-                      className="bg-secondary/50"
-                      required
-                    />
-                  </div>
-
-                  {/* Major */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-major" className="text-sm font-medium">Major</Label>
-                    <Input
-                      id="s-major"
-                      placeholder="Computer Science"
-                      value={studentData.major}
-                      onChange={(e) => setStudentData({ ...studentData, major: e.target.value })}
-                      className="bg-secondary/50"
+                      id="hr-name"
+                      placeholder="Sarah Johnson"
+                      value={hrData.name}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, name: e.target.value })
+                      }
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-password" className="text-sm font-medium">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="s-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={studentData.password}
-                        onChange={(e) => setStudentData({ ...studentData, password: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="s-confirm" className="text-sm font-medium">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="s-confirm"
-                        type="password"
-                        placeholder="••••••••"
-                        value={studentData.confirmPassword}
-                        onChange={(e) => setStudentData({ ...studentData, confirmPassword: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-company">Company</Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-company"
+                      placeholder="Tech Corp Inc."
+                      value={hrData.companyName}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, companyName: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
                   </div>
                 </div>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border" required />
-                  <span className="text-muted-foreground">
-                    I agree to the{' '}
-                    <Link href="#" className="text-primary hover:underline">Terms of Service</Link>
-                  </span>
-                </label>
-
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Create Student Account'}
-                </Button>
-              </form>
-            </TabsContent>
-
-            {/* HR Registration */}
-            <TabsContent value="hr" className="space-y-6">
-              <div className="space-y-2 mb-6">
-                <h2 className="text-2xl font-bold text-foreground">HR Registration</h2>
-                <p className="text-muted-foreground">Register your company to post internship opportunities</p>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-industry">Industry</Label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-industry"
+                      placeholder="Technology, Finance, etc."
+                      value={hrData.industry}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, industry: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-email">Work Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-email"
+                      type="email"
+                      placeholder="hr@company.com"
+                      value={hrData.email}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, email: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-phone">Phone</Label>
+                  <Input
+                    id="hr-phone"
+                    placeholder="+1 (555) 123-4567"
+                    value={hrData.phone}
+                    onChange={(e) =>
+                      setHrData({ ...hrData, phone: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-address">Company Address</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-address"
+                      placeholder="Enter company headquarters address"
+                      value={hrData.address}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, address: e.target.value })
+                      }
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={hrData.password}
+                      onChange={(e) =>
+                        setHrData({ ...hrData, password: e.target.value })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="hr-confirm">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="hr-confirm"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={hrData.confirmPassword}
+                      onChange={(e) =>
+                        setHrData({
+                          ...hrData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleHRSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-name" className="text-sm font-medium">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="hr-name"
-                        placeholder="Sarah Johnson"
-                        value={hrData.name}
-                        onChange={(e) => setHrData({ ...hrData, name: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <label className="flex items-center gap-2 text-sm pt-2">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border"
+                  required
+                />
+                <span className="text-muted-foreground">
+                  I agree to the <TermsDialog />
+                </span>
+              </label>
 
-                  {/* Company Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-company" className="text-sm font-medium">Company Name</Label>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="hr-company"
-                        placeholder="Tech Corp Inc."
-                        value={hrData.companyName}
-                        onChange={(e) => setHrData({ ...hrData, companyName: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Registering..." : "Register as Company"}
+              </Button>
+            </form>
+          </TabsContent>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-email" className="text-sm font-medium">Company Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="hr-email"
-                        type="email"
-                        placeholder="hr@company.com"
-                        value={hrData.email}
-                        onChange={(e) => setHrData({ ...hrData, email: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-phone" className="text-sm font-medium">Phone</Label>
+          {/* Supervisor Registration */}
+          <TabsContent value="supervisor">
+            <form onSubmit={handleSupervisorSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sup-name">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
-                      id="hr-phone"
-                      placeholder="+1 (555) 123-4567"
-                      value={hrData.phone}
-                      onChange={(e) => setHrData({ ...hrData, phone: e.target.value })}
-                      className="bg-secondary/50"
+                      id="sup-name"
+                      placeholder="Prof. Michael Chen"
+                      value={supervisorData.name}
+                      onChange={(e) =>
+                        setSupervisorData({
+                          ...supervisorData,
+                          name: e.target.value,
+                        })
+                      }
+                      className="pl-10"
                       required
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-password" className="text-sm font-medium">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="hr-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={hrData.password}
-                        onChange={(e) => setHrData({ ...hrData, password: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="hr-confirm" className="text-sm font-medium">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="hr-confirm"
-                        type="password"
-                        placeholder="••••••••"
-                        value={hrData.confirmPassword}
-                        onChange={(e) => setHrData({ ...hrData, confirmPassword: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sup-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="sup-email"
+                      type="email"
+                      placeholder="prof@university.edu"
+                      value={supervisorData.email}
+                      onChange={(e) =>
+                        setSupervisorData({
+                          ...supervisorData,
+                          email: e.target.value,
+                        })
+                      }
+                      className="pl-10"
+                      required
+                    />
                   </div>
                 </div>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border" required />
-                  <span className="text-muted-foreground">
-                    I agree to the{' '}
-                    <Link href="#" className="text-primary hover:underline">Terms of Service</Link>
-                  </span>
-                </label>
-
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Register Company'}
-                </Button>
-              </form>
-            </TabsContent>
-
-            {/* Supervisor Registration */}
-            <TabsContent value="supervisor" className="space-y-6">
-              <div className="space-y-2 mb-6">
-                <h2 className="text-2xl font-bold text-foreground">Supervisor Registration</h2>
-                <p className="text-muted-foreground">Register as a faculty supervisor to monitor students</p>
+                <div className="space-y-2">
+                  <Label htmlFor="sup-uni">University</Label>
+                  <Input
+                    id="sup-uni"
+                    placeholder="Stanford University"
+                    value={supervisorData.university}
+                    onChange={(e) =>
+                      setSupervisorData({
+                        ...supervisorData,
+                        university: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sup-dept">Department</Label>
+                  <Input
+                    id="sup-dept"
+                    placeholder="Computer Science"
+                    value={supervisorData.department}
+                    onChange={(e) =>
+                      setSupervisorData({
+                        ...supervisorData,
+                        department: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sup-password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="sup-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={supervisorData.password}
+                      onChange={(e) =>
+                        setSupervisorData({
+                          ...supervisorData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sup-confirm">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="sup-confirm"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={supervisorData.confirmPassword}
+                      onChange={(e) =>
+                        setSupervisorData({
+                          ...supervisorData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <form onSubmit={handleSupervisorSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-name" className="text-sm font-medium">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="sup-name"
-                        placeholder="Prof. Michael Chen"
-                        value={supervisorData.name}
-                        onChange={(e) => setSupervisorData({ ...supervisorData, name: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <label className="flex items-center gap-2 text-sm pt-2">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border"
+                  required
+                />
+                <span className="text-muted-foreground">
+                  I agree to the <TermsDialog />
+                </span>
+              </label>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-email" className="text-sm font-medium">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="sup-email"
-                        type="email"
-                        placeholder="prof@university.edu"
-                        value={supervisorData.email}
-                        onChange={(e) => setSupervisorData({ ...supervisorData, email: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Register as Supervisor"}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
 
-                  {/* University */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-uni" className="text-sm font-medium">University</Label>
-                    <Input
-                      id="sup-uni"
-                      placeholder="Stanford University"
-                      value={supervisorData.university}
-                      onChange={(e) => setSupervisorData({ ...supervisorData, university: e.target.value })}
-                      className="bg-secondary/50"
-                      required
-                    />
-                  </div>
+        <div className="text-center pt-6 mt-6 border-t border-border">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="text-primary hover:underline font-semibold"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </Card>
 
-                  {/* Department */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-dept" className="text-sm font-medium">Department</Label>
-                    <Input
-                      id="sup-dept"
-                      placeholder="Computer Science"
-                      value={supervisorData.department}
-                      onChange={(e) => setSupervisorData({ ...supervisorData, department: e.target.value })}
-                      className="bg-secondary/50"
-                      required
-                    />
-                  </div>
-                </div>
+      {/* HR Registration Success Dialog */}
+      <Dialog open={showHRSuccessDialog} onOpenChange={setShowHRSuccessDialog}>
+        <DialogContent className="sm:max-w-[450px] p-8">
+          <div className="flex flex-col items-center text-center space-y-6">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              <Clock className="w-10 h-10 text-primary animate-pulse" />
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-password" className="text-sm font-medium">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="sup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={supervisorData.password}
-                        onChange={(e) => setSupervisorData({ ...supervisorData, password: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
+            <DialogHeader className="space-y-3 flex flex-col items-center">
+              <DialogTitle className="text-3xl font-bold tracking-tight text-foreground">
+                Registration Pending
+              </DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground leading-relaxed px-4">
+                Your HR account has been successfully registered. To maintain
+                platform security, a supervisor must review and approve your
+                application.
+              </DialogDescription>
+            </DialogHeader>
 
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="sup-confirm" className="text-sm font-medium">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                      <Input
-                        id="sup-confirm"
-                        type="password"
-                        placeholder="••••••••"
-                        value={supervisorData.confirmPassword}
-                        onChange={(e) => setSupervisorData({ ...supervisorData, confirmPassword: e.target.value })}
-                        className="pl-10 bg-secondary/50"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border" required />
-                  <span className="text-muted-foreground">
-                    I agree to the{' '}
-                    <Link href="#" className="text-primary hover:underline">Terms of Service</Link>
-                  </span>
-                </label>
-
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
-                  {isLoading ? 'Creating Account...' : 'Register as Supervisor'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          {/* Login Link */}
-          <div className="text-center pt-6 mt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-primary hover:underline font-semibold">
-                Sign in here
-              </Link>
-            </p>
+            <DialogFooter className="w-full pt-4">
+              <Button
+                type="button"
+                className="w-full h-12 text-md font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                onClick={() => router.push("/auth/login")}
+              >
+                Return to Login
+              </Button>
+            </DialogFooter>
           </div>
-        </Card>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }
