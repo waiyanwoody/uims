@@ -12,13 +12,11 @@ export default function PostInternship() {
   const [formData, setFormData] = useState({
     title: '',
     category: '',
-    location: '',
-    duration: '',
-    stipend: '',
+    // duration: '',
     deadline: '',
     description: '',
     requirements: '',
-    responsibilities: ''
+    slots: ''
   })
 
   const handleInputChange = (field: string, value: string) => {
@@ -45,14 +43,14 @@ export default function PostInternship() {
                 placeholder="e.g., Frontend Developer Internship"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="category" className="text-sm font-medium text-foreground">Category</Label>
               <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                <SelectTrigger className="bg-secondary/50 border-border">
+                <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -64,36 +62,17 @@ export default function PostInternship() {
                 </SelectContent>
               </Select>
             </div>
+        
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium text-foreground">Location</Label>
+              <Label htmlFor="duration" className="text-sm font-medium text-foreground">Slots</Label>
               <Input
-                id="location"
-                placeholder="e.g., San Francisco, CA"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                className="bg-secondary/50 border-border"
+                id="slots"
+                placeholder="e.g., 3"
+                value={formData.slots}
+                onChange={(e) => handleInputChange('slots', e.target.value)}
+              className="bg-background border-border"
+              type='number'
                 required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="duration" className="text-sm font-medium text-foreground">Duration</Label>
-              <Input
-                id="duration"
-                placeholder="e.g., 3 months"
-                value={formData.duration}
-                onChange={(e) => handleInputChange('duration', e.target.value)}
-                className="bg-secondary/50 border-border"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stipend" className="text-sm font-medium text-foreground">Stipend (Optional)</Label>
-              <Input
-                id="stipend"
-                placeholder="e.g., $5,000/month"
-                value={formData.stipend}
-                onChange={(e) => handleInputChange('stipend', e.target.value)}
-                className="bg-secondary/50 border-border"
               />
             </div>
             <div className="space-y-2">
@@ -103,7 +82,7 @@ export default function PostInternship() {
                 type="date"
                 value={formData.deadline}
                 onChange={(e) => handleInputChange('deadline', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
                 required
               />
             </div>
@@ -121,7 +100,7 @@ export default function PostInternship() {
                 placeholder="Describe the internship role and what the student will work on..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="bg-secondary/50 border-border min-h-32"
+                className="bg-background border-border min-h-32"
                 required
               />
             </div>
@@ -132,18 +111,8 @@ export default function PostInternship() {
                 placeholder="List the required skills and qualifications (one per line)"
                 value={formData.requirements}
                 onChange={(e) => handleInputChange('requirements', e.target.value)}
-                className="bg-secondary/50 border-border min-h-32"
+                className="bg-background border-border min-h-32"
                 required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="responsibilities" className="text-sm font-medium text-foreground">Key Responsibilities</Label>
-              <Textarea
-                id="responsibilities"
-                placeholder="Outline the main responsibilities (one per line)"
-                value={formData.responsibilities}
-                onChange={(e) => handleInputChange('responsibilities', e.target.value)}
-                className="bg-secondary/50 border-border min-h-32"
               />
             </div>
           </div>
@@ -151,9 +120,6 @@ export default function PostInternship() {
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
-          <Button variant="outline" className="border-border bg-transparent">
-            Save as Draft
-          </Button>
           <Button className="bg-primary hover:bg-primary/90">
             Publish Internship
           </Button>

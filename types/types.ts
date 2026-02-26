@@ -11,26 +11,25 @@ export interface CV {
 export interface Company {
   id: number;
   name: string;
-  location: string;
   industry: string;
-  contact_email: string;
-  status: 'PENDING' | 'ACTIVE';
-  created_at: Date;
+  location: string;
+  status: string;
+  createdAt: string;
 }
 
 export interface Internship {
   id: number;
-  company_id: number;
+  company: Company;
   title: string;
   description: string;
   category: string;
   requirements: string;
-  status: 'PENDING' | 'OPEN' | 'CLOSED';
+  status: string;
   slots: number;
-  deadline: Date | string;
-  created_at: Date;
-  company?: Company;
+  deadline: string;
+  createdAt: string;
 }
+
 
 export interface StudentProfile {
   id: number;

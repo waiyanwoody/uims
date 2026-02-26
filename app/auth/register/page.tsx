@@ -32,7 +32,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { Textarea } from "@/components/ui/textarea";
+import { useRegisterStudent } from "@/hooks/useRegisterStudent";
+import { toast } from "sonner";
+import { useRegisterCompany } from "@/hooks/useRegisterCompany";
 const TermsContent = () => (
   <div className="space-y-6">
     <section>
@@ -69,9 +72,9 @@ const TermsContent = () => (
         Professionalism
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        All users (Students, HR, Supervisors) must maintain professional
-        standards. Harassment, deceptive listings, or falsification of
-        evaluations may lead to permanent account suspension.
+        All users (Students, Companies) must maintain professional standards.
+        Harassment, deceptive listings, or falsification of evaluations may lead
+        to permanent account suspension.
       </p>
     </section>
     <section>
@@ -135,20 +138,22 @@ export default function RegisterPage() {
   const [studentData, setStudentData] = useState({
     name: "",
     email: "",
-    university: "",
+    studentNumber: "",
     major: "",
+    address: "",
+    gender: "",
     password: "",
     confirmPassword: "",
   });
 
   const [hrData, setHrData] = useState({
-    name: "",
     companyName: "",
     industry: "",
-    email: "",
-    phone: "",
-    address: "",
-    password: "",
+    location: "",
+    hrName: "",
+    hrEmail: "",
+    hrPhone: "",
+    hrPassword: "",
     confirmPassword: "",
   });
 
@@ -161,22 +166,63 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
+  const { registerStudent, loading: studentLoading } = useRegisterStudent();
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      router.push("/student/dashboard");
-      setIsLoading(false);
-    }, 800);
+
+    // Password validation
+    if (studentData.password !== studentData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      console.log("Registering student with data:", studentData);
+      await registerStudent({
+        name: studentData.name,
+        email: studentData.email,
+        studentNumber: "YKPT - " + studentData.studentNumber,
+        major: studentData.major,
+        address: studentData.address,
+        gender: studentData.gender as "MALE" | "FEMALE",
+        password: studentData.password,
+      });
+      toast.success("Registration Successful!", {
+        description:
+          "Your student account has been created. You can now log in and start applying for internships.",
+      });
+      router.push("/auth/login");
+    } catch (error) {
+      console.error(error);
+      alert("Registration failed");
+    }
   };
 
-  const handleHRSubmit = async (e: React.FormEvent) => {
+  const { registerCompany, loading:hrLoading } = useRegisterCompany();
+
+  const handleCompanySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      setShowHRSuccessDialog(true);
-      setIsLoading(false);
-    }, 800);
+
+    // Password check
+    if (hrData.hrPassword !== hrData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const { confirmPassword, ...payload } = hrData;
+
+      await registerCompany(payload);
+
+      toast.success("Registration Successful!", {
+        description:
+         "Your HR account has been created. A supervisor will review your application within 1-2 business days. You will receive an email notification once your account is approved.",
+      });
+      router.push("/auth/login");
+    } catch (error) {
+      console.error(error);
+      alert("Registration failed");
+    }
   };
 
   const handleSupervisorSubmit = async (e: React.FormEvent) => {
@@ -199,19 +245,19 @@ export default function RegisterPage() {
         </div>
 
         <Tabs defaultValue="student" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="student" className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4" />
               <span>Student</span>
             </TabsTrigger>
             <TabsTrigger value="hr" className="flex items-center gap-2">
               <Building2 className="w-4 h-4" />
-              <span>HR</span>
+              <span>Company</span>
             </TabsTrigger>
-            <TabsTrigger value="supervisor" className="flex items-center gap-2">
+            {/* <TabsTrigger value="supervisor" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               <span>Supervisor</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           {/* Student Registration */}
@@ -255,19 +301,29 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="s-uni">University</Label>
-                  <Input
-                    id="s-uni"
-                    placeholder="Stanford University"
-                    value={studentData.university}
-                    onChange={(e) =>
-                      setStudentData({
-                        ...studentData,
-                        university: e.target.value,
-                      })
-                    }
-                    required
-                  />
+                  <Label htmlFor="s-uni">Student Number</Label>
+                  <div className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                    {/* Static Prefix */}
+                    <span className="text-muted-foreground pr-1 select-none font-medium">
+                      YKPT -
+                    </span>
+
+                    {/* Editable Number Input */}
+                    <input
+                      id="s-uni"
+                      type="number"
+                      placeholder="00000"
+                      className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                      value={studentData.studentNumber}
+                      onChange={(e) =>
+                        setStudentData({
+                          ...studentData,
+                          studentNumber: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="s-major">Major</Label>
@@ -277,6 +333,39 @@ export default function RegisterPage() {
                     value={studentData.major}
                     onChange={(e) =>
                       setStudentData({ ...studentData, major: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-gender">Gender</Label>
+                  <select
+                    id="s-gender"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={studentData.gender}
+                    onChange={(e) =>
+                      setStudentData({ ...studentData, gender: e.target.value })
+                    }
+                    required
+                  >
+                    <option value="" disabled>
+                      Select Gender
+                    </option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="s-address">Address</Label>
+                  <Input
+                    id="s-address"
+                    placeholder="Your Home Address"
+                    value={studentData.address}
+                    onChange={(e) =>
+                      setStudentData({
+                        ...studentData,
+                        address: e.target.value,
+                      })
                     }
                     required
                   />
@@ -356,26 +445,30 @@ export default function RegisterPage() {
                 </span>
               </label>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Register as Student"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={studentLoading}
+              >
+                {studentLoading ? "Creating..." : "Register as Student"}
               </Button>
             </form>
           </TabsContent>
 
           {/* HR Registration */}
           <TabsContent value="hr">
-            <form onSubmit={handleHRSubmit} className="space-y-4">
+            <form onSubmit={handleCompanySubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="hr-name">Full Name</Label>
+                  <Label htmlFor="hr-name">HR Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="hr-name"
                       placeholder="Sarah Johnson"
-                      value={hrData.name}
+                      value={hrData.hrName}
                       onChange={(e) =>
-                        setHrData({ ...hrData, name: e.target.value })
+                        setHrData({ ...hrData, hrName: e.target.value })
                       }
                       className="pl-10"
                       required
@@ -415,16 +508,16 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="hr-email">Work Email</Label>
+                  <Label htmlFor="hr-email">HR Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                     <Input
                       id="hr-email"
                       type="email"
                       placeholder="hr@company.com"
-                      value={hrData.email}
+                      value={hrData.hrEmail}
                       onChange={(e) =>
-                        setHrData({ ...hrData, email: e.target.value })
+                        setHrData({ ...hrData, hrEmail: e.target.value })
                       }
                       className="pl-10"
                       required
@@ -436,9 +529,9 @@ export default function RegisterPage() {
                   <Input
                     id="hr-phone"
                     placeholder="+1 (555) 123-4567"
-                    value={hrData.phone}
+                    value={hrData.hrPhone}
                     onChange={(e) =>
-                      setHrData({ ...hrData, phone: e.target.value })
+                      setHrData({ ...hrData, hrPhone: e.target.value })
                     }
                     required
                   />
@@ -450,9 +543,9 @@ export default function RegisterPage() {
                     <Input
                       id="hr-address"
                       placeholder="Enter company headquarters address"
-                      value={hrData.address}
+                      value={hrData.location}
                       onChange={(e) =>
-                        setHrData({ ...hrData, address: e.target.value })
+                        setHrData({ ...hrData, location: e.target.value })
                       }
                       className="pl-10"
                       required
@@ -467,9 +560,9 @@ export default function RegisterPage() {
                       id="hr-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      value={hrData.password}
+                      value={hrData.hrPassword}
                       onChange={(e) =>
-                        setHrData({ ...hrData, password: e.target.value })
+                        setHrData({ ...hrData, hrPassword: e.target.value })
                       }
                       className="pl-10 pr-10"
                       required
@@ -531,8 +624,8 @@ export default function RegisterPage() {
                 </span>
               </label>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Registering..." : "Register as Company"}
+              <Button type="submit" className="w-full" disabled={hrLoading}>
+                {hrLoading ? "Registering..." : "Register as Company"}
               </Button>
             </form>
           </TabsContent>

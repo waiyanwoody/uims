@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Search, MapPin, Clock, DollarSign, Briefcase, Users } from 'lucide-react'
 import { ApplyModal } from '@/components/apply-modal'
+import { getInternships } from '@/lib/internships/hooks'
+import { Internship } from '@/types/types'
 
 export default function BrowseInternships() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -14,6 +16,8 @@ export default function BrowseInternships() {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [selectedInternship, setSelectedInternship] = useState<any>(null)
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<number>>(new Set())
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const categories = ['All', 'Engineering', 'Design', 'Business', 'Marketing', 'Data Science']
 
@@ -38,134 +42,145 @@ export default function BrowseInternships() {
     }
   }
 
-  const internships = [
-    {
-      id: 1,
-      company_id: 1,
-      title: 'Frontend Developer Internship',
-      category: 'Engineering',
-      description: 'We are seeking a passionate Frontend Developer intern to join our dynamic team. You will work on building responsive web applications. This is an excellent opportunity to gain hands-on experience while working on real-world projects.',
-      requirements: '["React", "TypeScript", "Tailwind CSS"]',
-      status: 'OPEN' as const,
-      slots: 5,
-      deadline: new Date('2024-03-15'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 1,
-        name: 'Tech Corp',
-        location: 'San Francisco, CA',
-        industry: 'Technology',
-        contact_email: 'hr@techcorp.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    },
-    {
-      id: 2,
-      company_id: 2,
-      title: 'Data Science Internship',
-      category: 'Data Science',
-      description: 'Join our data science team and work on cutting-edge machine learning projects. You will analyze large datasets, build predictive models, and contribute to data-driven decision making.',
-      requirements: '["Python", "Machine Learning", "SQL"]',
-      status: 'OPEN' as const,
-      slots: 3,
-      deadline: new Date('2024-02-28'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 2,
-        name: 'Data Solutions Inc.',
-        location: 'New York, NY',
-        industry: 'Data Analytics',
-        contact_email: 'careers@datasolutions.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    },
-    {
-      id: 3,
-      company_id: 3,
-      title: 'UX Design Internship',
-      category: 'Design',
-      description: 'Create beautiful and functional user experiences for our products. Work with designers and developers to craft intuitive interfaces. Learn industry-standard tools like Figma and participate in user research sessions to understand customer needs.',
-      requirements: '["Figma", "UI/UX", "Prototyping"]',
-      status: 'CLOSED' as const,
-      slots: 2,
-      deadline: new Date('2024-02-20'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 3,
-        name: 'Design Studio',
-        location: 'Los Angeles, CA',
-        industry: 'Design',
-        contact_email: 'jobs@designstudio.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    },
-    {
-      id: 4,
-      company_id: 4,
-      title: 'Backend Developer Internship',
-      category: 'Engineering',
-      description: 'Build scalable backend systems using modern technologies. Work on API development, database optimization, and microservices architecture.',
-      requirements: '["Node.js", "PostgreSQL", "Docker"]',
-      status: 'OPEN' as const,
-      slots: 4,
-      deadline: new Date('2024-03-10'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 4,
-        name: 'CloudTech',
-        location: 'Seattle, WA',
-        industry: 'Cloud Computing',
-        contact_email: 'recruiting@cloudtech.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    },
-    {
-      id: 5,
-      company_id: 5,
-      title: 'Product Manager Internship',
-      category: 'Business',
-      description: 'Help shape the future of our products by working closely with engineering and design teams.',
-      requirements: '["Communication", "Analytics", "Leadership"]',
-      status: 'OPEN' as const,
-      slots: 2,
-      deadline: new Date('2024-03-05'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 5,
-        name: 'InnovateCo',
-        location: 'Boston, MA',
-        industry: 'Product Development',
-        contact_email: 'hr@innovateco.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    },
-    {
-      id: 6,
-      company_id: 6,
-      title: 'Marketing Specialist Internship',
-      category: 'Marketing',
-      description: 'Execute marketing campaigns and support brand development. Analyze campaign performance metrics and create engaging social media content.',
-      requirements: '["Social Media", "Content Creation", "Analytics"]',
-      status: 'PENDING' as const,
-      slots: 3,
-      deadline: new Date('2024-03-20'),
-      created_at: new Date('2024-01-01'),
-      company: {
-        id: 6,
-        name: 'Brand Agency',
-        location: 'Chicago, IL',
-        industry: 'Marketing',
-        contact_email: 'careers@brandagency.com',
-        status: 'ACTIVE' as const,
-        created_at: new Date('2023-01-01')
-      }
-    }
-  ]
+const [internships, setInternships] =
+  useState<Internship[]>([]);
+
+  useEffect(() => {
+
+    getInternships()
+      .then(setInternships);
+    isLoading && setIsLoading(false);
+
+  }, []);
+
+  // const internships = [
+  //   {
+  //     id: 1,
+  //     company_id: 1,
+  //     title: 'Frontend Developer Internship',
+  //     category: 'Engineering',
+  //     description: 'We are seeking a passionate Frontend Developer intern to join our dynamic team. You will work on building responsive web applications. This is an excellent opportunity to gain hands-on experience while working on real-world projects.',
+  //     requirements: '["React", "TypeScript", "Tailwind CSS"]',
+  //     status: 'OPEN' as const,
+  //     slots: 5,
+  //     deadline: new Date('2024-03-15'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 1,
+  //       name: 'Tech Corp',
+  //       location: 'San Francisco, CA',
+  //       industry: 'Technology',
+  //       contact_email: 'hr@techcorp.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   },
+  //   {
+  //     id: 2,
+  //     company_id: 2,
+  //     title: 'Data Science Internship',
+  //     category: 'Data Science',
+  //     description: 'Join our data science team and work on cutting-edge machine learning projects. You will analyze large datasets, build predictive models, and contribute to data-driven decision making.',
+  //     requirements: '["Python", "Machine Learning", "SQL"]',
+  //     status: 'OPEN' as const,
+  //     slots: 3,
+  //     deadline: new Date('2024-02-28'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 2,
+  //       name: 'Data Solutions Inc.',
+  //       location: 'New York, NY',
+  //       industry: 'Data Analytics',
+  //       contact_email: 'careers@datasolutions.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   },
+  //   {
+  //     id: 3,
+  //     company_id: 3,
+  //     title: 'UX Design Internship',
+  //     category: 'Design',
+  //     description: 'Create beautiful and functional user experiences for our products. Work with designers and developers to craft intuitive interfaces. Learn industry-standard tools like Figma and participate in user research sessions to understand customer needs.',
+  //     requirements: '["Figma", "UI/UX", "Prototyping"]',
+  //     status: 'CLOSED' as const,
+  //     slots: 2,
+  //     deadline: new Date('2024-02-20'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 3,
+  //       name: 'Design Studio',
+  //       location: 'Los Angeles, CA',
+  //       industry: 'Design',
+  //       contact_email: 'jobs@designstudio.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   },
+  //   {
+  //     id: 4,
+  //     company_id: 4,
+  //     title: 'Backend Developer Internship',
+  //     category: 'Engineering',
+  //     description: 'Build scalable backend systems using modern technologies. Work on API development, database optimization, and microservices architecture.',
+  //     requirements: '["Node.js", "PostgreSQL", "Docker"]',
+  //     status: 'OPEN' as const,
+  //     slots: 4,
+  //     deadline: new Date('2024-03-10'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 4,
+  //       name: 'CloudTech',
+  //       location: 'Seattle, WA',
+  //       industry: 'Cloud Computing',
+  //       contact_email: 'recruiting@cloudtech.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   },
+  //   {
+  //     id: 5,
+  //     company_id: 5,
+  //     title: 'Product Manager Internship',
+  //     category: 'Business',
+  //     description: 'Help shape the future of our products by working closely with engineering and design teams.',
+  //     requirements: '["Communication", "Analytics", "Leadership"]',
+  //     status: 'OPEN' as const,
+  //     slots: 2,
+  //     deadline: new Date('2024-03-05'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 5,
+  //       name: 'InnovateCo',
+  //       location: 'Boston, MA',
+  //       industry: 'Product Development',
+  //       contact_email: 'hr@innovateco.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   },
+  //   {
+  //     id: 6,
+  //     company_id: 6,
+  //     title: 'Marketing Specialist Internship',
+  //     category: 'Marketing',
+  //     description: 'Execute marketing campaigns and support brand development. Analyze campaign performance metrics and create engaging social media content.',
+  //     requirements: '["Social Media", "Content Creation", "Analytics"]',
+  //     status: 'PENDING' as const,
+  //     slots: 3,
+  //     deadline: new Date('2024-03-20'),
+  //     created_at: new Date('2024-01-01'),
+  //     company: {
+  //       id: 6,
+  //       name: 'Brand Agency',
+  //       location: 'Chicago, IL',
+  //       industry: 'Marketing',
+  //       contact_email: 'careers@brandagency.com',
+  //       status: 'ACTIVE' as const,
+  //       created_at: new Date('2023-01-01')
+  //     }
+  //   }
+  // ]
 
   const filteredInternships = internships.filter(internship => {
     const matchesSearch = internship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,6 +269,14 @@ export default function BrowseInternships() {
         Showing {filteredInternships.length} internships
       </div>
 
+      {/* Loading state */}
+      {isLoading && (
+        <Card className="p-12 border border-border text-center  animate-pulse">
+          <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Loading ...</h3>
+        </Card>
+      )}
+
       {/* Internship Cards Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         {filteredInternships.map((internship) => {
@@ -275,7 +298,7 @@ export default function BrowseInternships() {
                     {internship.status}
                   </Badge>
                 </div>
-                <p className="text-sm font-medium text-accent">{internship.company.name}</p>
+                <p className="text-sm font-medium text-primary">{internship.company.name}</p>
               </div>
 
               {/* Details */}
@@ -287,10 +310,6 @@ export default function BrowseInternships() {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 flex-shrink-0" />
                   3 months
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4 flex-shrink-0" />
-                  $5,000/month
                 </div>
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Users className="w-4 h-4 flex-shrink-0 text-primary" />
@@ -362,7 +381,7 @@ export default function BrowseInternships() {
       </div>
 
       {/* No Results */}
-      {filteredInternships.length === 0 && (
+      {!isLoading && filteredInternships.length === 0 && (
         <Card className="p-12 border border-border text-center">
           <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
           <h3 className="text-lg font-semibold text-foreground mb-2">No internships found</h3>
