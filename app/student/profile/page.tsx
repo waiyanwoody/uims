@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,22 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Plus, X, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import { set } from 'date-fns'
+import { useStudentProfile } from '@/hooks/useStudentProfile'
+
+export interface StudentProfile {
+  studentId: number;
+  name: string;
+  email: string;
+  major: string;
+  profileImageUrl: string | null;
+  address: string | null;
+  bio: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  dateOfBirth: string | null; // Usually an ISO string from APIs
+}
 
 export default function StudentProfile() {
   const [skills, setSkills] = useState(['React', 'TypeScript', 'Node.js', 'Tailwind CSS'])
@@ -25,16 +41,29 @@ export default function StudentProfile() {
   const [success, setSuccess] = useState<string | null>(null)
   const [profileImage, setProfileImage] = useState<string | null>(null)
   
-  const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    email: 'john@university.edu',
-    major: 'Computer Science',
-    bio: 'Passionate developer interested in full-stack development and cloud technologies.',
-    address: '123 Main St, City, State 12345',
-    github: 'https://github.com/johndoe',
-    linkedin: 'https://linkedin.com/in/johndoe',
-    dateOfBirth: '2002-05-15'
-  })
+  const { user } = useAuth();
+  // 1. Move the hook to the top level
+  const { profile, isLoading } = useStudentProfile(user?.id || 0);
+
+  // 2. Initialize state with the Interface
+  const [profileData, setProfileData] = useState<StudentProfile>({
+    name: '',
+    email: '',
+    major: '',
+    dateOfBirth: '',
+    address: '',
+    bio: '',
+    github: '',
+    linkedin: '',
+    gender: '',
+  });
+
+  // 3. Sync state when the profile data is fetched
+  useEffect(() => {
+    if (profile) {
+      setProfileData(profile);
+    }
+  }, [profile]); // Runs whenever 'profile' updates from the hook
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({ ...prev, [field]: value }))
@@ -177,7 +206,7 @@ export default function StudentProfile() {
                 id="name"
                 value={profileData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2">
@@ -187,7 +216,7 @@ export default function StudentProfile() {
                 type="email"
                 value={profileData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2">
@@ -196,7 +225,7 @@ export default function StudentProfile() {
                 id="major"
                 value={profileData.major}
                 onChange={(e) => handleInputChange('major', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2">
@@ -204,27 +233,27 @@ export default function StudentProfile() {
               <Input
                 id="dob"
                 type="date"
-                value={profileData.dateOfBirth}
+                value={profileData.dateOfBirth ? profileData.dateOfBirth.split('T')[0] : ''}
                 onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="address" className="text-sm font-medium text-foreground">Address</Label>
               <Input
                 id="address"
-                value={profileData.address}
+                value={profileData.address || ''}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="bio" className="text-sm font-medium text-foreground">Bio</Label>
               <Textarea
                 id="bio"
-                value={profileData.bio}
+                value={profileData.bio || ''}
                 onChange={(e) => handleInputChange('bio', e.target.value)}
-                className="bg-secondary/50 border-border min-h-32"
+                className="bg-transparent border-border min-h-32"
               />
             </div>
           </div>
@@ -240,7 +269,7 @@ export default function StudentProfile() {
                 id="github"
                 value={profileData.github}
                 onChange={(e) => handleInputChange('github', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
                 placeholder="https://github.com/username"
               />
             </div>
@@ -250,7 +279,7 @@ export default function StudentProfile() {
                 id="linkedin"
                 value={profileData.linkedin}
                 onChange={(e) => handleInputChange('linkedin', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-transparent border-border"
                 placeholder="https://linkedin.com/in/username"
               />
             </div>
@@ -258,7 +287,7 @@ export default function StudentProfile() {
         </Card>
 
         {/* Skills */}
-        <Card className="p-8 border border-border">
+        {/* <Card className="p-8 border border-border">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-foreground">Skills & Expertise</h2>
             <Button
@@ -273,7 +302,7 @@ export default function StudentProfile() {
           
           <div className="space-y-4">
             {/* Skills Display */}
-            {skills.length > 0 ? (
+            {/* {skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill, index) => (
                   <Badge
@@ -309,8 +338,8 @@ export default function StudentProfile() {
             <p className="text-xs text-muted-foreground">
               💡 Add your technical and soft skills to showcase your expertise to potential employers
             </p>
-          </div>
-        </Card>
+          </div> */}
+        {/* </Card>  */}
 
         {/* Save Button */}
         <div className="flex justify-end gap-3">
