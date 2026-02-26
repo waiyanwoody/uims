@@ -3,9 +3,10 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 
 type User = {
-  id: string
+  id: number
   name: string
   email: string
+  type: "student" | "company" | "supervisor"
 } | null
 
 type AuthContextType = {
@@ -17,6 +18,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+
   const [user, setUser] = useState<User>(() => {
     if (typeof window !== 'undefined') {
       return JSON.parse(localStorage.getItem('user') || 'null')
