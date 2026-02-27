@@ -8,6 +8,11 @@ export interface CV {
   updated_at: Date | string;
 }
 
+export interface CvFormRequest {
+  studentId: number;
+  title: string;
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -30,7 +35,6 @@ export interface Internship {
   createdAt: string;
 }
 
-
 export interface StudentProfile {
   id: number;
   student_id: number;
@@ -45,7 +49,7 @@ export interface StudentProfile {
 export interface Student {
   id: number;
   name: string;
-  gender: 'MALE' | 'FEMALE';
+  gender: "MALE" | "FEMALE";
   student_number: string;
   email: string;
   major: string;
@@ -57,6 +61,12 @@ export interface StudentExpertise {
   id: number;
   student_id: number;
   skill_name: string;
+}
+
+export interface CreateApplicationRequest {
+  studentId: number;
+  internshipId: number;
+  cvId: number;
 }
 
 export interface Application {
@@ -87,4 +97,3 @@ export interface ApplicationWithDetails extends Application {
   };
   cv: CV;
 }
-

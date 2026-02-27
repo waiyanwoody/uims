@@ -20,8 +20,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Upload, CheckCircle2, AlertCircle, X, File, FileText, Paperclip } from "lucide-react";
-import { Internship, Student, CV } from "@/types/types";
+import {
+  Loader2,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  File,
+  FileText,
+  Paperclip,
+  Briefcase,
+  MapPin,
+  Calendar,
+  Users,
+} from "lucide-react";
+import {
+  Internship,
+  Student,
+  CV,
+  CreateApplicationRequest,
+  CvFormRequest,
+} from "@/types/types";
+import { useApplication } from "@/hooks/StudentHook/useApplication";
+import { useCvs } from "@/hooks/StudentHook/useCvs";
 
 interface ApplyModalProps {
   isOpen: boolean;
@@ -31,10 +52,17 @@ interface ApplyModalProps {
   useSampleData?: boolean;
 }
 
-export function ApplyModal({ isOpen, onClose, internship, student, useSampleData = true }: ApplyModalProps) {
+export function ApplyModal({
+  isOpen,
+  onClose,
+  internship,
+  student,
+  useSampleData = true,
+}: ApplyModalProps) {
   const [cvList, setCvList] = useState<CV[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [cvTitle, setCvTitle] = useState("");
   const [useFileUpload, setUseFileUpload] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,60 +70,38 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Sample CVs data
-  const sampleCVs: CV[] = [
-    {
-      id: 1,
-      student_id: 1,
-      title: "Software Engineer Resume 2024",
-      file_path: "/uploads/cvs/john_doe_resume_2024.pdf",
-      created_at: new Date('2024-01-15'),
-      updated_at: new Date('2024-02-10')
-    },
-    {
-      id: 2,
-      student_id: 1,
-      title: "Full Stack Developer CV",
-      file_path: "/uploads/cvs/john_doe_fullstack.pdf",
-      created_at: new Date('2024-01-20'),
-      updated_at: new Date('2024-02-05')
-    },
-    {
-      id: 3,
-      student_id: 1,
-      title: "Technical Resume - Updated",
-      file_path: "/uploads/cvs/john_doe_tech_resume.pdf",
-      created_at: new Date('2024-02-01'),
-      updated_at: new Date('2024-02-15')
-    }
-  ];
+  const {
+    createApplication,
+    loading: applicationLoading,
+    error: applicationError,
+  } = useApplication();
+
+  const { createCv: uploadCvToBackend } = useCvs();
 
   useEffect(() => {
     if (isOpen) {
-      if (useSampleData) {
-        setCvList(sampleCVs);
-      } else {
-        fetchCVs();
-      }
+      fetchCVs();
       // Reset states when modal opens
       setUseFileUpload(false);
       setUploadedFile(null);
+      setCvTitle("");
       setSelectedCvId("");
       setCoverLetter("");
       setError(null);
       setSuccess(false);
     }
-  }, [isOpen, useSampleData]);
+  }, [isOpen]);
 
   const fetchCVs = async () => {
     setLoadingCvs(true);
     try {
-      const response = await fetch("/api/student/cvs");
+      const response = await fetch("/api/v1/students/cvs"); // Updated to match API pattern
       if (!response.ok) throw new Error("Failed to fetch CVs");
       const data = await response.json();
-      setCvList(data.cvs || []);
+      setCvList(data.data || data.cvs || []);
     } catch (err) {
-      setError("Failed to load your CVs. Please try again.");
+      // Don't show error if it's just empty
+      console.error("Failed to load CVs:", err);
     } finally {
       setLoadingCvs(false);
     }
@@ -105,27 +111,31 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
-      if (file.type !== 'application/pdf') {
-        setError('Only PDF files are allowed');
+      if (file.type !== "application/pdf") {
+        setError("Only PDF files are allowed");
         return;
       }
 
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        setError('File size must be less than 5MB');
+        setError("File size must be less than 5MB");
         return;
       }
 
       setUploadedFile(file);
+      setCvTitle(file.name.replace(".pdf", ""));
       setError(null);
     }
   };
 
   const handleRemoveFile = () => {
     setUploadedFile(null);
-    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-    if (fileInput) fileInput.value = '';
+    setCvTitle("");
+    const fileInput = document.getElementById(
+      "file-upload",
+    ) as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -139,18 +149,19 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
 
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Only PDF files are allowed');
+      if (file.type !== "application/pdf") {
+        setError("Only PDF files are allowed");
         return;
       }
 
       const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        setError('File size must be less than 5MB');
+        setError("File size must be less than 5MB");
         return;
       }
 
       setUploadedFile(file);
+      setCvTitle(file.name.replace(".pdf", ""));
       setError(null);
     }
   };
@@ -172,42 +183,58 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
     setIsLoading(true);
 
     try {
+      let finalCvId: number | null = null;
+
+      // Handle CV Upload if a new file is provided
+      if (useFileUpload && uploadedFile) {
+        const cvRequest: CvFormRequest = {
+          studentId: student.id,
+          title: cvTitle || uploadedFile.name.replace(".pdf", ""),
+        };
+        const uploadedCv = await uploadCvToBackend(cvRequest, uploadedFile);
+        finalCvId = uploadedCv.id;
+      } else if (!useFileUpload && selectedCvId) {
+        finalCvId = parseInt(selectedCvId);
+      }
+
       if (useSampleData) {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Get CV title
-        let cvTitle = 'No CV attached';
-        if (useFileUpload && uploadedFile) {
-          cvTitle = uploadedFile.name;
-        } else if (!useFileUpload && selectedCvId) {
-          const selectedCV = cvList.find(cv => cv.id.toString() === selectedCvId);
-          cvTitle = selectedCV?.title || 'CV';
+        if (finalCvId) {
+          const request: CreateApplicationRequest = {
+            studentId: student.id,
+            internshipId: internship.id,
+            cvId: finalCvId,
+          };
+          await createApplication(request);
+        } else {
+          // Fallback if no CV
+          await new Promise((resolve) => setTimeout(resolve, 1500));
         }
-        
+
+        // Get CV title for local display
+        let displayCvTitle = "No CV attached";
+        if (useFileUpload && uploadedFile) {
+          displayCvTitle = uploadedFile.name;
+        } else if (!useFileUpload && selectedCvId) {
+          const selectedCV = cvList.find(
+            (cv) => cv.id.toString() === selectedCvId,
+          );
+          displayCvTitle = selectedCV?.title || "CV";
+        }
+
         // Dispatch custom event
-        const newApplicationEvent = new CustomEvent('newApplication', {
+        const newApplicationEvent = new CustomEvent("newApplication", {
           detail: {
             internshipTitle: internship.title,
-            companyName: internship.company?.name || 'Company',
-            location: internship.company?.location || '',
+            companyName: internship.company?.name || "Company",
+            location: internship.company?.location || "",
             category: internship.category,
             deadline: internship.deadline,
-            cvTitle: cvTitle,
+            cvTitle: displayCvTitle,
             coverLetter: coverLetter,
-            appliedDate: new Date().toISOString()
-          }
+            appliedDate: new Date().toISOString(),
+          },
         });
         window.dispatchEvent(newApplicationEvent);
-        
-        console.log('Application submitted (sample mode):', {
-          internship_id: internship.id,
-          cv_type: useFileUpload ? (uploadedFile ? 'uploaded_file' : 'no_cv') : 'existing_cv',
-          cv_id: !useFileUpload && selectedCvId ? parseInt(selectedCvId) : null,
-          cv_file: useFileUpload && uploadedFile ? uploadedFile.name : null,
-          cover_letter: coverLetter,
-          student_id: student.id
-        });
 
         setSuccess(true);
         setTimeout(() => {
@@ -220,25 +247,15 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
         }, 2000);
       } else {
         // Real API call
-        const formData = new FormData();
-        formData.append('internship_id', internship.id.toString());
-        formData.append('cover_letter', coverLetter);
-        
-        if (useFileUpload && uploadedFile) {
-          formData.append('cv_file', uploadedFile);
-        } else if (!useFileUpload && selectedCvId) {
-          formData.append('cv_id', selectedCvId);
-        }
-
-        const response = await fetch("/api/applications", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to submit application");
+        if (finalCvId) {
+          const request: CreateApplicationRequest = {
+            studentId: student.id,
+            internshipId: internship.id,
+            cvId: finalCvId,
+          };
+          await createApplication(request);
+        } else {
+          throw new Error("No CV provided for application");
         }
 
         setSuccess(true);
@@ -252,7 +269,11 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
         }, 2000);
       }
     } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(
+        applicationError ||
+          err.message ||
+          "Something went wrong. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -271,70 +292,105 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Apply for Internship</DialogTitle>
-          <DialogDescription>
-            Submit your application for this position
-            {useSampleData}
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-y-auto no-scrollbar rounded-2xl p-0 border border-border shadow-2xl">
+        <DialogHeader className="p-6 pb-0">
+          <DialogTitle className="text-2xl font-bold text-primary">
+            Apply for Internship
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Submit your application for this position to start your professional
+            journey
           </DialogDescription>
         </DialogHeader>
 
         {success ? (
-          <div className="py-8 flex flex-col items-center justify-center gap-4">
-            <CheckCircle2 className="w-16 h-16 text-green-500" />
-            <p className="text-lg font-semibold">Application Submitted Successfully!</p>
-            <p className="text-muted-foreground text-center">
-              {useSampleData 
-                ? "Your application has been added! Check 'My Applications' to see it."
-                : "Your application has been sent to the company. You can track its status in your applications page."}
-            </p>
+          <div className="py-12 px-6 flex flex-col items-center justify-center gap-6">
+            <div className="p-4 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+              <CheckCircle2 className="w-16 h-16 text-emerald-500" />
+            </div>
+            <div className="text-center space-y-2">
+              <p className="text-xl font-bold">
+                Application Submitted Successfully!
+              </p>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                {useSampleData
+                  ? "Your application has been added! Check 'My Applications' to track your status."
+                  : "Your application has been sent to the company. You will be notified of any updates via email."}
+              </p>
+            </div>
             {useSampleData && (
               <Button
-                onClick={() => window.location.href = '/student/applications'}
-                className="mt-2"
+                onClick={() => (window.location.href = "/student/applications")}
+                className="mt-2 bg-primary hover:bg-primary/90 min-w-[200px]"
               >
                 View My Applications
               </Button>
             )}
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 pt-2 space-y-6">
             {/* Internship Details */}
-            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-              <h3 className="font-semibold text-lg">{internship.title}</h3>
-              <p className="text-sm text-muted-foreground">
-                {internship.company?.name || "Company"}
-              </p>
-              <div className="flex gap-4 text-sm flex-wrap">
-                <span className="flex items-center gap-1">
-                  📍 {internship.company?.location}
+            <div className="bg-primary/5 border border-primary/20 p-5 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider">
+                <Briefcase className="w-4 h-4" />
+                Internship Details
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-lg text-foreground leading-tight">
+                  {internship.title}
+                </h3>
+                <p className="text-sm font-medium text-muted-foreground">
+                  {internship.company?.name || "Company"}
+                </p>
+              </div>
+              <div className="flex gap-4 text-xs font-medium text-muted-foreground flex-wrap pt-1 border-t border-primary/10 mt-2">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {internship.company?.location}
                 </span>
-                <span className="flex items-center gap-1">
-                  ⏰ Deadline: {new Date(internship.deadline).toLocaleDateString()}
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Deadline: {new Date(internship.deadline).toLocaleDateString()}
                 </span>
               </div>
             </div>
 
             {/* Student Information */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold">Your Information</Label>
-              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="font-medium">{student.name}</p>
+            <div className="space-y-4">
+              <Label className="text-base font-bold flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Your Information
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-secondary/30 p-4 rounded-xl border border-border/50">
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                    Name
+                  </p>
+                  <p className="font-semibold text-sm">{student.name}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{student.email}</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                    Email
+                  </p>
+                  <p className="font-semibold text-sm truncate">
+                    {student.email}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Student Number</p>
-                  <p className="font-medium">{student.student_number}</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                    Student ID
+                  </p>
+                  <p className="font-semibold text-sm">
+                    {student.student_number || "N/A"}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Major</p>
-                  <p className="font-medium">{student.major}</p>
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                    Major
+                  </p>
+                  <p className="font-semibold text-sm">
+                    {student.major || "N/A"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -344,38 +400,6 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
               <Label className="text-base font-semibold">
                 Resume/CV <span className="text-red-500">*</span>
               </Label>
-
-              {/* Toggle Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={!useFileUpload ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setUseFileUpload(false);
-                    setUploadedFile(null);
-                    setError(null);
-                  }}
-                  className={!useFileUpload ? "bg-primary" : ""}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Select from My CVs
-                </Button>
-                {/* <Button
-                  type="button"
-                  variant={useFileUpload ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setUseFileUpload(true);
-                    setSelectedCvId("");
-                    setError(null);
-                  }}
-                  className={useFileUpload ? "bg-primary" : ""}
-                >
-                  <Paperclip className="w-4 h-4 mr-2" />
-                  Attach New File
-                </Button> */}
-              </div>
 
               {/* Select from My CVs */}
               {!useFileUpload && (
@@ -391,23 +415,22 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
                       <p className="text-sm text-muted-foreground">
                         You don't have any saved CVs yet
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Switch to "Attach New File" to upload one now
-                      </p>
                     </div>
                   ) : (
-                    <Select value={selectedCvId} onValueChange={setSelectedCvId}>
-                      <SelectTrigger>
+                    <Select
+                      value={selectedCvId}
+                      onValueChange={setSelectedCvId}
+                    >
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Choose a CV from your library" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="w-[calc(100vw-4rem)] sm:max-w-md">
                         {cvList.map((cv) => (
                           <SelectItem key={cv.id} value={cv.id.toString()}>
                             <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4" />
-                              <span className="font-medium">{cv.title}</span>
-                              <span className="text-xs text-muted-foreground">
-                                • Updated {new Date(cv.updated_at).toLocaleDateString()}
+                              <FileText className="w-4 h-4 shrink-0 text-primary" />
+                              <span className="font-medium truncate text-sm sm:text-base">
+                                {cv.title}
                               </span>
                             </div>
                           </SelectItem>
@@ -422,7 +445,7 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
               {useFileUpload && (
                 <div className="space-y-3">
                   {!uploadedFile ? (
-                    <div 
+                    <div
                       className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
                       onDragOver={handleDragOver}
                       onDrop={handleDrop}
@@ -449,7 +472,12 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
                             PDF format only • Maximum 5MB • Optional
                           </p>
                         </div>
-                        <Button type="button" variant="outline" size="sm" className="mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                        >
                           <Upload className="w-4 h-4 mr-2" />
                           Choose File
                         </Button>
@@ -463,9 +491,12 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
                             <File className="w-6 h-6 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{uploadedFile.name}</p>
+                            <p className="font-medium text-sm truncate">
+                              {uploadedFile.name}
+                            </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB • PDF
+                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                              • PDF
                             </p>
                           </div>
                         </div>
@@ -491,7 +522,10 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
             {/* Cover Letter */}
             <div className="space-y-2">
               <Label htmlFor="coverLetter" className="text-base font-semibold">
-                Cover Letter <span className="text-muted-foreground text-sm">(Optional)</span>
+                Cover Letter{" "}
+                <span className="text-muted-foreground text-sm">
+                  (Optional)
+                </span>
               </Label>
               <Textarea
                 id="coverLetter"
@@ -517,7 +551,12 @@ export function ApplyModal({ isOpen, onClose, internship, student, useSampleData
 
             {/* Footer Actions */}
             <DialogFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading || !isFormValid()}>
