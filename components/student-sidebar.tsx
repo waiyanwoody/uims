@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -34,8 +34,18 @@ const menuItems = [
 export function StudentSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user,logout } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/login");
+      return;
+    }
+    if (user?.type !== "student") {
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleLogout = () => {
     logout();

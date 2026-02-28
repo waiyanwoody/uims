@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -17,6 +17,9 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/company/dashboard" },
@@ -38,6 +41,27 @@ const menuItems = [
 export function CompanySidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { user,logout } = useAuth();
+  const router = useRouter();
+
+    useEffect(() => {
+    if (!user) {
+      router.push("/auth/login");
+      return;
+    }
+    if (user?.type !== "company") {
+      router.push("/");
+    }
+    }, [user, router]);
+  
+  const handleLogout = () => {
+    logout();
+    toast.message("Logged out successfully", {
+      description: "You have been logged out."
+    });
+    router.push("/auth/login");
+    setIsOpen(false);
+  }
 
   return (
     <>
@@ -91,6 +115,7 @@ export function CompanySidebar() {
         {/* Logout Button */}
         <div className="absolute bottom-6 left-4 right-4">
           <Button
+            onClick={handleLogout}
             variant="outline"
             className="w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
           >

@@ -45,13 +45,23 @@ export default function LoginPage() {
     try {
       const user = await login(selectedRole, { email, password });
 
+      console.log("login user",user)
       // Save to AuthContext
-      authLogin({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        type: selectedRole,
-      });
+      if (selectedRole === "student") {
+          authLogin({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          type: selectedRole,
+        });
+      }else if (selectedRole === "company") {
+          authLogin({
+          id: user.id,
+          name: user.hrName,
+          email: user.hrEmail,
+          type: selectedRole,
+        });
+      }
 
       // Redirect based on role
       const redirectMap = {

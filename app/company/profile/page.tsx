@@ -43,7 +43,7 @@ export default function CompanyProfile() {
                 id="companyName"
                 value={profileData.companyName}
                 onChange={(e) => handleInputChange('companyName', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -53,7 +53,7 @@ export default function CompanyProfile() {
                 type="email"
                 value={profileData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -62,7 +62,7 @@ export default function CompanyProfile() {
                 id="phone"
                 value={profileData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -71,7 +71,7 @@ export default function CompanyProfile() {
                 id="website"
                 value={profileData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -80,7 +80,7 @@ export default function CompanyProfile() {
                 id="address"
                 value={profileData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -89,7 +89,7 @@ export default function CompanyProfile() {
                 id="bio"
                 value={profileData.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value)}
-                className="bg-secondary/50 border-border min-h-32"
+                className="bg-background border-border min-h-32"
               />
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function CompanyProfile() {
                 id="industry"
                 value={profileData.industry}
                 onChange={(e) => handleInputChange('industry', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -114,7 +114,7 @@ export default function CompanyProfile() {
                 id="employeeCount"
                 value={profileData.employeeCount}
                 onChange={(e) => handleInputChange('employeeCount', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
             <div className="space-y-2">
@@ -123,7 +123,7 @@ export default function CompanyProfile() {
                 id="yearFounded"
                 value={profileData.yearFounded}
                 onChange={(e) => handleInputChange('yearFounded', e.target.value)}
-                className="bg-secondary/50 border-border"
+                className="bg-background border-border"
               />
             </div>
           </div>

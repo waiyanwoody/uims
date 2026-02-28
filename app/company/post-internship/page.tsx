@@ -1,55 +1,125 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCreateInternship } from "@/hooks/useCreateInternship";
+import {toast} from "sonner"
 
 export default function PostInternship() {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
-    title: '',
-    category: '',
-    // duration: '',
-    deadline: '',
-    description: '',
-    requirements: '',
-    slots: ''
-  })
+    title: "",
+    category: "",
+    deadline: "",
+    description: "",
+    requirements: "",
+    slots: "",
+  });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const { createInternship, loading, error } = useCreateInternship();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("User not logged in");
+      return;
+    }
+
+    try {
+      await createInternship({
+        companyId: user.id, //  get from auth user
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        requirements: formData.requirements,
+        slots: Number(formData.slots), //  convert string → number
+        deadline: formData.deadline,
+      });
+
+      toast.success("Internship created successfully");
+
+      // Optional: reset form
+      setFormData({
+        title: "",
+        category: "",
+        deadline: "",
+        description: "",
+        requirements: "",
+        slots: "",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error(err);
+    }
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Post New Internship</h1>
-        <p className="text-muted-foreground mt-2">Create and publish a new internship opportunity</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          Post New Internship
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Create and publish a new internship opportunity
+        </p>
       </div>
 
-      <form className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Basic Information</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            Basic Information
+          </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium text-foreground">Position Title</Label>
+              <Label
+                htmlFor="title"
+                className="text-sm font-medium text-foreground"
+              >
+                Position Title
+              </Label>
               <Input
                 id="title"
                 placeholder="e.g., Frontend Developer Internship"
                 value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                onChange={(e) => handleInputChange("title", e.target.value)}
                 className="bg-background border-border"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium text-foreground">Category</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+              <Label
+                htmlFor="category"
+                className="text-sm font-medium text-foreground"
+              >
+                Category
+              </Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => handleInputChange("category", value)}
+              >
                 <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -62,26 +132,36 @@ export default function PostInternship() {
                 </SelectContent>
               </Select>
             </div>
-        
+
             <div className="space-y-2">
-              <Label htmlFor="duration" className="text-sm font-medium text-foreground">Slots</Label>
+              <Label
+                htmlFor="duration"
+                className="text-sm font-medium text-foreground"
+              >
+                Slots
+              </Label>
               <Input
                 id="slots"
                 placeholder="e.g., 3"
                 value={formData.slots}
-                onChange={(e) => handleInputChange('slots', e.target.value)}
-              className="bg-background border-border"
-              type='number'
+                onChange={(e) => handleInputChange("slots", e.target.value)}
+                className="bg-background border-border"
+                type="number"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="deadline" className="text-sm font-medium text-foreground">Application Deadline</Label>
+              <Label
+                htmlFor="deadline"
+                className="text-sm font-medium text-foreground"
+              >
+                Application Deadline
+              </Label>
               <Input
                 id="deadline"
                 type="date"
                 value={formData.deadline}
-                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                onChange={(e) => handleInputChange("deadline", e.target.value)}
                 className="bg-background border-border"
                 required
               />
@@ -91,26 +171,42 @@ export default function PostInternship() {
 
         {/* Description & Details */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Description & Details</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            Description & Details
+          </h2>
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium text-foreground">Job Description</Label>
+              <Label
+                htmlFor="description"
+                className="text-sm font-medium text-foreground"
+              >
+                Job Description
+              </Label>
               <Textarea
                 id="description"
                 placeholder="Describe the internship role and what the student will work on..."
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 className="bg-background border-border min-h-32"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="requirements" className="text-sm font-medium text-foreground">Required Skills & Qualifications</Label>
+              <Label
+                htmlFor="requirements"
+                className="text-sm font-medium text-foreground"
+              >
+                Required Skills & Qualifications
+              </Label>
               <Textarea
                 id="requirements"
                 placeholder="List the required skills and qualifications (one per line)"
                 value={formData.requirements}
-                onChange={(e) => handleInputChange('requirements', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("requirements", e.target.value)
+                }
                 className="bg-background border-border min-h-32"
                 required
               />
@@ -120,11 +216,11 @@ export default function PostInternship() {
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
-          <Button className="bg-primary hover:bg-primary/90">
+          <Button type="submit" className="bg-primary hover:bg-primary/90">
             Publish Internship
           </Button>
         </div>
       </form>
     </div>
-  )
+  );
 }

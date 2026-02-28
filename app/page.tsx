@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
 
 function FadeInSection({
   children,
@@ -64,6 +65,7 @@ function FadeInSection({
 }
 
 export default function Home() {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -75,19 +77,29 @@ export default function Home() {
             </div>
             <span className="font-bold text-xl text-foreground">UIMS</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/auth/login">
-              <Button variant="ghost" className="" size="sm">
+            <div className="flex items-center gap-3">
+            {!user ? (
+              <>
+              <Link href="/auth/login">
+                <Button variant="ghost" className="" size="sm">
                 Login
-              </Button>
-            </Link>
-            <Link href="/auth/register">
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                </Button>
+              </Link>
+              <Link href="/auth/register">
+                <Button size="sm" className="bg-primary hover:bg-primary/90">
                 Register
+                </Button>
+              </Link>
+              </>
+            ) : (
+              <Link href={`/${user.type}/dashboard`}>
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Return to Dashboard
               </Button>
-            </Link>
+              </Link>
+            )}
             <ThemeToggle />
-          </div>
+            </div>
         </div>
       </nav>
 

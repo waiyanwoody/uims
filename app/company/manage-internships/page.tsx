@@ -1,132 +1,375 @@
-'use client'
+"use client";
 
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Edit, Trash2, Eye, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Edit,
+  Trash2,
+  Eye,
+  Plus,
+  Loader2,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  useCompanyInternships,
+  Internship,
+} from "@/hooks/useCompanyInternships";
+import { useUpdateInternship } from "@/hooks/useUpdateInternship";
+import { useDeleteInternship } from "@/hooks/useDeleteInternship";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 export default function ManageInternships() {
-  const internships = [
-    {
-      id: 1,
-      title: 'Frontend Developer Internship',
-      category: 'Engineering',
-      slots: 5,
-      applications: 12,
-      deadline: '2024-03-15',
-      status: 'OPEN',
-      applicants: '12 received, 3 approved'
-    },
-    {
-      id: 2,
-      title: 'Backend Developer Internship',
-      category: 'Engineering',
-      slots: 3,
-      applications: 8,
-      deadline: '2024-03-10',
-      status: 'OPEN',
-      applicants: '8 received, 2 approved'
-    },
-    {
-      id: 3,
-      title: 'Data Science Internship',
-      category: 'Data Science',
-      slots: 4,
-      applications: 15,
-      deadline: '2024-02-28',
-      status: 'CLOSED',
-      applicants: '15 received, 4 approved'
-    },
-    {
-      id: 4,
-      title: 'UI/UX Design Internship',
-      category: 'Design',
-      slots: 2,
-      applications: 6,
-      deadline: '2024-03-20',
-      status: 'OPEN',
-      applicants: '6 received, 1 approved'
-    }
-  ]
+  const companyId = 11; // In reality, get this from JWT context
+  const {
+    data: internships,
+    isLoading,
+    error,
+    refetch,
+  } = useCompanyInternships(companyId);
+  const { updateInternship, isUpdating } = useUpdateInternship();
 
-  const getStatusColor = (status: string) => {
-    return status === 'OPEN' 
-      ? 'bg-emerald-100 text-emerald-800' 
-      : 'bg-red-100 text-red-800'
-  }
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedInternship, setSelectedInternship] =
+    useState<Internship | null>(null);
+
+  // Helper to format ISO date string to YYYY-MM-DD for input[type="date"]
+  const formatDateForInput = (dateStr: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toISOString().split("T")[0];
+  };
+
+  const handleEditClick = (internship: Internship) => {
+    setSelectedInternship(internship);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInternship) return;
+
+    const result = await updateInternship(
+      selectedInternship.id,
+      selectedInternship
+    );
+    if (result.success) {
+      setIsEditModalOpen(false);
+      refetch(); // Refresh list from server
+    } else {
+      alert(result.error);
+    }
+  };
+
+  const { deleteInternship, isDeleting } = useDeleteInternship();
+
+  // State for Delete Confirmation
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<number | null>(null);
+
+  const handleDeleteClick = (id: number) => {
+    setIdToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!idToDelete) return;
+
+    const result = await deleteInternship(idToDelete);
+    if (result.success) {
+      setIsDeleteModalOpen(false);
+      refetch(); // Refresh the list
+    } else {
+      alert(result.error);
+    }
+  };
+
+  if (isLoading)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
 
   return (
-    <div className="p-6 md:p-8 space-y-8">
-      {/* Header */}
+    <div className="p-6 md:p-10 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Manage Internships</h1>
-          <p className="text-muted-foreground mt-2">View and edit your internship postings</p>
+          <h1 className="text-3xl font-bold">Manage Internships</h1>
+          <p className="text-muted-foreground">
+            Admin panel for {internships[0]?.id ? "your postings" : "company"}
+          </p>
         </div>
         <Link href="/company/post-internship">
-          <Button className="gap-2 bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Internship</span>
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" /> New Internship
           </Button>
         </Link>
       </div>
 
-      {/* Internships Table */}
-      <Card className="border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-secondary/50">
+      <Card className="border-border">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead>Title</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Slots</TableHead>
+              <TableHead>Deadline</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {internships.length === 0 ? (
               <TableRow>
-                <TableHead className="font-semibold text-foreground">Position</TableHead>
-                <TableHead className="font-semibold text-foreground">Category</TableHead>
-                <TableHead className="font-semibold text-foreground">Slots</TableHead>
-                <TableHead className="font-semibold text-foreground">Applications</TableHead>
-                <TableHead className="font-semibold text-foreground">Deadline</TableHead>
-                <TableHead className="font-semibold text-foreground">Status</TableHead>
-                <TableHead className="text-right font-semibold text-foreground">Actions</TableHead>
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center text-muted-foreground italic"
+                >
+                  No Internship to show
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {internships.map((internship) => (
-                <TableRow key={internship.id} className="border-border hover:bg-secondary/30 transition-colors">
-                  <TableCell className="font-medium text-foreground">
-                    <div className="space-y-1">
-                      <p>{internship.title}</p>
-                      <p className="text-xs text-muted-foreground">{internship.applicants}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{internship.category}</TableCell>
-                  <TableCell className="text-foreground">{internship.slots}</TableCell>
-                  <TableCell className="text-foreground font-medium">{internship.applications}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(internship.deadline).toLocaleDateString()}
+            ) : (
+              internships.map((job) => (
+                <TableRow key={job.id} className="hover:bg-muted/30">
+                  <TableCell className="font-medium">{job.title}</TableCell>
+                  <TableCell>{job.category}</TableCell>
+                  <TableCell>{job.slots}</TableCell>
+                  <TableCell>
+                    {new Date(job.deadline).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(internship.status)}>
-                      {internship.status}
+                    <Badge
+                      variant={job.status === "OPEN" ? "default" : "secondary"}
+                    >
+                      {job.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditClick(job)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="gap-1 text-destructive hover:text-destructive">
+
+                      {/* DELETE BUTTON */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDeleteClick(job.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+            </div>
+            <DialogDescription className="pt-2">
+              This action cannot be undone. This will permanently delete the
+              internship posting from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
+              Delete Internship
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* FULL EDIT DIALOG */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              Edit Internship Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedInternship && (
+            <form onSubmit={handleSave} className="space-y-6 pt-4">
+              {/* Basic Info Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Job Title</Label>
+                  <Input
+                    value={selectedInternship.title}
+                    onChange={(e) =>
+                      setSelectedInternship({
+                        ...selectedInternship,
+                        title: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. System Engineer Intern"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Input
+                    value={selectedInternship.category}
+                    onChange={(e) =>
+                      setSelectedInternship({
+                        ...selectedInternship,
+                        category: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Description & Requirements */}
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  rows={3}
+                  value={selectedInternship.description}
+                  onChange={(e) =>
+                    setSelectedInternship({
+                      ...selectedInternship,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Requirements</Label>
+                <Textarea
+                  rows={3}
+                  value={selectedInternship.requirements}
+                  onChange={(e) =>
+                    setSelectedInternship({
+                      ...selectedInternship,
+                      requirements: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              {/* Slots, Deadline & Status Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Available Slots</Label>
+                  <Input
+                    type="number"
+                    value={selectedInternship.slots}
+                    onChange={(e) =>
+                      setSelectedInternship({
+                        ...selectedInternship,
+                        slots: parseInt(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Deadline</Label>
+                  <Input
+                    type="date"
+                    value={formatDateForInput(selectedInternship.deadline)}
+                    onChange={(e) =>
+                      setSelectedInternship({
+                        ...selectedInternship,
+                        deadline: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                {/* <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select 
+                    value={selectedInternship.status} 
+                    onValueChange={(val: any) => setSelectedInternship({...selectedInternship, status: val})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">PENDING</SelectItem>
+                      <SelectItem value="OPEN">OPEN</SelectItem>
+                      <SelectItem value="CLOSED">CLOSED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div> */}
+              </div>
+
+              <DialogFooter className="border-t pt-6">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="min-w-[120px]"
+                >
+                  {isUpdating ? (
+                    <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }
