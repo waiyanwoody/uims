@@ -26,7 +26,11 @@ const menuItems = [
   { icon: User, label: "My Profile", href: "/student/profile" },
   { icon: ClipboardList, label: "Browse Internships", href: "/student/browse" },
   { icon: FileText, label: "My Applications", href: "/student/applications" },
-  { icon: ClipboardList, label: "My Montly Reports", href: "/student/monitoring" },
+  {
+    icon: ClipboardList,
+    label: "My Montly Reports",
+    href: "/student/monitoring",
+  },
   { icon: Briefcase, label: "My CVs", href: "/student/cvs" },
   { icon: Settings, label: "Settings", href: "/student/settings" },
 ];
@@ -40,11 +44,11 @@ export function StudentSidebar() {
   const handleLogout = () => {
     logout();
     toast.message("Logged out successfully", {
-      description: "You have been logged out."
+      description: "You have been logged out.",
     });
     router.push("/auth/login");
     setIsOpen(false);
-  }
+  };
 
   return (
     <>
@@ -58,8 +62,9 @@ export function StudentSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border z-30 transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border z-30 transition-transform duration-300 md:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Logo & Theme Toggle */}
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between gap-2">
