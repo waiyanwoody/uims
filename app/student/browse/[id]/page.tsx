@@ -24,6 +24,7 @@ import { Internship, Student } from "@/types/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApplyModal } from "@/components/apply-modal";
 import { useStudentProfile } from "@/hooks/StudentHook/useStudentProfile";
+import { useStudent } from "@/hooks/StudentHook/useStudent";
 
 export default function InternshipPostDetails() {
   const params = useParams();
@@ -36,8 +37,11 @@ export default function InternshipPostDetails() {
   const [error, setError] = useState<string | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
-  // Fetch student profile for the apply modal
+  // Fetch student profile for profile-specific data (bio, etc.)
   const { profile: studentProfile } = useStudentProfile(user?.id || 0);
+
+  // Fetch full student entity for core data (student_number, name, email)
+  const { student: fullStudentData } = useStudent(user?.id || 0);
 
   useEffect(() => {
     const fetchInternship = async () => {
@@ -283,8 +287,16 @@ export default function InternshipPostDetails() {
           isOpen={isApplyModalOpen}
           onClose={() => setIsApplyModalOpen(false)}
           internship={internship}
-          // Fallback to user if profile hasn't loaded yet
-          student={studentProfile || (user as any)}
+          // Merge full student data (for student_number) with profile data
+          student={
+            {
+              ...fullStudentData,
+              ...studentProfile,
+              id: user?.id || 0,
+              name: fullStudentData?.name || user?.name || "Student",
+              email: fullStudentData?.email || user?.email || "",
+            } as any
+          }
         />
       )}
     </div>

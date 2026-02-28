@@ -59,6 +59,15 @@ export function ApplyModal({
   student,
   useSampleData = true,
 }: ApplyModalProps) {
+  useEffect(() => {
+    console.log("ApplyModal student input details:", {
+      id: student.id,
+      name: student.name,
+      student_number: student.student_number,
+      studentNumber: (student as any).studentNumber,
+    });
+  }, [student]);
+
   const [cvList, setCvList] = useState<CV[]>([]);
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -70,17 +79,13 @@ export function ApplyModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const {
-    createApplication,
-    loading: applicationLoading,
-    error: applicationError,
-  } = useApplication();
+  const { createApplication, loading: applicationLoading } = useApplication();
 
-  const { createCv: uploadCvToBackend } = useCvs();
+  const { createCv: uploadCvToBackend, fetchCvs, error: cvError } = useCvs();
 
   useEffect(() => {
     if (isOpen) {
-      fetchCVs();
+      loadCVs();
       // Reset states when modal opens
       setUseFileUpload(false);
       setUploadedFile(null);
@@ -92,15 +97,12 @@ export function ApplyModal({
     }
   }, [isOpen]);
 
-  const fetchCVs = async () => {
+  const loadCVs = async () => {
     setLoadingCvs(true);
     try {
-      const response = await fetch("/api/v1/students/cvs"); // Updated to match API pattern
-      if (!response.ok) throw new Error("Failed to fetch CVs");
-      const data = await response.json();
-      setCvList(data.data || data.cvs || []);
+      const data = await fetchCvs();
+      setCvList(data || []);
     } catch (err) {
-      // Don't show error if it's just empty
       console.error("Failed to load CVs:", err);
     } finally {
       setLoadingCvs(false);
@@ -197,80 +199,49 @@ export function ApplyModal({
         finalCvId = parseInt(selectedCvId);
       }
 
-      if (useSampleData) {
-        if (finalCvId) {
-          const request: CreateApplicationRequest = {
-            studentId: student.id,
-            internshipId: internship.id,
-            cvId: finalCvId,
-          };
-          await createApplication(request);
-        } else {
-          // Fallback if no CV
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-        }
-
-        // Get CV title for local display
-        let displayCvTitle = "No CV attached";
-        if (useFileUpload && uploadedFile) {
-          displayCvTitle = uploadedFile.name;
-        } else if (!useFileUpload && selectedCvId) {
-          const selectedCV = cvList.find(
-            (cv) => cv.id.toString() === selectedCvId,
-          );
-          displayCvTitle = selectedCV?.title || "CV";
-        }
-
-        // Dispatch custom event
-        const newApplicationEvent = new CustomEvent("newApplication", {
-          detail: {
-            internshipTitle: internship.title,
-            companyName: internship.company?.name || "Company",
-            location: internship.company?.location || "",
-            category: internship.category,
-            deadline: internship.deadline,
-            cvTitle: displayCvTitle,
-            coverLetter: coverLetter,
-            appliedDate: new Date().toISOString(),
-          },
-        });
-        window.dispatchEvent(newApplicationEvent);
-
-        setSuccess(true);
-        setTimeout(() => {
-          onClose();
-          setSelectedCvId("");
-          setUploadedFile(null);
-          setUseFileUpload(false);
-          setCoverLetter("");
-          setSuccess(false);
-        }, 2000);
-      } else {
-        // Real API call
-        if (finalCvId) {
-          const request: CreateApplicationRequest = {
-            studentId: student.id,
-            internshipId: internship.id,
-            cvId: finalCvId,
-          };
-          await createApplication(request);
-        } else {
-          throw new Error("No CV provided for application");
-        }
-
-        setSuccess(true);
-        setTimeout(() => {
-          onClose();
-          setSelectedCvId("");
-          setUploadedFile(null);
-          setUseFileUpload(false);
-          setCoverLetter("");
-          setSuccess(false);
-        }, 2000);
+      if (!finalCvId) {
+        throw new Error("No CV provided for application");
       }
+
+      const request: CreateApplicationRequest = {
+        studentId: student.student_id || student.id,
+        internshipId: internship.id,
+        cvId: finalCvId,
+      };
+
+      await createApplication(request);
+
+      // Get CV title for local display
+      let displayCvTitle = "CV attached";
+      if (useFileUpload && uploadedFile) {
+        displayCvTitle = uploadedFile.name;
+      } else if (!useFileUpload && selectedCvId) {
+        const selectedCV = cvList.find(
+          (cv) => cv.id.toString() === selectedCvId,
+        );
+        displayCvTitle = selectedCV?.title || "CV";
+      }
+
+      // Dispatch custom event
+      const newApplicationEvent = new CustomEvent("newApplication", {
+        detail: {
+          internshipTitle: internship.title,
+          companyName: internship.company?.name || "Company",
+          location: internship.company?.location || "",
+          category: internship.category,
+          deadline: internship.deadline,
+          cvTitle: displayCvTitle,
+          coverLetter: coverLetter,
+          appliedDate: new Date().toISOString(),
+        },
+      });
+      window.dispatchEvent(newApplicationEvent);
+
+      setSuccess(true);
+      // Removed automatic close timeout to keep success message visible
     } catch (err: any) {
       setError(
-        applicationError ||
+        err.response?.data?.message ||
           err.message ||
           "Something went wrong. Please try again.",
       );
@@ -319,12 +290,23 @@ export function ApplyModal({
               </p>
             </div>
             {useSampleData && (
-              <Button
-                onClick={() => (window.location.href = "/student/applications")}
-                className="mt-2 bg-primary hover:bg-primary/90 min-w-[200px]"
-              >
-                View My Applications
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                <Button
+                  onClick={() =>
+                    (window.location.href = "/student/applications")
+                  }
+                  className="bg-primary hover:bg-primary/90 min-w-[160px]"
+                >
+                  View My Applications
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  className="min-w-[160px]"
+                >
+                  Close
+                </Button>
+              </div>
             )}
           </div>
         ) : (
@@ -381,7 +363,9 @@ export function ApplyModal({
                     Student ID
                   </p>
                   <p className="font-semibold text-sm">
-                    {student.student_number || "N/A"}
+                    {student.student_number ||
+                      (student as any).studentNumber ||
+                      "N/A"}
                   </p>
                 </div>
                 <div className="space-y-1">

@@ -32,20 +32,17 @@ export default function BrowseInternships() {
     new Set(),
   );
 
-  const categories = [
-    "All",
-    "Engineering",
-    "Design",
-    "Business",
-    "Marketing",
-    "Data Science",
-  ];
-
   const {
     internships,
     loading: isLoading,
     pagination,
   } = useInternship(currentPage, pageSize, "OPEN");
+
+  // Extract unique categories from all fetched internships
+  const categories = [
+    "All",
+    ...Array.from(new Set(internships.map((i) => i.category))).sort(),
+  ];
 
   const filteredInternships = internships.filter((internship) => {
     const matchesSearch =

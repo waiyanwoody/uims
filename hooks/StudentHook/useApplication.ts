@@ -17,8 +17,7 @@ export const useApplication = () => {
       const res = await api.post("/applications", request);
 
       // Assuming the backend returns the created application in res.data
-      // Based on useUpdateStudentProfile, it might be in res.data.data
-      return res.data.data || res.data;
+      return res.data;
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message ||
