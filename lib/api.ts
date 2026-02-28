@@ -18,13 +18,17 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Optional: handle 401 Unauthorized globally
+    // Handle 401 Unauthorized globally
     if (error.response?.status === 401) {
-      // e.g., logout user
-      console.log("Unauthorized, please login again");
+      if (typeof window !== "undefined") {
+        // Clear local storage to sync with backend state
+        localStorage.removeItem("user");
+        // Redirect to login page
+        window.location.href = "/auth/login";
+      }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 
-export const useStudentProfile = (id:number) => {
+export const useStudentProfile = (id: number) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!id) return;
       try {
         setLoading(true);
         setError(null);
 
-        const res = await api.get(`students/${id}/profile`);
+        const res = await api.get(`/students/${id}/profile`);
         console.log("student profile", res);
 
         setProfile(res.data.data);
@@ -24,7 +25,7 @@ export const useStudentProfile = (id:number) => {
     };
 
     fetchProfile();
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, [id]); // Add id to dependency array
 
   return {
     profile,

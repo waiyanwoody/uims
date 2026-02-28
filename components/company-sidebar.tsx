@@ -96,11 +96,11 @@ export function CompanySidebar() {
             return (
               <Link key={item.href} href={item.href}>
                 <Button
-                  variant={isActive ? "default" : "ghost"}
-                  className={`w-full justify-start gap-3 ${
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 transition-colors ${
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50"
                   }`}
                   onClick={() => setIsOpen(false)}
                 >

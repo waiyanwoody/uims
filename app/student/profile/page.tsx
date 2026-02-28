@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
+import { useEffect, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -14,155 +14,235 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Plus, X, Upload, CheckCircle2, AlertCircle } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { set } from 'date-fns'
-import { useStudentProfile } from '@/hooks/useStudentProfile'
+} from "@/components/ui/dialog";
+import { Plus, X, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useStudentProfile } from "@/hooks/StudentHook/useStudentProfile";
+import { useUpdateStudentProfile } from "@/hooks/StudentHook/useUpdateStudentProfile";
 
 export interface StudentProfile {
-  studentId: number;
+  studentId?: number;
   name: string;
   email: string;
   major: string;
-  profileImageUrl: string | null;
-  address: string | null;
-  bio: string | null;
-  githubUrl: string | null;
-  linkedinUrl: string | null;
-  dateOfBirth: string | null; // Usually an ISO string from APIs
+  studentNumber?: string | null;
+  profileImageUrl?: string | null;
+  address?: string | null;
+  bio?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  dateOfBirth?: string | null; // Usually an ISO string from APIs
+  gender?: string;
 }
 
 export default function StudentProfile() {
-  const [skills, setSkills] = useState(['React', 'TypeScript', 'Node.js', 'Tailwind CSS'])
-  const [newSkill, setNewSkill] = useState('')
-  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [profileImage, setProfileImage] = useState<string | null>(null)
-  
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+
   const { user } = useAuth();
   // 1. Move the hook to the top level
-  const { profile, isLoading } = useStudentProfile(user?.id || 0);
+  const { profile, loading: isLoading } = useStudentProfile(user?.id || 0);
+  const { updateProfile, loading: isUpdating } = useUpdateStudentProfile(
+    user?.id || 0,
+  );
 
   // 2. Initialize state with the Interface
   const [profileData, setProfileData] = useState<StudentProfile>({
-    name: '',
-    email: '',
-    major: '',
-    dateOfBirth: '',
-    address: '',
-    bio: '',
-    github: '',
-    linkedin: '',
-    gender: '',
+    name: "",
+    email: "",
+    major: "",
+    studentNumber: "",
+    dateOfBirth: "",
+    address: "",
+    bio: "",
+    githubUrl: "",
+    linkedinUrl: "",
+    gender: "",
   });
 
   // 3. Sync state when the profile data is fetched
   useEffect(() => {
     if (profile) {
-      setProfileData(profile);
+      // Correct for optional nested 'profile' object from backend
+      const combinedProfile = {
+        ...profile,
+        ...(profile.profile || {}),
+        studentNumber:
+          profile.student_number ||
+          profile.studentNumber ||
+          (profile.profile &&
+            (profile.profile.student_number || profile.profile.studentNumber)),
+      };
+      setProfileData(combinedProfile);
+
+      // Set skills if available
+      if (combinedProfile.skills && Array.isArray(combinedProfile.skills)) {
+        // Use a Set to ensure unique skills from the API
+        const uniqueSkills = Array.from(new Set(combinedProfile.skills));
+        setSkills(uniqueSkills);
+      } else if (profile.skills && Array.isArray(profile.skills)) {
+        const uniqueSkills = Array.from(new Set(profile.skills));
+        setSkills(uniqueSkills);
+      }
+
+      // Set profile image if available
+      const imageUrl =
+        combinedProfile.profile_image_url || combinedProfile.profileImageUrl;
+      if (imageUrl) {
+        setProfileImage(imageUrl);
+      }
     }
   }, [profile]); // Runs whenever 'profile' updates from the hook
 
   const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({ ...prev, [field]: value }))
-  }
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file')
-        setTimeout(() => setError(null), 3000)
-        return
+      if (!file.type.startsWith("image/")) {
+        setError("Please upload an image file");
+        setTimeout(() => setError(null), 3000);
+        return;
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image size must be less than 5MB')
-        setTimeout(() => setError(null), 3000)
-        return
+        setError("Image size must be less than 5MB");
+        setTimeout(() => setError(null), 3000);
+        return;
       }
 
       // Read and display image
-      const reader = new FileReader()
+      setSelectedImageFile(file);
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result as string)
-        setSuccess('Profile picture uploaded successfully!')
-        setTimeout(() => setSuccess(null), 3000)
-      }
-      reader.readAsDataURL(file)
+        const base64 = reader.result as string;
+        setProfileImage(base64);
+        setSuccess("Profile picture selected successfully!");
+        setTimeout(() => setSuccess(null), 3000);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const addSkill = () => {
     if (!newSkill.trim()) {
-      setError('Please enter a skill name')
-      return
+      setError("Please enter a skill name");
+      return;
     }
 
     // Check if skill already exists
-    if (skills.some(skill => skill.toLowerCase() === newSkill.trim().toLowerCase())) {
-      setError('This skill already exists')
-      return
+    if (
+      skills.some(
+        (skill) => skill.toLowerCase() === newSkill.trim().toLowerCase(),
+      )
+    ) {
+      setError("This skill already exists");
+      return;
     }
 
     // Add skill to list
-    setSkills([...skills, newSkill.trim()])
-    setNewSkill('')
-    setError(null)
-    setIsAddSkillModalOpen(false)
-    setSuccess('Skill added successfully!')
-    setTimeout(() => setSuccess(null), 3000)
-  }
+    setSkills([...skills, newSkill.trim()]);
+    setNewSkill("");
+    setError(null);
+    setIsAddSkillModalOpen(false);
+    setSuccess("Skill added successfully!");
+    setTimeout(() => setSuccess(null), 3000);
+  };
 
   const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(s => s !== skillToRemove))
-    setError('Skill removed successfully!')
-    setTimeout(() => setError(null), 3000)
-  }
+    setSkills(skills.filter((s) => s !== skillToRemove));
+    setError("Skill removed successfully!");
+    setTimeout(() => setError(null), 3000);
+  };
 
-  const handleSaveChanges = () => {
-    setSuccess('Profile changes saved successfully!')
-    setTimeout(() => setSuccess(null), 3000)
-  }
+  const handleSaveChanges = async () => {
+    try {
+      // Create a specific update request payload matching the backend expectations
+      const updatePayload = {
+        address: profileData.address,
+        bio: profileData.bio,
+        githubUrl: profileData.githubUrl,
+        linkedinUrl: profileData.linkedinUrl,
+        dateOfBirth: profileData.dateOfBirth,
+        skills: skills, // Added skills to payload
+      };
+
+      const updatedProfileResponse = await updateProfile(
+        updatePayload,
+        selectedImageFile || undefined,
+      );
+
+      // 1. Correctly handle the response structure from backend
+      // From the provided Java code, it returns StudentProfileResponse which has List<String> skills
+      const newSkills =
+        updatedProfileResponse?.skills ||
+        updatedProfileResponse?.profile?.skills;
+
+      if (Array.isArray(newSkills)) {
+        // Use a Set to strictly prevent any duplication from the server response
+        const uniqueSkills = Array.from(new Set(newSkills));
+        setSkills(uniqueSkills);
+      } else {
+        // Fallback: If for some reason backend doesn't return skills,
+        // keep local state but don't clear it
+      }
+
+      setSuccess("Profile changes saved successfully!");
+      setSelectedImageFile(null); // Clear selected file after success
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to save profile changes");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
 
   // Skill color variants
   const skillColors = [
-    'bg-blue-100 text-blue-700 border-blue-300',
-    'bg-green-100 text-green-700 border-green-300',
-    'bg-purple-100 text-purple-700 border-purple-300',
-    'bg-orange-100 text-orange-700 border-orange-300',
-    'bg-pink-100 text-pink-700 border-pink-300',
-    'bg-indigo-100 text-indigo-700 border-indigo-300',
-    'bg-cyan-100 text-cyan-700 border-cyan-300',
-    'bg-teal-100 text-teal-700 border-teal-300',
-  ]
+    "bg-blue-100 text-blue-700 border-blue-300",
+    "bg-green-100 text-green-700 border-green-300",
+    "bg-purple-100 text-purple-700 border-purple-300",
+    "bg-orange-100 text-orange-700 border-orange-300",
+    "bg-pink-100 text-pink-700 border-pink-300",
+    "bg-indigo-100 text-indigo-700 border-indigo-300",
+    "bg-cyan-100 text-cyan-700 border-cyan-300",
+    "bg-teal-100 text-teal-700 border-teal-300",
+  ];
 
   const getSkillColor = (index: number) => {
-    return skillColors[index % skillColors.length]
-  }
+    return skillColors[index % skillColors.length];
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-        <p className="text-muted-foreground mt-2">Manage your personal information and skills</p>
+        <p className="text-muted-foreground mt-2">
+          Manage your personal information and skills
+        </p>
       </div>
 
       <form className="space-y-6">
         {/* Profile Picture Section */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Profile Picture</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            Profile Picture
+          </h2>
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 rounded-lg border border-border overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
               {profileImage ? (
-                <img 
-                  src={profileImage} 
-                  alt="Profile" 
+                <img
+                  src={profileImage}
+                  alt="Profile"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -172,7 +252,9 @@ export default function StudentProfile() {
               )}
             </div>
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">Upload a new profile picture</p>
+              <p className="text-sm text-muted-foreground">
+                Upload a new profile picture
+              </p>
               <input
                 type="file"
                 id="profile-upload"
@@ -180,11 +262,13 @@ export default function StudentProfile() {
                 onChange={handleImageUpload}
                 className="hidden"
               />
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 className="border-border bg-transparent gap-2"
-                onClick={() => document.getElementById('profile-upload')?.click()}
+                onClick={() =>
+                  document.getElementById("profile-upload")?.click()
+                }
               >
                 <Upload className="w-4 h-4" />
                 Choose File
@@ -198,61 +282,113 @@ export default function StudentProfile() {
 
         {/* Personal Information */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Personal Information</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            Personal Information
+          </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-foreground">Full Name</Label>
+              <Label
+                htmlFor="name"
+                className="text-sm font-medium text-foreground opacity-60"
+              >
+                Full Name
+              </Label>
               <Input
                 id="name"
                 value={profileData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className="bg-transparent border-border"
+                disabled
+                className="bg-muted border-border cursor-not-allowed"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">Email Address</Label>
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-foreground opacity-60"
+              >
+                Email Address
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={profileData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-transparent border-border"
+                disabled
+                className="bg-muted border-border cursor-not-allowed"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="major" className="text-sm font-medium text-foreground">Major</Label>
+              <Label
+                htmlFor="major"
+                className="text-sm font-medium text-foreground opacity-60"
+              >
+                Major
+              </Label>
               <Input
                 id="major"
                 value={profileData.major}
-                onChange={(e) => handleInputChange('major', e.target.value)}
+                disabled
+                className="bg-muted border-border cursor-not-allowed"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="studentNumber"
+                className="text-sm font-medium text-foreground opacity-60"
+              >
+                Student Number
+              </Label>
+              <Input
+                id="studentNumber"
+                value={profileData.studentNumber || ""}
+                disabled
+                className="bg-muted border-border cursor-not-allowed"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="address"
+                className="text-sm font-medium text-foreground"
+              >
+                Address
+              </Label>
+              <Input
+                id="address"
+                value={profileData.address || ""}
+                onChange={(e) => handleInputChange("address", e.target.value)}
                 className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dob" className="text-sm font-medium text-foreground">Date of Birth</Label>
+              <Label
+                htmlFor="dob"
+                className="text-sm font-medium text-foreground"
+              >
+                Date of Birth
+              </Label>
               <Input
                 id="dob"
                 type="date"
-                value={profileData.dateOfBirth ? profileData.dateOfBirth.split('T')[0] : ''}
-                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                value={
+                  profileData.dateOfBirth
+                    ? profileData.dateOfBirth.split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  handleInputChange("dateOfBirth", e.target.value)
+                }
                 className="bg-transparent border-border"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address" className="text-sm font-medium text-foreground">Address</Label>
-              <Input
-                id="address"
-                value={profileData.address || ''}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className="bg-transparent border-border"
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bio" className="text-sm font-medium text-foreground">Bio</Label>
+              <Label
+                htmlFor="bio"
+                className="text-sm font-medium text-foreground"
+              >
+                Bio
+              </Label>
               <Textarea
                 id="bio"
-                value={profileData.bio || ''}
-                onChange={(e) => handleInputChange('bio', e.target.value)}
+                value={profileData.bio || ""}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
                 className="bg-transparent border-border min-h-32"
               />
             </div>
@@ -261,24 +397,38 @@ export default function StudentProfile() {
 
         {/* Social Links */}
         <Card className="p-8 border border-border">
-          <h2 className="text-xl font-bold text-foreground mb-6">Social Links</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">
+            Social Links
+          </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="github" className="text-sm font-medium text-foreground">GitHub URL</Label>
+              <Label
+                htmlFor="github"
+                className="text-sm font-medium text-foreground"
+              >
+                GitHub URL
+              </Label>
               <Input
                 id="github"
-                value={profileData.github}
-                onChange={(e) => handleInputChange('github', e.target.value)}
+                value={profileData.githubUrl || ""}
+                onChange={(e) => handleInputChange("githubUrl", e.target.value)}
                 className="bg-transparent border-border"
                 placeholder="https://github.com/username"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="linkedin" className="text-sm font-medium text-foreground">LinkedIn URL</Label>
+              <Label
+                htmlFor="linkedin"
+                className="text-sm font-medium text-foreground"
+              >
+                LinkedIn URL
+              </Label>
               <Input
                 id="linkedin"
-                value={profileData.linkedin}
-                onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                value={profileData.linkedinUrl || ""}
+                onChange={(e) =>
+                  handleInputChange("linkedinUrl", e.target.value)
+                }
                 className="bg-transparent border-border"
                 placeholder="https://linkedin.com/in/username"
               />
@@ -287,9 +437,11 @@ export default function StudentProfile() {
         </Card>
 
         {/* Skills */}
-        {/* <Card className="p-8 border border-border">
+        <Card className="p-8 border border-border">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-foreground">Skills & Expertise</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              Skills & Expertise
+            </h2>
             <Button
               type="button"
               onClick={() => setIsAddSkillModalOpen(true)}
@@ -299,10 +451,10 @@ export default function StudentProfile() {
               Add Skill
             </Button>
           </div>
-          
+
           <div className="space-y-4">
             {/* Skills Display */}
-            {/* {skills.length > 0 ? (
+            {skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill, index) => (
                   <Badge
@@ -322,7 +474,9 @@ export default function StudentProfile() {
               </div>
             ) : (
               <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                <p className="text-sm text-muted-foreground mb-4">No skills added yet</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  No skills added yet
+                </p>
                 <Button
                   type="button"
                   onClick={() => setIsAddSkillModalOpen(true)}
@@ -334,24 +488,30 @@ export default function StudentProfile() {
                 </Button>
               </div>
             )}
-            
+
             <p className="text-xs text-muted-foreground">
-              💡 Add your technical and soft skills to showcase your expertise to potential employers
+              💡 Add your technical and soft skills to showcase your expertise
+              to potential employers
             </p>
-          </div> */}
-        {/* </Card>  */}
+          </div>
+        </Card>
 
         {/* Save Button */}
         <div className="flex justify-end gap-3">
-          <Button type="button" variant="outline" className="border-border bg-transparent">
+          <Button
+            type="button"
+            variant="outline"
+            className="border-border bg-transparent"
+          >
             Cancel
           </Button>
-          <Button 
-            type="button" 
+          <Button
+            type="button"
             className="bg-primary hover:bg-primary/90"
             onClick={handleSaveChanges}
+            disabled={isUpdating}
           >
-            Save Changes
+            {isUpdating ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>
@@ -377,13 +537,13 @@ export default function StudentProfile() {
                 placeholder="e.g., React, Python, Leadership..."
                 value={newSkill}
                 onChange={(e) => {
-                  setNewSkill(e.target.value)
-                  setError(null)
+                  setNewSkill(e.target.value);
+                  setError(null);
                 }}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addSkill()
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSkill();
                   }
                 }}
                 autoFocus
@@ -407,9 +567,9 @@ export default function StudentProfile() {
               type="button"
               variant="outline"
               onClick={() => {
-                setIsAddSkillModalOpen(false)
-                setNewSkill('')
-                setError(null)
+                setIsAddSkillModalOpen(false);
+                setNewSkill("");
+                setError(null);
               }}
             >
               Cancel
@@ -445,5 +605,5 @@ export default function StudentProfile() {
         </div>
       )}
     </div>
-  )
+  );
 }

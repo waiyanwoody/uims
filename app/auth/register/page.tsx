@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { useRegisterStudent } from "@/hooks/useRegisterStudent";
+import { useRegisterStudent } from "@/hooks/StudentHook/useRegisterStudent";
 import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useRegisterCompany";
 const TermsContent = () => (
@@ -198,7 +198,7 @@ export default function RegisterPage() {
     }
   };
 
-  const { registerCompany, loading:hrLoading } = useRegisterCompany();
+  const { registerCompany, loading: hrLoading } = useRegisterCompany();
 
   const handleCompanySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,7 +216,7 @@ export default function RegisterPage() {
 
       toast.success("Registration Successful!", {
         description:
-         "Your HR account has been created. A supervisor will review your application within 1-2 business days. You will receive an email notification once your account is approved.",
+          "Your HR account has been created. A supervisor will review your application within 1-2 business days. You will receive an email notification once your account is approved.",
       });
       router.push("/auth/login");
     } catch (error) {

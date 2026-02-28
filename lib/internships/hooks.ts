@@ -22,20 +22,12 @@ export const getInternships = async (page: number = 1, size: number = 10) => {
   return res.data.data.data;
 };
 
-
 /**
  * Create internship
  */
 
-export const createInternship = async (
-  data: CreateInternshipPayload
-) => {
-
-  const res = await api.post(
-    "/api/v1/internships",
-    data
-  );
+export const createInternship = async (data: CreateInternshipPayload) => {
+  const res = await api.post("/api/v1/internships", data);
 
   return res.data;
-
 };

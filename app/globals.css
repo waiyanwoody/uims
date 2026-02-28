@@ -10,6 +10,13 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @layer base {
@@ -177,13 +184,13 @@ body {
     --radius: 0.5rem;
 
     /* Sidebar colors - LIGHTER */
-    --sidebar-background: 192 40% 92%; /* Light teal-gray sidebar */
+    --sidebar-background: 0 0% 100%; /* Pure white sidebar for better contrast */
     --sidebar-foreground: 220 13% 25%;
     --sidebar-primary: 192 70% 40%; /* Medium teal for active */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 192 50% 88%;
-    --sidebar-accent-foreground: 192 60% 35%;
-    --sidebar-border: 220 13% 88%;
+    --sidebar-accent: 192 60% 95%; /* Very light teal for hover/active */
+    --sidebar-accent-foreground: 192 70% 40%; /* Primary color for text */
+    --sidebar-border: 220 13% 92%;
     --sidebar-ring: 192 70% 40%;
   }
 
@@ -238,16 +245,24 @@ body {
   }
 
   .auth-layered-bg {
-    background: 
+    background:
       radial-gradient(circle at 80% 20%, hsl(186 70% 90%) 0%, transparent 40%),
       radial-gradient(circle at 10% 80%, hsl(280 60% 92%) 0%, transparent 40%),
       linear-gradient(135deg, hsl(230 40% 98%), hsl(230 30% 94%));
   }
 
   .dark .auth-layered-bg {
-    background: 
-      radial-gradient(circle at 80% 20%, hsl(186 95% 45% / 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 90% 80%, hsl(280 70% 40% / 0.1) 0%, transparent 50%),
+    background:
+      radial-gradient(
+        circle at 80% 20%,
+        hsl(186 95% 45% / 0.1) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 90% 80%,
+        hsl(280 70% 40% / 0.1) 0%,
+        transparent 50%
+      ),
       linear-gradient(135deg, hsl(230 60% 8%), hsl(230 60% 4%));
   }
 }
