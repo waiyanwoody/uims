@@ -25,6 +25,7 @@ export interface StudentProfile {
   name: string;
   email: string;
   major: string;
+  studentNumber?: string | null;
   profileImageUrl?: string | null;
   address?: string | null;
   bio?: string | null;
@@ -35,17 +36,13 @@ export interface StudentProfile {
 }
 
 export default function StudentProfile() {
-  const [skills, setSkills] = useState([
-    "React",
-    "TypeScript",
-    "Node.js",
-    "Tailwind CSS",
-  ]);
+  const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   const { user } = useAuth();
   // 1. Move the hook to the top level
@@ -59,6 +56,7 @@ export default function StudentProfile() {
     name: "",
     email: "",
     major: "",
+    studentNumber: "",
     dateOfBirth: "",
     address: "",
     bio: "",
@@ -74,8 +72,23 @@ export default function StudentProfile() {
       const combinedProfile = {
         ...profile,
         ...(profile.profile || {}),
+        studentNumber:
+          profile.student_number ||
+          profile.studentNumber ||
+          (profile.profile &&
+            (profile.profile.student_number || profile.profile.studentNumber)),
       };
       setProfileData(combinedProfile);
+
+      // Set skills if available
+      if (combinedProfile.skills && Array.isArray(combinedProfile.skills)) {
+        // Use a Set to ensure unique skills from the API
+        const uniqueSkills = Array.from(new Set(combinedProfile.skills));
+        setSkills(uniqueSkills);
+      } else if (profile.skills && Array.isArray(profile.skills)) {
+        const uniqueSkills = Array.from(new Set(profile.skills));
+        setSkills(uniqueSkills);
+      }
 
       // Set profile image if available
       const imageUrl =
@@ -108,12 +121,12 @@ export default function StudentProfile() {
       }
 
       // Read and display image
+      setSelectedImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
         setProfileImage(base64);
-        setProfileData((prev) => ({ ...prev, profileImageUrl: base64 }));
-        setSuccess("Profile picture uploaded successfully!");
+        setSuccess("Profile picture selected successfully!");
         setTimeout(() => setSuccess(null), 3000);
       };
       reader.readAsDataURL(file);
@@ -160,11 +173,31 @@ export default function StudentProfile() {
         githubUrl: profileData.githubUrl,
         linkedinUrl: profileData.linkedinUrl,
         dateOfBirth: profileData.dateOfBirth,
-        profileImageUrl: profileData.profileImageUrl,
+        skills: skills, // Added skills to payload
       };
 
-      await updateProfile(updatePayload);
+      const updatedProfileResponse = await updateProfile(
+        updatePayload,
+        selectedImageFile || undefined,
+      );
+
+      // 1. Correctly handle the response structure from backend
+      // From the provided Java code, it returns StudentProfileResponse which has List<String> skills
+      const newSkills =
+        updatedProfileResponse?.skills ||
+        updatedProfileResponse?.profile?.skills;
+
+      if (Array.isArray(newSkills)) {
+        // Use a Set to strictly prevent any duplication from the server response
+        const uniqueSkills = Array.from(new Set(newSkills));
+        setSkills(uniqueSkills);
+      } else {
+        // Fallback: If for some reason backend doesn't return skills,
+        // keep local state but don't clear it
+      }
+
       setSuccess("Profile changes saved successfully!");
+      setSelectedImageFile(null); // Clear selected file after success
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save profile changes");
@@ -298,6 +331,34 @@ export default function StudentProfile() {
             </div>
             <div className="space-y-2">
               <Label
+                htmlFor="studentNumber"
+                className="text-sm font-medium text-foreground opacity-60"
+              >
+                Student Number
+              </Label>
+              <Input
+                id="studentNumber"
+                value={profileData.studentNumber || ""}
+                disabled
+                className="bg-muted border-border cursor-not-allowed"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="address"
+                className="text-sm font-medium text-foreground"
+              >
+                Address
+              </Label>
+              <Input
+                id="address"
+                value={profileData.address || ""}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                className="bg-transparent border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
                 htmlFor="dob"
                 className="text-sm font-medium text-foreground"
               >
@@ -314,20 +375,6 @@ export default function StudentProfile() {
                 onChange={(e) =>
                   handleInputChange("dateOfBirth", e.target.value)
                 }
-                className="bg-transparent border-border"
-              />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label
-                htmlFor="address"
-                className="text-sm font-medium text-foreground"
-              >
-                Address
-              </Label>
-              <Input
-                id="address"
-                value={profileData.address || ""}
-                onChange={(e) => handleInputChange("address", e.target.value)}
                 className="bg-transparent border-border"
               />
             </div>
@@ -390,9 +437,11 @@ export default function StudentProfile() {
         </Card>
 
         {/* Skills */}
-        {/* <Card className="p-8 border border-border">
+        <Card className="p-8 border border-border">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-foreground">Skills & Expertise</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              Skills & Expertise
+            </h2>
             <Button
               type="button"
               onClick={() => setIsAddSkillModalOpen(true)}
@@ -402,10 +451,10 @@ export default function StudentProfile() {
               Add Skill
             </Button>
           </div>
-          
+
           <div className="space-y-4">
             {/* Skills Display */}
-        {/* {skills.length > 0 ? (
+            {skills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill, index) => (
                   <Badge
@@ -425,7 +474,9 @@ export default function StudentProfile() {
               </div>
             ) : (
               <div className="text-center py-8 border-2 border-dashed rounded-lg">
-                <p className="text-sm text-muted-foreground mb-4">No skills added yet</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  No skills added yet
+                </p>
                 <Button
                   type="button"
                   onClick={() => setIsAddSkillModalOpen(true)}
@@ -437,12 +488,13 @@ export default function StudentProfile() {
                 </Button>
               </div>
             )}
-            
+
             <p className="text-xs text-muted-foreground">
-              💡 Add your technical and soft skills to showcase your expertise to potential employers
+              💡 Add your technical and soft skills to showcase your expertise
+              to potential employers
             </p>
-          </div> */}
-        {/* </Card>  */}
+          </div>
+        </Card>
 
         {/* Save Button */}
         <div className="flex justify-end gap-3">

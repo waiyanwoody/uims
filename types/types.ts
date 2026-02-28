@@ -48,10 +48,11 @@ export interface StudentProfile {
 }
 
 export interface Student {
+  student_id: number;
   id: number;
   name: string;
   gender: "MALE" | "FEMALE";
-  student_number: string;
+  studentNumber: string;
   email: string;
   major: string;
   created_at: Date;
@@ -76,7 +77,7 @@ export interface Application {
   internship_id: number;
   cv_id: number;
   status: "PENDING" | "APPROVED" | "REJECTED";
-  applied_at: Date;
+  appliedAt: Date;
   student?: Student;
   internship?: Internship;
   cv?: CV;
@@ -89,6 +90,7 @@ export interface CreateApplicationDTO {
 }
 
 export interface ApplicationWithDetails extends Application {
+  cvForm: any;
   student: Student & {
     profile?: StudentProfile;
     expertise?: StudentExpertise[];

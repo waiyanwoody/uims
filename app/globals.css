@@ -184,13 +184,13 @@ body {
     --radius: 0.5rem;
 
     /* Sidebar colors - LIGHTER */
-    --sidebar-background: 192 40% 92%; /* Light teal-gray sidebar */
+    --sidebar-background: 0 0% 100%; /* Pure white sidebar for better contrast */
     --sidebar-foreground: 220 13% 25%;
     --sidebar-primary: 192 70% 40%; /* Medium teal for active */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 192 50% 88%;
-    --sidebar-accent-foreground: 192 60% 35%;
-    --sidebar-border: 220 13% 88%;
+    --sidebar-accent: 192 60% 95%; /* Very light teal for hover/active */
+    --sidebar-accent-foreground: 192 70% 40%; /* Primary color for text */
+    --sidebar-border: 220 13% 92%;
     --sidebar-ring: 192 70% 40%;
   }
 

@@ -63,7 +63,7 @@ export function ApplyModal({
     console.log("ApplyModal student input details:", {
       id: student.id,
       name: student.name,
-      student_number: student.student_number,
+      student_number: student.studentNumber,
       studentNumber: (student as any).studentNumber,
     });
   }, [student]);
@@ -178,9 +178,6 @@ export function ApplyModal({
       setError("Please select a CV from your library or attach a new file");
       return;
     }
-
-    // If using file upload mode but no file, that's okay (optional)
-    // If using select mode, CV must be selected
 
     setIsLoading(true);
 
@@ -363,7 +360,7 @@ export function ApplyModal({
                     Student ID
                   </p>
                   <p className="font-semibold text-sm">
-                    {student.student_number ||
+                    {student.studentNumber ||
                       (student as any).studentNumber ||
                       "N/A"}
                   </p>

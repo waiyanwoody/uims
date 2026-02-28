@@ -17,14 +17,19 @@ import {
   Mail,
   Loader2,
   CheckCircle2,
+  FileText,
+  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import api from "@/lib/api";
-import { Internship, Student } from "@/types/types";
+import { Internship, Student, ApplicationWithDetails } from "@/types/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApplyModal } from "@/components/apply-modal";
 import { useStudentProfile } from "@/hooks/StudentHook/useStudentProfile";
 import { useStudent } from "@/hooks/StudentHook/useStudent";
+import { useStudentApplications } from "@/hooks/StudentHook/useStudentApplications";
+import { useApplicationDetails } from "@/hooks/StudentHook/useApplicationDetails";
 
 export default function InternshipPostDetails() {
   const params = useParams();
@@ -42,6 +47,16 @@ export default function InternshipPostDetails() {
 
   // Fetch full student entity for core data (student_number, name, email)
   const { student: fullStudentData } = useStudent(user?.id || 0);
+
+  // Fetch student's applications to check if they already applied to this internship
+  const { applications } = useStudentApplications(user?.id, 1, 100);
+  const existingApplication = applications?.find(
+    (app) => app.internship_id === id,
+  );
+
+  // Fetch specific application details if the user has applied
+  const { application: fullApplicationDetails, loading: applicationLoading } =
+    useApplicationDetails(existingApplication?.id);
 
   useEffect(() => {
     const fetchInternship = async () => {
@@ -64,6 +79,32 @@ export default function InternshipPostDetails() {
       fetchInternship();
     }
   }, [id]);
+
+  const getApplicationStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "pending":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "rejected":
+        return "bg-red-50 text-red-700 border-red-200";
+      default:
+        return "bg-secondary text-foreground";
+    }
+  };
+
+  const getApplicationStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved":
+        return <CheckCircle2 className="w-4 h-4" />;
+      case "pending":
+        return <AlertCircle className="w-4 h-4" />;
+      case "rejected":
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return null;
+    }
+  };
 
   const parseRequirements = (requirements: string): string[] => {
     try {
@@ -118,23 +159,67 @@ export default function InternshipPostDetails() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-xl font-semibold">Role Overview</h2>
-                <Badge className="bg-emerald-100 text-emerald-800">
+                <Badge
+                  className={
+                    internship.status === "OPEN"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-rose-100 text-rose-800"
+                  }
+                >
                   {internship.status}
                 </Badge>
               </div>
+              <p className="text-slate-600 dark:text-slate-400 mb-6 whitespace-pre-wrap leading-relaxed">
+                {internship.description}
+              </p>
             </div>
-            <Button
-              onClick={() => setIsApplyModalOpen(true)}
-              className="hidden md:flex bg-primary hover:bg-primary/90 min-w-[140px] shadow-sm"
-              disabled={internship.status !== "OPEN"}
-            >
-              Apply Now
-            </Button>
+            <div className="flex flex-col items-end gap-3 min-w-[200px]">
+              {existingApplication || fullApplicationDetails ? (
+                <>
+                  <Badge
+                    variant="outline"
+                    className={`${getApplicationStatusColor(
+                      fullApplicationDetails?.status ||
+                        existingApplication?.status ||
+                        "PENDING",
+                    )} px-4 py-2 flex items-center gap-2 font-semibold text-sm shadow-sm border-2`}
+                  >
+                    {getApplicationStatusIcon(
+                      fullApplicationDetails?.status ||
+                        existingApplication?.status ||
+                        "PENDING",
+                    )}
+                    {(
+                      fullApplicationDetails?.status ||
+                      existingApplication?.status ||
+                      "PENDING"
+                    ).toUpperCase()}
+                  </Badge>
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-secondary/50 px-4 py-2 rounded-lg border border-border transition-colors hover:bg-secondary/80">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span>
+                      Submitted CV:{" "}
+                      <span className="text-foreground font-semibold">
+                        {fullApplicationDetails?.cvForm?.title ||
+                          existingApplication?.cvForm?.title ||
+                          fullApplicationDetails?.cv?.title ||
+                          existingApplication?.cv?.title ||
+                          "Assessment CV"}
+                      </span>
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setIsApplyModalOpen(true)}
+                  className="w-full md:w-auto bg-primary hover:bg-primary/90 px-8 py-6 text-base font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  disabled={internship.status !== "OPEN"}
+                >
+                  Apply Now
+                </Button>
+              )}
+            </div>
           </div>
-
-          <p className="text-slate-600 dark:text-slate-400 mb-6 whitespace-pre-wrap leading-relaxed">
-            {internship.description}
-          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
@@ -271,14 +356,38 @@ export default function InternshipPostDetails() {
           </div>
         </Card>
 
-        {/* Mobile Apply Button */}
+        {/* Mobile Apply Button or Status */}
         <div className="md:hidden pt-4 pb-20">
-          <Button
-            onClick={() => setIsApplyModalOpen(true)}
-            className="w-full bg-primary hover:bg-primary/90 py-6 text-lg"
-          >
-            Apply Now
-          </Button>
+          {existingApplication ? (
+            <div className="space-y-3">
+              <Badge
+                variant="outline"
+                className={`w-full py-4 text-center flex items-center justify-center gap-2 text-lg ${getApplicationStatusColor(
+                  existingApplication.status,
+                )}`}
+              >
+                {getApplicationStatusIcon(existingApplication.status)}
+                Application {existingApplication.status.toLowerCase()}
+              </Badge>
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-secondary/30 p-3 rounded-lg border border-border">
+                <FileText className="w-4 h-4" />
+                <span>
+                  Submitted CV:{" "}
+                  {existingApplication.cvForm?.title ||
+                    existingApplication.cv?.title ||
+                    "N/A"}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <Button
+              onClick={() => setIsApplyModalOpen(true)}
+              className="w-full bg-primary hover:bg-primary/90 py-6 text-lg"
+              disabled={internship.status !== "OPEN"}
+            >
+              Apply Now
+            </Button>
+          )}
         </div>
       </div>
 
