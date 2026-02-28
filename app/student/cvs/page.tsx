@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Download,
-  Edit,
   Trash2,
   Plus,
   FileText,
@@ -41,13 +40,7 @@ import {
 import { useCvs } from "@/hooks/StudentHook/useCvs";
 import { CvFormRequest } from "@/types/types";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface CV {
-  id: number;
-  name: string;
-  uploadedDate: string;
-  file?: File;
-}
+import type { CV } from "@/types/types";
 
 export default function MyCVs() {
   const [cvs, setCvs] = useState<CV[]>([]);
@@ -60,8 +53,24 @@ export default function MyCVs() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const { createCv, loading: isUploading, error: uploadError } = useCvs();
+  const {
+    createCv,
+    fetchCvs,
+    deleteCv,
+    loading: isUploading,
+    error: uploadError,
+  } = useCvs();
   const { user } = useAuth();
+
+  // Fetch CVs when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      const cvData = await fetchCvs(1, 10);
+      setCvs(cvData);
+    };
+
+    fetchData();
+  }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -132,6 +141,8 @@ export default function MyCVs() {
     if (fileInput) fileInput.value = "";
   };
 
+
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setError("Please select a file to upload");
@@ -159,9 +170,11 @@ export default function MyCVs() {
       // Add new CV to list
       const newCV: CV = {
         id: uploadedCv.id,
-        name: uploadedCv.title,
-        uploadedDate: new Date().toISOString(),
-        file: selectedFile,
+        student_id: uploadedCv.student_id,
+        title: uploadedCv.title,
+        uploadedDate: uploadedCv.uploadedDate,
+        file_path: uploadedCv.file_path,
+        updated_at: uploadedCv.updated_at,
       };
 
       setCvs([newCV, ...cvs]);
@@ -183,30 +196,52 @@ export default function MyCVs() {
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (cvToDelete !== null) {
-      setCvs(cvs.filter((cv) => cv.id !== cvToDelete));
-      setError("CV deleted successfully!");
-      setTimeout(() => setError(null), 3000);
+  const confirmDelete = async () => {
+    if (cvToDelete === null) return;
+
+    try {
+      await deleteCv(cvToDelete);
+
+      // Update local state to remove deleted CV
+      setCvs((prevCvs) => prevCvs.filter((cv) => cv.id !== cvToDelete));
+      setSuccess("CV deleted successfully!");
+      setTimeout(() => setSuccess(null), 3000);
       setIsDeleteDialogOpen(false);
       setCvToDelete(null);
+    } catch (err: any) {
+      setError(uploadError || err.response?.data?.message || err.message || "Failed to delete CV");
     }
   };
+  const handleDownload = async (cv: CV) => {
+    const fileUrl = cv.file_path;
 
-  const handleDownload = (cv: CV) => {
-    if (cv.file) {
-      // Download the actual file
-      const url = URL.createObjectURL(cv.file);
+    if (!fileUrl) {
+      setError(`Cannot download ${cv.title}`);
+      return;
+    }
+
+    try {
+      // Show/open the backend PDF URL (presigned URL)
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+
+      // Also trigger direct download for better UX
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch file from URL");
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = cv.name;
+      a.href = blobUrl;
+      a.download = `${cv.title}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } else {
-      // Simulate download for existing CVs
-      alert(`Downloading ${cv.name}`);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open backend URL only
+      window.location.href = fileUrl;
     }
   };
 
@@ -242,7 +277,7 @@ export default function MyCVs() {
                     <FileText className="w-6 h-6 text-accent" />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{cv.name}</p>
+                    <p className="font-medium text-foreground">{cv.title}</p>
                     <p className="text-xs text-muted-foreground">
                       Uploaded {new Date(cv.uploadedDate).toLocaleDateString()}
                     </p>

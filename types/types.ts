@@ -4,12 +4,13 @@ export interface CV {
   student_id: number;
   title: string;
   file_path: string;
-  created_at: Date | string;
+  uploadedDate: Date | string;
   updated_at: Date | string;
 }
 
 export interface CvFormRequest {
-  studentId: number;
+  studentId?: number;
+  student_id?: number;
   title: string;
 }
 
