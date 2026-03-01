@@ -129,11 +129,45 @@ const TermsDialog = () => (
   </Dialog>
 );
 
+const PasswordStrengthMeter = ({ score }: { score: number }) => {
+  const segments = [0, 1, 2, 3, 4];
+  const getColor = (index: number) => {
+    if (score === 0) return "bg-muted";
+    if (score <= 2) return index < score ? "bg-destructive" : "bg-muted";
+    if (score <= 4) return index < score ? "bg-yellow-500" : "bg-muted";
+    return "bg-green-500";
+  };
+
+  const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+
+  return (
+    <div className="space-y-2 mt-2">
+      <div className="flex gap-1 h-1">
+        {segments.map((_, i) => (
+          <div
+            key={i}
+            className={`h-full flex-1 rounded-full transition-colors duration-300 ${getColor(
+              i
+            )}`}
+          />
+        ))}
+      </div>
+      <p className="text-[10px] font-medium text-muted-foreground flex justify-between uppercase tracking-wider">
+        <span>Strength: {score > 0 ? labels[score - 1] : "None"}</span>
+        <span>{score}/5</span>
+      </p>
+    </div>
+  );
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showHRSuccessDialog, setShowHRSuccessDialog] = useState(false);
+  const [showStudentErrors, setShowStudentErrors] = useState(false);
+  const [showHrErrors, setShowHrErrors] = useState(false);
+  const [showSupervisorErrors, setShowSupervisorErrors] = useState(false);
 
   const [studentData, setStudentData] = useState({
     name: "",
@@ -166,13 +200,46 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
+  const isStrongPassword = (password: string) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return (
+      password.length >= minLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
+  };
+
+  const getPasswordStrength = (password: string) => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    return score;
+  };
+
   const { registerStudent, loading: studentLoading } = useRegisterStudent();
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Password validation
     if (studentData.password !== studentData.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!isStrongPassword(studentData.password)) {
+      toast.error("Weak Password", {
+        description: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.",
+      });
       return;
     }
 
@@ -194,7 +261,9 @@ export default function RegisterPage() {
       router.push("/auth/login");
     } catch (error) {
       console.error(error);
-      alert("Registration failed");
+      toast.error("Registration failed", {
+        description: "An error occurred during registration. Please try again later.",
+      });
     }
   };
 
@@ -205,7 +274,14 @@ export default function RegisterPage() {
 
     // Password check
     if (hrData.hrPassword !== hrData.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!isStrongPassword(hrData.hrPassword)) {
+      toast.error("Weak Password", {
+        description: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.",
+      });
       return;
     }
 
@@ -221,12 +297,25 @@ export default function RegisterPage() {
       router.push("/auth/login");
     } catch (error) {
       console.error(error);
-      alert("Registration failed");
+      toast.error("Registration failed", {
+        description: "An error occurred during registration. Please try again later.",
+      });
     }
   };
 
   const handleSupervisorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSupervisorErrors(true);
+
+    const isMissingFields = !supervisorData.name || !supervisorData.university || !supervisorData.department || !supervisorData.email || !supervisorData.password || !supervisorData.confirmPassword;
+
+    if (isMissingFields) {
+      toast.error("Missing Information", {
+        description: "Please fill in all required fields.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setTimeout(() => {
       router.push("/supervisor/dashboard");
@@ -400,6 +489,7 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
+                  <PasswordStrengthMeter score={getPasswordStrength(studentData.password)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="s-confirm">Confirm Password</Label>
@@ -470,7 +560,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, hrName: e.target.value })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showHrErrors && !hrData.hrName ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -486,7 +576,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, companyName: e.target.value })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showHrErrors && !hrData.companyName ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -502,7 +592,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, industry: e.target.value })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showHrErrors && !hrData.industry ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -519,7 +609,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, hrEmail: e.target.value })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showHrErrors && !hrData.hrEmail ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -533,6 +623,7 @@ export default function RegisterPage() {
                     onChange={(e) =>
                       setHrData({ ...hrData, hrPhone: e.target.value })
                     }
+                    className={showHrErrors && !hrData.hrPhone ? "border-destructive focus-visible:ring-destructive" : ""}
                     required
                   />
                 </div>
@@ -547,7 +638,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, location: e.target.value })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showHrErrors && !hrData.location ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -564,7 +655,7 @@ export default function RegisterPage() {
                       onChange={(e) =>
                         setHrData({ ...hrData, hrPassword: e.target.value })
                       }
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${showHrErrors && !hrData.hrPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                     <button
@@ -579,6 +670,7 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
+                  <PasswordStrengthMeter score={getPasswordStrength(hrData.hrPassword)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="hr-confirm">Confirm Password</Label>
@@ -595,7 +687,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${showHrErrors && !hrData.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                     <button
@@ -648,7 +740,7 @@ export default function RegisterPage() {
                           name: e.target.value,
                         })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showSupervisorErrors && !supervisorData.name ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -668,7 +760,7 @@ export default function RegisterPage() {
                           email: e.target.value,
                         })
                       }
-                      className="pl-10"
+                      className={`pl-10 ${showSupervisorErrors && !supervisorData.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                   </div>
@@ -685,6 +777,7 @@ export default function RegisterPage() {
                         university: e.target.value,
                       })
                     }
+                    className={showSupervisorErrors && !supervisorData.university ? "border-destructive focus-visible:ring-destructive" : ""}
                     required
                   />
                 </div>
@@ -700,6 +793,7 @@ export default function RegisterPage() {
                         department: e.target.value,
                       })
                     }
+                    className={showSupervisorErrors && !supervisorData.department ? "border-destructive focus-visible:ring-destructive" : ""}
                     required
                   />
                 </div>
@@ -718,7 +812,7 @@ export default function RegisterPage() {
                           password: e.target.value,
                         })
                       }
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${showSupervisorErrors && !supervisorData.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                     <button
@@ -749,7 +843,7 @@ export default function RegisterPage() {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="pl-10 pr-10"
+                      className={`pl-10 pr-10 ${showSupervisorErrors && !supervisorData.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       required
                     />
                     <button
