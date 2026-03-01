@@ -45,17 +45,17 @@ export default function LoginPage() {
     try {
       const user = await login(selectedRole, { email, password });
 
-      console.log("login user",user)
+      console.log("login user", user)
       // Save to AuthContext
       if (selectedRole === "student") {
-          authLogin({
+        authLogin({
           id: user.id,
           name: user.name,
           email: user.email,
           type: selectedRole,
         });
-      }else if (selectedRole === "company") {
-          authLogin({
+      } else if (selectedRole === "company") {
+        authLogin({
           id: user.id,
           name: user.hrName,
           email: user.hrEmail,
@@ -72,12 +72,14 @@ export default function LoginPage() {
 
       toast.success("Login Successful!", {
         description:
-        "Welcome back, " + user.name + "! Redirecting to your dashboard...",
+          "Welcome back, " + user.name + "! Redirecting to your dashboard...",
       });
 
       router.push(redirectMap[selectedRole]);
     } catch (error) {
-      alert("Login failed");
+      toast.error("Login Failed", {
+        description: "Invalid email or password. Please try again.",
+      });
       console.error(error);
     }
   };
@@ -155,7 +157,7 @@ export default function LoginPage() {
                   {loading ? "Signing in..." : "Sign In"}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
-               
+
               </form>
             </TabsContent>
 
