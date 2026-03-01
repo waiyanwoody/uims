@@ -17,13 +17,20 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/student/dashboard" },
   { icon: User, label: "My Profile", href: "/student/profile" },
   { icon: ClipboardList, label: "Browse Internships", href: "/student/browse" },
   { icon: FileText, label: "My Applications", href: "/student/applications" },
-  { icon: ClipboardList, label: "My Montly Reports", href: "/student/monitoring" },
+  {
+    icon: ClipboardList,
+    label: "My Montly Reports",
+    href: "/student/monitoring",
+  },
   { icon: Briefcase, label: "My CVs", href: "/student/cvs" },
   { icon: Settings, label: "Settings", href: "/student/settings" },
 ];
@@ -31,6 +38,17 @@ const menuItems = [
 export function StudentSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    toast.message("Logged out successfully", {
+      description: "You have been logged out.",
+    });
+    router.push("/auth/login");
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -44,8 +62,9 @@ export function StudentSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border z-30 transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border z-30 transition-transform duration-300 md:translate-x-0 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Logo & Theme Toggle */}
         <div className="p-6 border-b border-sidebar-border flex items-center justify-between gap-2">
@@ -64,11 +83,12 @@ export function StudentSidebar() {
             return (
               <Link key={item.href} href={item.href}>
                 <Button
-                  variant={isActive ? "default" : "ghost"}
-                  className={`w-full justify-start gap-3 ${isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    }`}
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 transition-colors ${
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      : "text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50"
+                  }`}
                   onClick={() => setIsOpen(false)}
                 >
                   <Icon className="w-5 h-5" />
@@ -82,6 +102,7 @@ export function StudentSidebar() {
         {/* Logout Button */}
         <div className="absolute bottom-6 left-4 right-4">
           <Button
+            onClick={handleLogout}
             variant="outline"
             className="w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
           >

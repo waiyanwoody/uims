@@ -4,32 +4,36 @@ export interface CV {
   student_id: number;
   title: string;
   file_path: string;
-  created_at: Date | string;
+  uploadedDate: Date | string;
   updated_at: Date | string;
+}
+
+export interface CvFormRequest {
+  studentId?: number;
+  student_id?: number;
+  title: string;
 }
 
 export interface Company {
   id: number;
   name: string;
-  location: string;
   industry: string;
-  contact_email: string;
-  status: 'PENDING' | 'ACTIVE';
-  created_at: Date;
+  location: string;
+  status: string;
+  createdAt: string;
 }
 
 export interface Internship {
   id: number;
-  company_id: number;
+  company: Company;
   title: string;
   description: string;
   category: string;
   requirements: string;
-  status: 'PENDING' | 'OPEN' | 'CLOSED';
+  status: string;
   slots: number;
-  deadline: Date | string;
-  created_at: Date;
-  company?: Company;
+  deadline: string;
+  createdAt: string;
 }
 
 export interface StudentProfile {
@@ -44,10 +48,11 @@ export interface StudentProfile {
 }
 
 export interface Student {
+  student_id: number;
   id: number;
   name: string;
-  gender: 'MALE' | 'FEMALE';
-  student_number: string;
+  gender: "MALE" | "FEMALE";
+  studentNumber: string;
   email: string;
   major: string;
   created_at: Date;
@@ -60,13 +65,19 @@ export interface StudentExpertise {
   skill_name: string;
 }
 
+export interface CreateApplicationRequest {
+  studentId: number;
+  internshipId: number;
+  cvId: number;
+}
+
 export interface Application {
   id: number;
   student_id: number;
   internship_id: number;
   cv_id: number;
   status: "PENDING" | "APPROVED" | "REJECTED";
-  applied_at: Date;
+  appliedAt: Date;
   student?: Student;
   internship?: Internship;
   cv?: CV;
@@ -79,6 +90,7 @@ export interface CreateApplicationDTO {
 }
 
 export interface ApplicationWithDetails extends Application {
+  cvForm: any;
   student: Student & {
     profile?: StudentProfile;
     expertise?: StudentExpertise[];
@@ -88,4 +100,3 @@ export interface ApplicationWithDetails extends Application {
   };
   cv: CV;
 }
-
