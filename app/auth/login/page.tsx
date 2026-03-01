@@ -8,11 +8,99 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Mail, Lock, ArrowRight, Eye, EyeOff, GraduationCap, Building2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // your Tabs component
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLogin } from "@/hooks/useLogin";
 import { toast } from "sonner";
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function fieldCls(invalid: boolean, extra = "") {
+  return [extra, invalid ? "border-destructive focus-visible:ring-destructive" : ""]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+// ─── LoginForm — defined OUTSIDE LoginPage so it never re-mounts on re-render ─
+type LoginFormProps = {
+  role: string;
+  emailPlaceholder: string;
+  email: string;
+  password: string;
+  showPassword: boolean;
+  loading: boolean;
+  errors: { email?: boolean; password?: boolean };
+  onEmailChange: (val: string) => void;
+  onPasswordChange: (val: string) => void;
+  onTogglePassword: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+};
+
+function LoginForm({
+  role,
+  emailPlaceholder,
+  email,
+  password,
+  showPassword,
+  loading,
+  errors,
+  onEmailChange,
+  onPasswordChange,
+  onTogglePassword,
+  onSubmit,
+}: LoginFormProps) {
+  return (
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <div className="space-y-2">
+        <Label htmlFor={`${role}-email`}>Email Address</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+          <Input
+            id={`${role}-email`}
+            type="email"
+            placeholder={emailPlaceholder}
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            className={fieldCls(!!errors.email, "pl-10")}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`${role}-password`}>Password</Label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+          <Input
+            id={`${role}-password`}
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => onPasswordChange(e.target.value)}
+            className={fieldCls(!!errors.password, "pl-10 pr-10")}
+          />
+          <button
+            type="button"
+            onClick={onTogglePassword}
+            className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Signing in..." : "Sign In"}
+        <ArrowRight className="ml-2 w-4 h-4" />
+      </Button>
+    </form>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function LoginPage() {
   const router = useRouter();
   const { login: authLogin } = useAuth();
@@ -22,48 +110,55 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"student" | "company" | "supervisor">("student");
+  const [errors, setErrors] = useState<{ email?: boolean; password?: boolean }>({});
 
-  // Demo accounts (optional)
-  const demoAccounts = [
-    { role: "student" as const, email: "john.student@university.edu", password: "password123" },
-    { role: "company" as const, email: "hr@techcorp.com", password: "password123" },
-    { role: "supervisor" as const, email: "prof.supervisor@university.edu", password: "password123" },
-  ];
-
-  const fillDemoCredentials = (role: "student" | "company" | "supervisor") => {
-    const account = demoAccounts.find(acc => acc.role === role);
-    if (account) {
-      setEmail(account.email);
-      setPassword(account.password);
-      setSelectedRole(role);
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    // Clear error once the email becomes valid (or empty — empty is caught on submit)
+    if (errors.email && (val === "" || isValidEmail(val))) {
+      setErrors((prev) => ({ ...prev, email: false }));
     }
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    if (errors.password) setErrors((prev) => ({ ...prev, password: false }));
+  };
+
+  const handleRoleChange = (val: string) => {
+    setSelectedRole(val as "student" | "company" | "supervisor");
+    setErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const newErrors: { email?: boolean; password?: boolean } = {};
+    if (!email) {
+      newErrors.email = true;
+    } else if (!isValidEmail(email)) {
+      newErrors.email = true;
+    }
+    if (!password) newErrors.password = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      const msg = !email || !password
+        ? "Please fill in all required fields."
+        : "Please enter a valid email address.";
+      toast.error("Invalid Input", { description: msg });
+      return;
+    }
+
     try {
       const user = await login(selectedRole, { email, password });
 
-      console.log("login user", user)
-      // Save to AuthContext
       if (selectedRole === "student") {
-        authLogin({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          type: selectedRole,
-        });
+        authLogin({ id: user.id, name: user.name, email: user.email, type: selectedRole });
       } else if (selectedRole === "company") {
-        authLogin({
-          id: user.id,
-          name: user.hrName,
-          email: user.hrEmail,
-          type: selectedRole,
-        });
+        authLogin({ id: user.id, name: user.hrName, email: user.hrEmail, type: selectedRole });
       }
 
-      // Redirect based on role
       const redirectMap = {
         student: "/student/dashboard",
         company: "/company/dashboard",
@@ -71,17 +166,26 @@ export default function LoginPage() {
       };
 
       toast.success("Login Successful!", {
-        description:
-          "Welcome back, " + user.name + "! Redirecting to your dashboard...",
+        description: "Welcome back, " + user.name + "! Redirecting to your dashboard...",
       });
 
       router.push(redirectMap[selectedRole]);
     } catch (error) {
-      toast.error("Login Failed", {
-        description: "Invalid email or password. Please try again.",
-      });
+      toast.error("Login Failed", { description: "Invalid email or password. Please try again." });
       console.error(error);
     }
+  };
+
+  const formProps = {
+    email,
+    password,
+    showPassword,
+    loading,
+    errors,
+    onEmailChange: handleEmailChange,
+    onPasswordChange: handlePasswordChange,
+    onTogglePassword: () => setShowPassword((prev) => !prev),
+    onSubmit: handleSubmit,
   };
 
   return (
@@ -94,8 +198,13 @@ export default function LoginPage() {
             <p className="text-muted-foreground">Sign in to your account</p>
           </div>
 
-          {/* Tabs for Roles */}
-          <Tabs defaultValue="student" className="w-full" value={selectedRole} onValueChange={(val) => setSelectedRole(val as "student" | "company" | "supervisor")}>
+          {/* Tabs */}
+          <Tabs
+            defaultValue="student"
+            className="w-full"
+            value={selectedRole}
+            onValueChange={handleRoleChange}
+          >
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="student" className="flex items-center gap-2">
                 <GraduationCap className="w-4 h-4" />
@@ -105,156 +214,22 @@ export default function LoginPage() {
                 <Building2 className="w-4 h-4" />
                 <span>Company</span>
               </TabsTrigger>
-              {/* Uncomment for supervisor if needed */}
               <TabsTrigger value="supervisor" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 <span>Supervisor</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Student Login */}
             <TabsContent value="student">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student-email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="student-email"
-                      type="email"
-                      placeholder="john.student@university.edu"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="student-password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="student-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-
-              </form>
+              <LoginForm role="student" emailPlaceholder="john.student@university.edu" {...formProps} />
             </TabsContent>
 
-            {/* Company Login */}
             <TabsContent value="company">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company-email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="company-email"
-                      type="email"
-                      placeholder="hr@techcorp.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company-password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="company-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </form>
+              <LoginForm role="company" emailPlaceholder="hr@techcorp.com" {...formProps} />
             </TabsContent>
 
-            {/* Company Login */}
             <TabsContent value="supervisor">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company-email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="company-email"
-                      type="email"
-                      placeholder="supervisor@ucsy.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company-password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="company-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </form>
+              <LoginForm role="supervisor" emailPlaceholder="supervisor@ucsy.com" {...formProps} />
             </TabsContent>
           </Tabs>
 
