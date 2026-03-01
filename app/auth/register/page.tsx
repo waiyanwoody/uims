@@ -36,58 +36,61 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRegisterStudent } from "@/hooks/StudentHook/useRegisterStudent";
 import { toast } from "sonner";
 import { useRegisterCompany } from "@/hooks/useRegisterCompany";
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function fieldCls(invalid: boolean, extra = "") {
+  return [extra, invalid ? "border-destructive focus-visible:ring-destructive" : ""]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+// ─── Sub-components ─────────────────────────────────────────────────────────
+
 const TermsContent = () => (
   <div className="space-y-6">
     <section>
       <h3 className="font-bold text-lg flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
-          1
-        </span>
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">1</span>
         General Usage
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        UIMS provides a platform for academic-to-professional transition. By
-        using the service, you represent that you are affiliated with a
-        recognized institution and provide truthful information.
+        UIMS provides a platform for academic-to-professional transition. By using the service, you
+        represent that you are affiliated with a recognized institution and provide truthful information.
       </p>
     </section>
     <section>
       <h3 className="font-bold text-lg flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
-          2
-        </span>
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">2</span>
         Data Privacy
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        Personal and academic data is stored securely. Students' data is only
-        shared with potential employers upon application. Employers agree to
-        handle student data with strict confidentiality.
+        Personal and academic data is stored securely. Students' data is only shared with potential
+        employers upon application. Employers agree to handle student data with strict confidentiality.
       </p>
     </section>
     <section>
       <h3 className="font-bold text-lg flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
-          3
-        </span>
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">3</span>
         Professionalism
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        All users (Students, Companies) must maintain professional standards.
-        Harassment, deceptive listings, or falsification of evaluations may lead
-        to permanent account suspension.
+        All users (Students, Companies) must maintain professional standards. Harassment, deceptive
+        listings, or falsification of evaluations may lead to permanent account suspension.
       </p>
     </section>
     <section>
       <h3 className="font-bold text-lg flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
-          4
-        </span>
+        <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">4</span>
         Liability
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        UIMS is an educational facilitation tool. Successful placement depends
-        on the interview process and academic requirements, not solely on
-        platform usage.
+        UIMS is an educational facilitation tool. Successful placement depends on the interview process
+        and academic requirements, not solely on platform usage.
       </p>
     </section>
   </div>
@@ -96,10 +99,7 @@ const TermsContent = () => (
 const TermsDialog = () => (
   <Dialog>
     <DialogTrigger asChild>
-      <button
-        type="button"
-        className="text-primary hover:underline font-medium focus:outline-none"
-      >
+      <button type="button" className="text-primary hover:underline font-medium focus:outline-none">
         Terms and Conditions
       </button>
     </DialogTrigger>
@@ -110,19 +110,15 @@ const TermsDialog = () => (
           <span className="font-bold text-sm tracking-widest">UIMS</span>
         </div>
         <DialogTitle className="text-2xl">Terms of Service</DialogTitle>
-        <DialogDescription>
-          Please review the agreement before proceeding with registration.
-        </DialogDescription>
+        <DialogDescription>Please review the agreement before proceeding with registration.</DialogDescription>
       </DialogHeader>
       <ScrollArea className="max-h-[50vh] pr-4 mt-4">
         <TermsContent />
       </ScrollArea>
       <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4 sm:justify-between items-center sm:items-end">
-        <p className="text-[10px] text-muted-foreground">
-          Last updated: February 2026
-        </p>
+        <p className="text-[10px] text-muted-foreground">Last updated: February 2026</p>
         <Link href="/terms" className="text-xs text-primary hover:underline">
-          View full full legal document &rarr;
+          View full legal document &rarr;
         </Link>
       </DialogFooter>
     </DialogContent>
@@ -130,26 +126,18 @@ const TermsDialog = () => (
 );
 
 const PasswordStrengthMeter = ({ score }: { score: number }) => {
-  const segments = [0, 1, 2, 3, 4];
   const getColor = (index: number) => {
     if (score === 0) return "bg-muted";
     if (score <= 2) return index < score ? "bg-destructive" : "bg-muted";
     if (score <= 4) return index < score ? "bg-yellow-500" : "bg-muted";
     return "bg-green-500";
   };
-
   const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
-
   return (
     <div className="space-y-2 mt-2">
       <div className="flex gap-1 h-1">
-        {segments.map((_, i) => (
-          <div
-            key={i}
-            className={`h-full flex-1 rounded-full transition-colors duration-300 ${getColor(
-              i
-            )}`}
-          />
+        {[0, 1, 2, 3, 4].map((_, i) => (
+          <div key={i} className={`h-full flex-1 rounded-full transition-colors duration-300 ${getColor(i)}`} />
         ))}
       </div>
       <p className="text-[10px] font-medium text-muted-foreground flex justify-between uppercase tracking-wider">
@@ -160,91 +148,138 @@ const PasswordStrengthMeter = ({ score }: { score: number }) => {
   );
 };
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type StudentFields = "name" | "email" | "studentNumber" | "major" | "address" | "gender" | "password" | "confirmPassword";
+type HrFields = "companyName" | "industry" | "location" | "hrName" | "hrEmail" | "hrPhone" | "hrPassword" | "confirmPassword";
+type SupervisorFields = "name" | "university" | "department" | "email" | "password" | "confirmPassword";
+
+// ─── Main Component ──────────────────────────────────────────────────────────
+
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showHRSuccessDialog, setShowHRSuccessDialog] = useState(false);
-  const [showStudentErrors, setShowStudentErrors] = useState(false);
-  const [showHrErrors, setShowHrErrors] = useState(false);
-  const [showSupervisorErrors, setShowSupervisorErrors] = useState(false);
 
+  // ── Invalid-field trackers (set on submit, cleared on change) ──
+  const [studentErrors, setStudentErrors] = useState<Partial<Record<StudentFields, boolean>>>({});
+  const [hrErrors, setHrErrors] = useState<Partial<Record<HrFields, boolean>>>({});
+  const [supervisorErrors, setSupervisorErrors] = useState<Partial<Record<SupervisorFields, boolean>>>({});
+
+  // ── Form state ──
   const [studentData, setStudentData] = useState({
-    name: "",
-    email: "",
-    studentNumber: "",
-    major: "",
-    address: "",
-    gender: "",
-    password: "",
-    confirmPassword: "",
+    name: "", email: "", studentNumber: "", major: "",
+    address: "", gender: "", password: "", confirmPassword: "",
   });
 
   const [hrData, setHrData] = useState({
-    companyName: "",
-    industry: "",
-    location: "",
-    hrName: "",
-    hrEmail: "",
-    hrPhone: "",
-    hrPassword: "",
-    confirmPassword: "",
+    companyName: "", industry: "", location: "",
+    hrName: "", hrEmail: "", hrPhone: "",
+    hrPassword: "", confirmPassword: "",
   });
 
   const [supervisorData, setSupervisorData] = useState({
-    name: "",
-    university: "",
-    department: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: "", university: "", department: "",
+    email: "", password: "", confirmPassword: "",
   });
 
-  const isStrongPassword = (password: string) => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  // ── Password helpers ──
+  const isStrongPassword = (pw: string) =>
+    pw.length >= 8 &&
+    /[A-Z]/.test(pw) &&
+    /[a-z]/.test(pw) &&
+    /[0-9]/.test(pw) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(pw);
 
-    return (
-      password.length >= minLength &&
-      hasUpperCase &&
-      hasLowerCase &&
-      hasNumber &&
-      hasSpecialChar
-    );
-  };
-
-  const getPasswordStrength = (password: string) => {
+  const getPasswordStrength = (pw: string) => {
     let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[a-z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(pw)) score++;
     return score;
   };
 
+  // ── Generic field-change helpers that also clear the error for that field ──
+  function changeStudent<K extends StudentFields>(field: K, value: string) {
+    setStudentData((prev) => ({ ...prev, [field]: value }));
+    if (studentErrors[field]) {
+      // For email, only clear the error once the format is valid
+      if (field === "email") {
+        if (isValidEmail(value)) setStudentErrors((prev) => ({ ...prev, [field]: false }));
+      } else {
+        setStudentErrors((prev) => ({ ...prev, [field]: false }));
+      }
+    }
+  }
+
+  function changeHr<K extends HrFields>(field: K, value: string) {
+    setHrData((prev) => ({ ...prev, [field]: value }));
+    if (hrErrors[field]) {
+      if (field === "hrEmail") {
+        if (isValidEmail(value)) setHrErrors((prev) => ({ ...prev, [field]: false }));
+      } else {
+        setHrErrors((prev) => ({ ...prev, [field]: false }));
+      }
+    }
+  }
+
+  function changeSupervisor<K extends SupervisorFields>(field: K, value: string) {
+    setSupervisorData((prev) => ({ ...prev, [field]: value }));
+    if (supervisorErrors[field]) {
+      if (field === "email") {
+        if (isValidEmail(value)) setSupervisorErrors((prev) => ({ ...prev, [field]: false }));
+      } else {
+        setSupervisorErrors((prev) => ({ ...prev, [field]: false }));
+      }
+    }
+  }
+
+  // ── Hooks ──
   const { registerStudent, loading: studentLoading } = useRegisterStudent();
+  const { registerCompany, loading: hrLoading } = useRegisterCompany();
+
+  // ── Student submit ──
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Password validation
+    // Collect empty required fields
+    const errors: Partial<Record<StudentFields, boolean>> = {};
+    (["name", "email", "studentNumber", "major", "address", "gender"] as StudentFields[]).forEach((f) => {
+      if (!studentData[f]) errors[f] = true;
+    });
+    if (studentData.email && !isValidEmail(studentData.email)) errors.email = true;
+    if (!studentData.password) errors.password = true;
+    if (!studentData.confirmPassword) errors.confirmPassword = true;
+
+    if (Object.keys(errors).length > 0) {
+      setStudentErrors(errors);
+      const hasInvalidEmail = studentData.email && !isValidEmail(studentData.email);
+      toast.error(hasInvalidEmail ? "Invalid Email" : "Missing Information", {
+        description: hasInvalidEmail
+          ? "Please enter a valid email address (e.g. john@university.edu)."
+          : "Please fill in all required fields.",
+      });
+      return;
+    }
+
     if (studentData.password !== studentData.confirmPassword) {
+      setStudentErrors({ confirmPassword: true });
       toast.error("Passwords do not match");
       return;
     }
 
     if (!isStrongPassword(studentData.password)) {
+      setStudentErrors({ password: true });
       toast.error("Weak Password", {
-        description: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.",
+        description: "Password must be at least 8 characters with uppercase, lowercase, numbers, and special characters.",
       });
       return;
     }
 
     try {
-      console.log("Registering student with data:", studentData);
       await registerStudent({
         name: studentData.name,
         email: studentData.email,
@@ -255,64 +290,89 @@ export default function RegisterPage() {
         password: studentData.password,
       });
       toast.success("Registration Successful!", {
-        description:
-          "Your student account has been created. You can now log in and start applying for internships.",
+        description: "Your student account has been created. You can now log in.",
       });
       router.push("/auth/login");
     } catch (error) {
       console.error(error);
-      toast.error("Registration failed", {
-        description: "An error occurred during registration. Please try again later.",
-      });
+      toast.error("Registration failed", { description: "An error occurred. Please try again." });
     }
   };
 
-  const { registerCompany, loading: hrLoading } = useRegisterCompany();
-
+  // ── Company submit ──
   const handleCompanySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Password check
+    const errors: Partial<Record<HrFields, boolean>> = {};
+    (["hrName", "companyName", "industry", "hrEmail", "hrPhone", "location"] as HrFields[]).forEach((f) => {
+      if (!hrData[f]) errors[f] = true;
+    });
+    if (hrData.hrEmail && !isValidEmail(hrData.hrEmail)) errors.hrEmail = true;
+    if (!hrData.hrPassword) errors.hrPassword = true;
+    if (!hrData.confirmPassword) errors.confirmPassword = true;
+
+    if (Object.keys(errors).length > 0) {
+      setHrErrors(errors);
+      const hasInvalidEmail = hrData.hrEmail && !isValidEmail(hrData.hrEmail);
+      toast.error(hasInvalidEmail ? "Invalid Email" : "Missing Information", {
+        description: hasInvalidEmail
+          ? "Please enter a valid email address (e.g. hr@company.com)."
+          : "Please fill in all required fields.",
+      });
+      return;
+    }
+
     if (hrData.hrPassword !== hrData.confirmPassword) {
+      setHrErrors({ confirmPassword: true });
       toast.error("Passwords do not match");
       return;
     }
 
     if (!isStrongPassword(hrData.hrPassword)) {
+      setHrErrors({ hrPassword: true });
       toast.error("Weak Password", {
-        description: "Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.",
+        description: "Password must be at least 8 characters with uppercase, lowercase, numbers, and special characters.",
       });
       return;
     }
 
     try {
       const { confirmPassword, ...payload } = hrData;
-
       await registerCompany(payload);
-
       toast.success("Registration Successful!", {
-        description:
-          "Your HR account has been created. A supervisor will review your application within 1-2 business days. You will receive an email notification once your account is approved.",
+        description: "Your HR account has been created. A supervisor will review it within 1-2 business days.",
       });
       router.push("/auth/login");
     } catch (error) {
       console.error(error);
-      toast.error("Registration failed", {
-        description: "An error occurred during registration. Please try again later.",
-      });
+      toast.error("Registration failed", { description: "An error occurred. Please try again." });
     }
   };
 
+  // ── Supervisor submit ──
   const handleSupervisorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSupervisorErrors(true);
 
-    const isMissingFields = !supervisorData.name || !supervisorData.university || !supervisorData.department || !supervisorData.email || !supervisorData.password || !supervisorData.confirmPassword;
+    const errors: Partial<Record<SupervisorFields, boolean>> = {};
+    (["name", "university", "department", "email", "password", "confirmPassword"] as SupervisorFields[]).forEach((f) => {
+      if (!supervisorData[f]) errors[f] = true;
+    });
+    if (supervisorData.email && !isValidEmail(supervisorData.email)) errors.email = true;
 
-    if (isMissingFields) {
-      toast.error("Missing Information", {
-        description: "Please fill in all required fields.",
+    if (Object.keys(errors).length > 0) {
+      setSupervisorErrors(errors);
+      const hasInvalidEmail = supervisorData.email && !isValidEmail(supervisorData.email);
+      toast.error(hasInvalidEmail ? "Invalid Email" : "Missing Information", {
+        description: hasInvalidEmail
+          ? "Please enter a valid email address (e.g. prof@university.edu)."
+          : "Please fill in all required fields.",
       });
+      return;
+    }
+
+    if (supervisorData.password !== supervisorData.confirmPassword) {
+      setSupervisorErrors({ confirmPassword: true });
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -323,14 +383,13 @@ export default function RegisterPage() {
     }, 800);
   };
 
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="w-full">
       <Card className="p-8 shadow-xl border-primary/10">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
-          <p className="text-muted-foreground mt-1">
-            Join the university internship portal
-          </p>
+          <p className="text-muted-foreground mt-1">Join the university internship portal</p>
         </div>
 
         <Tabs defaultValue="student" className="w-full">
@@ -343,16 +402,14 @@ export default function RegisterPage() {
               <Building2 className="w-4 h-4" />
               <span>Company</span>
             </TabsTrigger>
-            {/* <TabsTrigger value="supervisor" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              <span>Supervisor</span>
-            </TabsTrigger> */}
           </TabsList>
 
-          {/* Student Registration */}
+          {/* ── Student Registration ────────────────────────────────────── */}
           <TabsContent value="student">
-            <form onSubmit={handleStudentSubmit} className="space-y-4">
+            <form onSubmit={handleStudentSubmit} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Full Name */}
                 <div className="space-y-2">
                   <Label htmlFor="s-name">Full Name</Label>
                   <div className="relative">
@@ -361,14 +418,14 @@ export default function RegisterPage() {
                       id="s-name"
                       placeholder="John Doe"
                       value={studentData.name}
-                      onChange={(e) =>
-                        setStudentData({ ...studentData, name: e.target.value })
-                      }
-                      className="pl-10"
+                      onChange={(e) => changeStudent("name", e.target.value)}
+                      className={fieldCls(!!studentErrors.name, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Email */}
                 <div className="space-y-2">
                   <Label htmlFor="s-email">Email</Label>
                   <div className="relative">
@@ -378,87 +435,87 @@ export default function RegisterPage() {
                       type="email"
                       placeholder="john@university.edu"
                       value={studentData.email}
-                      onChange={(e) =>
-                        setStudentData({
-                          ...studentData,
-                          email: e.target.value,
-                        })
-                      }
-                      className="pl-10"
+                      onChange={(e) => changeStudent("email", e.target.value)}
+                      className={fieldCls(!!studentErrors.email, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Student Number */}
                 <div className="space-y-2">
                   <Label htmlFor="s-uni">Student Number</Label>
-                  <div className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                    {/* Static Prefix */}
-                    <span className="text-muted-foreground pr-1 select-none font-medium">
-                      YKPT -
-                    </span>
-
-                    {/* Editable Number Input */}
+                  <div
+                    className={[
+                      "flex h-10 w-full items-center rounded-md border bg-background px-3 py-2 text-sm ring-offset-background transition-colors",
+                      "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2",
+                      studentErrors.studentNumber
+                        ? "border-destructive focus-within:ring-destructive"
+                        : "border-input focus-within:ring-ring",
+                    ].join(" ")}
+                  >
+                    <span className="text-muted-foreground pr-1 select-none font-medium">YKPT -</span>
                     <input
                       id="s-uni"
                       type="number"
                       placeholder="00000"
-                      className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
                       value={studentData.studentNumber}
-                      onChange={(e) =>
-                        setStudentData({
-                          ...studentData,
-                          studentNumber: e.target.value,
-                        })
-                      }
+                      onChange={(e) => changeStudent("studentNumber", e.target.value)}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Major */}
                 <div className="space-y-2">
                   <Label htmlFor="s-major">Major</Label>
                   <Input
                     id="s-major"
                     placeholder="Computer Science"
                     value={studentData.major}
-                    onChange={(e) =>
-                      setStudentData({ ...studentData, major: e.target.value })
-                    }
+                    onChange={(e) => changeStudent("major", e.target.value)}
+                    className={fieldCls(!!studentErrors.major)}
                     required
                   />
                 </div>
+
+                {/* Gender */}
                 <div className="space-y-2">
                   <Label htmlFor="s-gender">Gender</Label>
                   <select
                     id="s-gender"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={[
+                      "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background transition-colors",
+                      "focus:outline-none focus:ring-2 focus:ring-offset-2",
+                      studentErrors.gender
+                        ? "border-destructive focus:ring-destructive"
+                        : "border-input focus:ring-ring",
+                    ].join(" ")}
                     value={studentData.gender}
-                    onChange={(e) =>
-                      setStudentData({ ...studentData, gender: e.target.value })
-                    }
+                    onChange={(e) => changeStudent("gender", e.target.value)}
                     required
                   >
-                    <option value="" disabled>
-                      Select Gender
-                    </option>
+                    <option value="" disabled>Select Gender</option>
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
                   </select>
                 </div>
+
+                {/* Address */}
                 <div className="space-y-2">
                   <Label htmlFor="s-address">Address</Label>
                   <Input
                     id="s-address"
                     placeholder="Your Home Address"
                     value={studentData.address}
-                    onChange={(e) =>
-                      setStudentData({
-                        ...studentData,
-                        address: e.target.value,
-                      })
-                    }
+                    onChange={(e) => changeStudent("address", e.target.value)}
+                    className={fieldCls(!!studentErrors.address)}
                     required
                   />
                 </div>
+
+                {/* Password */}
                 <div className="space-y-2">
                   <Label htmlFor="s-password">Password</Label>
                   <div className="relative">
@@ -468,29 +525,19 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={studentData.password}
-                      onChange={(e) =>
-                        setStudentData({
-                          ...studentData,
-                          password: e.target.value,
-                        })
-                      }
-                      className="pl-10 pr-10"
+                      onChange={(e) => changeStudent("password", e.target.value)}
+                      className={fieldCls(!!studentErrors.password, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                   <PasswordStrengthMeter score={getPasswordStrength(studentData.password)} />
                 </div>
+
+                {/* Confirm Password */}
                 <div className="space-y-2">
                   <Label htmlFor="s-confirm">Confirm Password</Label>
                   <div className="relative">
@@ -500,55 +547,35 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={studentData.confirmPassword}
-                      onChange={(e) =>
-                        setStudentData({
-                          ...studentData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      className="pl-10 pr-10"
+                      onChange={(e) => changeStudent("confirmPassword", e.target.value)}
+                      className={fieldCls(!!studentErrors.confirmPassword, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
               </div>
 
               <label className="flex items-center gap-2 text-sm pt-2">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border"
-                  required
-                />
-                <span className="text-muted-foreground">
-                  I agree to the <TermsDialog />
-                </span>
+                <input type="checkbox" className="w-4 h-4 rounded border-border" required />
+                <span className="text-muted-foreground">I agree to the <TermsDialog /></span>
               </label>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={studentLoading}
-              >
+              <Button type="submit" className="w-full" disabled={studentLoading}>
                 {studentLoading ? "Creating..." : "Register as Student"}
               </Button>
             </form>
           </TabsContent>
 
-          {/* HR Registration */}
+          {/* ── HR Registration ─────────────────────────────────────────── */}
           <TabsContent value="hr">
-            <form onSubmit={handleCompanySubmit} className="space-y-4">
+            <form onSubmit={handleCompanySubmit} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* HR Name */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-name">HR Name</Label>
                   <div className="relative">
@@ -557,14 +584,14 @@ export default function RegisterPage() {
                       id="hr-name"
                       placeholder="Sarah Johnson"
                       value={hrData.hrName}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, hrName: e.target.value })
-                      }
-                      className={`pl-10 ${showHrErrors && !hrData.hrName ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("hrName", e.target.value)}
+                      className={fieldCls(!!hrErrors.hrName, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Company */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-company">Company</Label>
                   <div className="relative">
@@ -573,14 +600,14 @@ export default function RegisterPage() {
                       id="hr-company"
                       placeholder="Tech Corp Inc."
                       value={hrData.companyName}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, companyName: e.target.value })
-                      }
-                      className={`pl-10 ${showHrErrors && !hrData.companyName ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("companyName", e.target.value)}
+                      className={fieldCls(!!hrErrors.companyName, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Industry */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-industry">Industry</Label>
                   <div className="relative">
@@ -589,14 +616,14 @@ export default function RegisterPage() {
                       id="hr-industry"
                       placeholder="Technology, Finance, etc."
                       value={hrData.industry}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, industry: e.target.value })
-                      }
-                      className={`pl-10 ${showHrErrors && !hrData.industry ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("industry", e.target.value)}
+                      className={fieldCls(!!hrErrors.industry, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* HR Email */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-email">HR Email</Label>
                   <div className="relative">
@@ -606,27 +633,27 @@ export default function RegisterPage() {
                       type="email"
                       placeholder="hr@company.com"
                       value={hrData.hrEmail}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, hrEmail: e.target.value })
-                      }
-                      className={`pl-10 ${showHrErrors && !hrData.hrEmail ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("hrEmail", e.target.value)}
+                      className={fieldCls(!!hrErrors.hrEmail, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Phone */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-phone">Phone</Label>
                   <Input
                     id="hr-phone"
                     placeholder="+1 (555) 123-4567"
                     value={hrData.hrPhone}
-                    onChange={(e) =>
-                      setHrData({ ...hrData, hrPhone: e.target.value })
-                    }
-                    className={showHrErrors && !hrData.hrPhone ? "border-destructive focus-visible:ring-destructive" : ""}
+                    onChange={(e) => changeHr("hrPhone", e.target.value)}
+                    className={fieldCls(!!hrErrors.hrPhone)}
                     required
                   />
                 </div>
+
+                {/* Company Address */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-address">Company Address</Label>
                   <div className="relative">
@@ -635,14 +662,14 @@ export default function RegisterPage() {
                       id="hr-address"
                       placeholder="Enter company headquarters address"
                       value={hrData.location}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, location: e.target.value })
-                      }
-                      className={`pl-10 ${showHrErrors && !hrData.location ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("location", e.target.value)}
+                      className={fieldCls(!!hrErrors.location, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
+                {/* Password */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-password">Password</Label>
                   <div className="relative">
@@ -652,26 +679,19 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={hrData.hrPassword}
-                      onChange={(e) =>
-                        setHrData({ ...hrData, hrPassword: e.target.value })
-                      }
-                      className={`pl-10 pr-10 ${showHrErrors && !hrData.hrPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("hrPassword", e.target.value)}
+                      className={fieldCls(!!hrErrors.hrPassword, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                   <PasswordStrengthMeter score={getPasswordStrength(hrData.hrPassword)} />
                 </div>
+
+                {/* Confirm Password */}
                 <div className="space-y-2">
                   <Label htmlFor="hr-confirm">Confirm Password</Label>
                   <div className="relative">
@@ -681,39 +701,21 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={hrData.confirmPassword}
-                      onChange={(e) =>
-                        setHrData({
-                          ...hrData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      className={`pl-10 pr-10 ${showHrErrors && !hrData.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeHr("confirmPassword", e.target.value)}
+                      className={fieldCls(!!hrErrors.confirmPassword, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
               </div>
 
               <label className="flex items-center gap-2 text-sm pt-2">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border"
-                  required
-                />
-                <span className="text-muted-foreground">
-                  I agree to the <TermsDialog />
-                </span>
+                <input type="checkbox" className="w-4 h-4 rounded border-border" required />
+                <span className="text-muted-foreground">I agree to the <TermsDialog /></span>
               </label>
 
               <Button type="submit" className="w-full" disabled={hrLoading}>
@@ -722,10 +724,11 @@ export default function RegisterPage() {
             </form>
           </TabsContent>
 
-          {/* Supervisor Registration */}
+          {/* ── Supervisor Registration (hidden tab, kept for completeness) ── */}
           <TabsContent value="supervisor">
-            <form onSubmit={handleSupervisorSubmit} className="space-y-4">
+            <form onSubmit={handleSupervisorSubmit} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-name">Full Name</Label>
                   <div className="relative">
@@ -734,17 +737,13 @@ export default function RegisterPage() {
                       id="sup-name"
                       placeholder="Prof. Michael Chen"
                       value={supervisorData.name}
-                      onChange={(e) =>
-                        setSupervisorData({
-                          ...supervisorData,
-                          name: e.target.value,
-                        })
-                      }
-                      className={`pl-10 ${showSupervisorErrors && !supervisorData.name ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeSupervisor("name", e.target.value)}
+                      className={fieldCls(!!supervisorErrors.name, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-email">Email</Label>
                   <div className="relative">
@@ -754,49 +753,37 @@ export default function RegisterPage() {
                       type="email"
                       placeholder="prof@university.edu"
                       value={supervisorData.email}
-                      onChange={(e) =>
-                        setSupervisorData({
-                          ...supervisorData,
-                          email: e.target.value,
-                        })
-                      }
-                      className={`pl-10 ${showSupervisorErrors && !supervisorData.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeSupervisor("email", e.target.value)}
+                      className={fieldCls(!!supervisorErrors.email, "pl-10")}
                       required
                     />
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-uni">University</Label>
                   <Input
                     id="sup-uni"
                     placeholder="Stanford University"
                     value={supervisorData.university}
-                    onChange={(e) =>
-                      setSupervisorData({
-                        ...supervisorData,
-                        university: e.target.value,
-                      })
-                    }
-                    className={showSupervisorErrors && !supervisorData.university ? "border-destructive focus-visible:ring-destructive" : ""}
+                    onChange={(e) => changeSupervisor("university", e.target.value)}
+                    className={fieldCls(!!supervisorErrors.university)}
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-dept">Department</Label>
                   <Input
                     id="sup-dept"
                     placeholder="Computer Science"
                     value={supervisorData.department}
-                    onChange={(e) =>
-                      setSupervisorData({
-                        ...supervisorData,
-                        department: e.target.value,
-                      })
-                    }
-                    className={showSupervisorErrors && !supervisorData.department ? "border-destructive focus-visible:ring-destructive" : ""}
+                    onChange={(e) => changeSupervisor("department", e.target.value)}
+                    className={fieldCls(!!supervisorErrors.department)}
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-password">Password</Label>
                   <div className="relative">
@@ -806,28 +793,17 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={supervisorData.password}
-                      onChange={(e) =>
-                        setSupervisorData({
-                          ...supervisorData,
-                          password: e.target.value,
-                        })
-                      }
-                      className={`pl-10 pr-10 ${showSupervisorErrors && !supervisorData.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeSupervisor("password", e.target.value)}
+                      className={fieldCls(!!supervisorErrors.password, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="sup-confirm">Confirm Password</Label>
                   <div className="relative">
@@ -837,39 +813,21 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={supervisorData.confirmPassword}
-                      onChange={(e) =>
-                        setSupervisorData({
-                          ...supervisorData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      className={`pl-10 pr-10 ${showSupervisorErrors && !supervisorData.confirmPassword ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      onChange={(e) => changeSupervisor("confirmPassword", e.target.value)}
+                      className={fieldCls(!!supervisorErrors.confirmPassword, "pl-10 pr-10")}
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
               </div>
 
               <label className="flex items-center gap-2 text-sm pt-2">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border"
-                  required
-                />
-                <span className="text-muted-foreground">
-                  I agree to the <TermsDialog />
-                </span>
+                <input type="checkbox" className="w-4 h-4 rounded border-border" required />
+                <span className="text-muted-foreground">I agree to the <TermsDialog /></span>
               </label>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -882,35 +840,29 @@ export default function RegisterPage() {
         <div className="text-center pt-6 mt-6 border-t border-border">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-primary hover:underline font-semibold"
-            >
+            <Link href="/auth/login" className="text-primary hover:underline font-semibold">
               Sign in
             </Link>
           </p>
         </div>
       </Card>
 
-      {/* HR Registration Success Dialog */}
+      {/* HR Registration Pending Dialog */}
       <Dialog open={showHRSuccessDialog} onOpenChange={setShowHRSuccessDialog}>
         <DialogContent className="sm:max-w-[450px] p-8">
           <div className="flex flex-col items-center text-center space-y-6">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
               <Clock className="w-10 h-10 text-primary animate-pulse" />
             </div>
-
             <DialogHeader className="space-y-3 flex flex-col items-center">
               <DialogTitle className="text-3xl font-bold tracking-tight text-foreground">
                 Registration Pending
               </DialogTitle>
               <DialogDescription className="text-base text-muted-foreground leading-relaxed px-4">
-                Your HR account has been successfully registered. To maintain
-                platform security, a supervisor must review and approve your
-                application.
+                Your HR account has been successfully registered. A supervisor must review and approve
+                your application to maintain platform security.
               </DialogDescription>
             </DialogHeader>
-
             <DialogFooter className="w-full pt-4">
               <Button
                 type="button"
