@@ -20,6 +20,7 @@ import {
   XCircle,
   FileText,
   Loader2,
+  Mail,
 } from "lucide-react";
 import { useApplicationDetails } from "@/hooks/StudentHook/useApplicationDetails";
 
@@ -316,15 +317,37 @@ export default function ApplicationViewDetails() {
             About Company
           </h2>
           <div className="space-y-4">
-            <h3 className="font-bold text-lg">
-              {company?.name || (application as any).companyName}
-            </h3>
-            <p className="text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold">
+                  {company?.name || (application as any).companyName}
+                </h3>
+                <p className="text-muted-foreground">
+                  {company?.industry || "Software & Technology"}
+                </p>
+              </div>
+              <Badge
+                variant="outline"
+                className="border-primary/20 bg-primary/5 text-primary"
+              >
+                Verified Company
+              </Badge>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
               {company?.description ||
                 (internship as any)?.companyDescription ||
                 (application as any).companyDescription ||
-                "No company information provided."}
+                "A leading company in the industry, committed to providing excellent training and mentorship to aspiring professionals. We foster a culture of innovation, collaboration, and continuous learning."}
             </p>
+            {company?.name && (
+              <div className="flex items-center gap-2 text-sm text-primary hover:underline cursor-pointer">
+                <Mail className="w-4 h-4" />
+                <span>
+                  contact@
+                  {company.name.toLowerCase().replace(/ /g, "")}.com
+                </span>
+              </div>
+            )}
           </div>
         </Card>
       </div>

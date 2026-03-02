@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useMonitoring, DashboardReport } from "@/hooks/use-monitoring";
+import { useAuth } from "@/contexts/AuthContext";
+import { useReport } from "@/hooks/StudentHook/useReport";
 import {
     FileText,
     Calendar,
@@ -43,24 +44,28 @@ import { Progress } from "@/components/ui/progress";
 
 export default function StudentMonitoring() {
     const isMobile = useIsMobile();
-    const { getStudentReports, submitReport } = useMonitoring();
-    const studentReports = getStudentReports("John Smith");
+    const { user } = useAuth();
+    const { uploadReport, fetchReports, reports, pagination, loading: isLoadingReports, loading: isSubmitting } = useReport();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = isMobile ? 5 : 10;
 
+    useEffect(() => {
+        fetchReports(currentPage - 1, itemsPerPage);
+    }, [currentPage, itemsPerPage]);
+
     // Dialog states
-    const [selectedReport, setSelectedReport] = useState<DashboardReport | null>(null);
+    const [selectedReport, setSelectedReport] = useState<any>(null);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
 
     // New report form state
     const [newReport, setNewReport] = useState({
-        student: "John Smith",
+        student: user?.name || "",
         company: "Google",
         position: "Software Engineer Intern",
-        month: "",
+        month: "", // This will now represent monthNumber
         description: "",
     });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -68,19 +73,19 @@ export default function StudentMonitoring() {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const filteredReports = studentReports.filter(
-        (report) =>
-            report.month.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            report.company.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
-    const currentReports = filteredReports.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const filteredReports = Array.isArray(reports) 
+        ? reports.filter(
+            (report) =>
+                monthNames[report?.monthNumber - 1]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                report?.internshipTitle?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : [];
 
-    const handleViewClick = (report: DashboardReport) => {
+    const totalPages = pagination?.totalPages || 1;
+
+    const handleViewClick = (report: any) => {
         setSelectedReport(report);
         setIsDetailDialogOpen(true);
     };
@@ -105,42 +110,44 @@ export default function StudentMonitoring() {
         e.preventDefault();
         if (!selectedFile) return;
 
-        await simulateUpload();
+        // Current user should have at least one active internship if they're on this page
+        // For now, using internshipId 1 as placeholder until active internship is available
+        const internshipId = 1;
+        const monthNumber = parseInt(newReport.month);
 
-        const now = new Date();
-        submitReport({
-            student: newReport.student,
-            company: newReport.company,
-            position: newReport.position,
-            month: newReport.month,
-            submittedDate: now.toISOString().split("T")[0],
-            submissionTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-            description: newReport.description,
-            attachmentName: selectedFile.name,
-        });
+        if (isNaN(monthNumber)) {
+            return;
+        }
 
-        setIsSubmitDialogOpen(false);
-        setNewReport({
-            student: "John Smith",
-            company: "Google",
-            position: "Software Engineer Intern",
-            month: "",
-            description: ""
-        });
-        setSelectedFile(null);
-        setUploadProgress(0);
+        const result = await uploadReport(
+            internshipId,
+            monthNumber,
+            selectedFile,
+            newReport.description,
+            300 // default expirySeconds from backend
+        );
+
+        if (result) {
+            fetchReports(currentPage - 1, itemsPerPage);
+
+            setIsSubmitDialogOpen(false);
+            setNewReport({
+                student: user?.name || "",
+                company: "Google",
+                position: "Software Engineer Intern",
+                month: "",
+                description: ""
+            });
+            setSelectedFile(null);
+            setUploadProgress(0);
+        }
     };
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "Review":
-                return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200 hover:bg-emerald-500/20 font-bold uppercase tracking-widest text-[10px] px-3 py-1">Reviewed</Badge>;
-            case "Verify":
-                return <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 hover:bg-amber-500/20 font-bold uppercase tracking-widest text-[10px] px-3 py-1">Awaiting Supervisor</Badge>;
-            case "Pending":
-                return <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 hover:bg-blue-500/20 font-bold uppercase tracking-widest text-[10px] px-3 py-1">Awaiting HR</Badge>;
-            default:
-                return <Badge variant="secondary" className="font-bold uppercase tracking-widest text-[10px] px-3 py-1">{status}</Badge>;
+    const getStatusBadge = (hrValidated: boolean) => {
+        if (hrValidated) {
+            return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200 hover:bg-emerald-500/20 font-bold uppercase tracking-widest text-[10px] px-3 py-1">Validated</Badge>;
+        } else {
+            return <Badge className="bg-blue-500/10 text-blue-600 border-blue-200 hover:bg-blue-500/20 font-bold uppercase tracking-widest text-[10px] px-3 py-1">Awaiting HR</Badge>;
         }
     };
 
@@ -182,21 +189,34 @@ export default function StudentMonitoring() {
                                         <Input
                                             id="student"
                                             value={newReport.student}
-                                            onChange={(e) => setNewReport({ ...newReport, student: e.target.value })}
+                                            disabled
                                             className="bg-secondary/20 focus-visible:ring-primary/20 text-xs"
                                             required
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="month" className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Report Month</Label>
-                                        <Input
+                                        <select
                                             id="month"
-                                            placeholder="e.g. May 2024"
                                             value={newReport.month}
                                             onChange={(e) => setNewReport({ ...newReport, month: e.target.value })}
-                                            className="bg-secondary/20 focus-visible:ring-primary/20 text-xs"
+                                            className="w-full h-9 rounded-md border border-input bg-secondary/20 px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                             required
-                                        />
+                                        >
+                                            <option value="">Select Month</option>
+                                            <option value="1">1 (January)</option>
+                                            <option value="2">2 (February)</option>
+                                            <option value="3">3 (March)</option>
+                                            <option value="4">4 (April)</option>
+                                            <option value="5">5 (May)</option>
+                                            <option value="6">6 (June)</option>
+                                            <option value="7">7 (July)</option>
+                                            <option value="8">8 (August)</option>
+                                            <option value="9">9 (September)</option>
+                                            <option value="10">10 (October)</option>
+                                            <option value="11">11 (November)</option>
+                                            <option value="12">12 (December)</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -308,10 +328,10 @@ export default function StudentMonitoring() {
                                     <Button
                                         type="submit"
                                         className="w-full gap-2 font-bold uppercase tracking-wider text-xs h-10 shadow-lg shadow-primary/20"
-                                        disabled={!selectedFile || isUploading}
+                                        disabled={!selectedFile || isSubmitting}
                                     >
-                                        {!isUploading && <Send className="w-4 h-4" />}
-                                        {isUploading ? "Uploading..." : "Submit Monthly Report"}
+                                        {!isSubmitting && <Send className="w-4 h-4" />}
+                                        {isSubmitting ? "Submitting..." : "Submit Monthly Report"}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -335,8 +355,12 @@ export default function StudentMonitoring() {
 
             {/* Reports List */}
             <div className="grid grid-cols-1 gap-4">
-                {currentReports.length > 0 ? (
-                    currentReports.map((report, idx) => (
+                {isLoadingReports ? (
+                    <div className="flex justify-center p-12">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                ) : filteredReports.length > 0 ? (
+                    filteredReports.map((report, idx) => (
                         <Card
                             key={report.id}
                             className="group relative overflow-hidden border-border/50 hover:border-primary/30 hover:shadow-md transition-all duration-300 animate-slideInUp bg-card"
@@ -351,16 +375,16 @@ export default function StudentMonitoring() {
                                         </div>
                                         <div className="space-y-1">
                                             <h3 className="text-base font-bold text-foreground">
-                                                {report.month}
+                                                {monthNames[report.monthNumber - 1]}
                                             </h3>
                                             <div className="flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
                                                 <span className="flex items-center gap-1.5">
                                                     <Calendar className="w-3.5 h-3.5" />
-                                                    {report.submittedDate}
+                                                    {new Date(report.createdAt).toLocaleDateString()}
                                                 </span>
                                                 <span className="flex items-center gap-1.5 font-bold text-primary/70">
                                                     <TrendingUp className="w-3.5 h-3.5" />
-                                                    {report.company}
+                                                    {report.internshipTitle}
                                                 </span>
                                             </div>
                                         </div>
@@ -369,31 +393,22 @@ export default function StudentMonitoring() {
                                     {/* Middle Section: Status (Centered) */}
                                     <div className="flex justify-center md:justify-center items-center">
                                         <div className="flex flex-col items-center gap-2">
-                                            {getStatusBadge(report.status)}
+                                            {getStatusBadge(report.hrValidated)}
                                             <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
                                                 <Clock className="w-3 h-3" />
-                                                Last Update: {report.submissionTime}
+                                                Created at: {new Date(report.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
                                     </div>
 
                                     {/* Right Section: Actions & Marks */}
                                     <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none pt-4 md:pt-0">
-                                        {report.status === "Review" && (
-                                            <div className="flex flex-col items-end mr-2">
-                                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mb-1">Score</p>
-                                                <div className="flex items-center gap-1 text-primary">
-                                                    <span className="text-xl font-black">{report.marks}</span>
-                                                    <span className="text-xs text-muted-foreground opacity-60 font-medium">/ 50</span>
-                                                </div>
-                                            </div>
-                                        )}
                                         <Button
                                             variant="ghost"
                                             className="h-9 font-bold gap-2 text-xs px-5 border border-transparent hover:border-primary/20 hover:bg-primary/5 text-primary transition-all group/btn"
                                             onClick={() => handleViewClick(report)}
                                         >
-                                            View Feedback
+                                            View Details
                                             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                         </Button>
                                     </div>
@@ -463,11 +478,11 @@ export default function StudentMonitoring() {
                                         <FileText className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <span className="block font-bold leading-none">{selectedReport?.month}</span>
+                                        <span className="block font-bold leading-none">{monthNames[selectedReport?.monthNumber - 1]}</span>
                                         <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">Monthly Evaluation</span>
                                     </div>
                                 </DialogTitle>
-                                {selectedReport && getStatusBadge(selectedReport.status)}
+                                {selectedReport && getStatusBadge(selectedReport.hrValidated)}
                             </div>
                         </DialogHeader>
                     </div>
@@ -480,14 +495,14 @@ export default function StudentMonitoring() {
                                     <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Submitted On</p>
                                     <p className="text-xs font-bold flex items-center gap-2">
                                         <Calendar className="w-3.5 h-3.5 text-primary/60" />
-                                        {selectedReport.submittedDate}
+                                        {new Date(selectedReport.createdAt).toLocaleDateString()}
                                     </p>
                                 </div>
                                 <div className="p-3 rounded-2xl bg-secondary/20 border border-border/50">
                                     <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1">At</p>
                                     <p className="text-xs font-bold flex items-center gap-2">
                                         <Clock className="w-3.5 h-3.5 text-primary/60" />
-                                        {selectedReport.submissionTime}
+                                        {new Date(selectedReport.createdAt).toLocaleTimeString()}
                                     </p>
                                 </div>
                             </div>
@@ -500,57 +515,31 @@ export default function StudentMonitoring() {
                                 </div>
                                 <div className="p-4 rounded-xl bg-card border shadow-sm text-xs leading-relaxed text-muted-foreground relative">
                                     <div className="absolute left-0 top-3 w-0.5 h-6 bg-primary rounded-full"></div>
-                                    "{selectedReport.description}"
+                                    "{selectedReport.summary}"
                                 </div>
                             </div>
-
-                            {/* Feedback Section (Conditional) */}
-                            {selectedReport.feedback ? (
-                                <div className="space-y-3 animate-fadeIn">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Supervisor Feedback</p>
-                                        </div>
-                                        {selectedReport.marks !== undefined && (
-                                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                                                <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" />
-                                                <span className="text-xs font-black text-emerald-700">{selectedReport.marks}/50</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs leading-relaxed text-foreground/80">
-                                        {selectedReport.feedback}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
-                                    <div className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 flex-shrink-0">
-                                        <Clock className="w-3.5 h-3.5" />
-                                    </div>
-                                    <div className="space-y-0.5">
-                                        <p className="text-[10px] font-bold text-amber-700">Evaluation Pending</p>
-                                        <p className="text-[10px] text-amber-600 font-medium leading-relaxed">Your supervisor has not yet reviewed this report.</p>
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Attachment */}
                             <div className="space-y-2 pt-1">
                                 <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Document</p>
-                                <div className="flex items-center justify-between p-3 rounded-xl border bg-card hover:border-primary/40 transition-all group cursor-pointer border-dashed">
+                                <a 
+                                    href={selectedReport.presignedUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between p-3 rounded-xl border bg-card hover:border-primary/40 transition-all group cursor-pointer border-dashed"
+                                >
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
                                             <FileText className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-bold truncate max-w-[180px] leading-tight">{selectedReport.attachmentName}</p>
+                                            <p className="text-[11px] font-bold truncate max-w-[180px] leading-tight">View Report PDF</p>
                                         </div>
                                     </div>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg">
                                         <Download className="w-4 h-4" />
                                     </Button>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     )}
