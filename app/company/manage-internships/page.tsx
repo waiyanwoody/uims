@@ -159,7 +159,7 @@ export default function ManageInternships() {
             ) : (
               internships.map((job) => (
                 <TableRow key={job.id} className="hover:bg-muted/30">
-                  <TableCell className="font-medium">{job.title}</TableCell>
+                  <TableCell className="font-medium">{ job.id}{job.title}</TableCell>
                   <TableCell>{job.category}</TableCell>
                   <TableCell>{job.slots}</TableCell>
                   <TableCell>
