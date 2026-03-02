@@ -141,8 +141,6 @@ export default function MyCVs() {
     if (fileInput) fileInput.value = "";
   };
 
-
-
   const handleUpload = async () => {
     if (!selectedFile) {
       setError("Please select a file to upload");
@@ -209,7 +207,12 @@ export default function MyCVs() {
       setIsDeleteDialogOpen(false);
       setCvToDelete(null);
     } catch (err: any) {
-      setError(uploadError || err.response?.data?.message || err.message || "Failed to delete CV");
+      setError(
+        uploadError ||
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to delete CV",
+      );
     }
   };
   const handleDownload = async (cv: CV) => {
@@ -274,7 +277,7 @@ export default function MyCVs() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-accent/10 rounded-lg">
-                    <FileText className="w-6 h-6 text-accent" />
+                    <FileText className="w-6 h-6 text-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">{cv.title}</p>

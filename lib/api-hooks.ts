@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import api from "./api";
 
 // Mock delay function
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -8,49 +9,8 @@ export const useStudentDashboard = () => {
   return useQuery({
     queryKey: ["student-dashboard"],
     queryFn: async () => {
-      await delay(600);
-      return {
-        stats: {
-          total: 12,
-          approved: 3,
-          pending: 5,
-          rejected: 4,
-        },
-        applications: [
-          {
-            id: 1,
-            company: "Google",
-            position: "Software Engineer Intern",
-            location: "Mountain View, CA",
-            appliedDate: "2 days ago",
-            status: "pending",
-            salary: "$25/hour",
-          },
-          {
-            id: 2,
-            company: "Apple",
-            position: "Product Design Intern",
-            location: "Cupertino, CA",
-            appliedDate: "5 days ago",
-            status: "approved",
-            salary: "$28/hour",
-          },
-          {
-            id: 3,
-            company: "Meta",
-            position: "Data Science Intern",
-            location: "Menlo Park, CA",
-            appliedDate: "1 week ago",
-            status: "rejected",
-            salary: "$26/hour",
-          },
-        ],
-        deadlines: [
-          { company: "Microsoft", deadline: "In 3 days", status: "urgent" },
-          { company: "Tesla", deadline: "In 7 days", status: "upcoming" },
-          { company: "Netflix", deadline: "In 14 days", status: "safe" },
-        ],
-      };
+      const { data } = await api.get("/student/dashboard");
+      return data;
     },
   });
 };
@@ -60,53 +20,8 @@ export const useCompanyDashboard = () => {
   return useQuery({
     queryKey: ["company-dashboard"],
     queryFn: async () => {
-      await delay(600);
-      return {
-        stats: {
-          activeInternships: 8,
-          openPositions: 5,
-          totalApplications: 47,
-          pendingApprovals: 12,
-        },
-        pipeline: [
-          {
-            id: 1,
-            name: "Sarah Johnson",
-            position: "Frontend Developer",
-            applied: "3 days ago",
-            status: "reviewing",
-            rating: 4.5,
-            skills: ["React", "TypeScript", "Tailwind"],
-          },
-          {
-            id: 2,
-            name: "Michael Chen",
-            position: "Backend Developer",
-            applied: "2 days ago",
-            status: "reviewing",
-            rating: 4.8,
-            skills: ["Node.js", "PostgreSQL", "AWS"],
-          },
-          {
-            id: 3,
-            name: "Emma Davis",
-            position: "Product Manager",
-            applied: "1 day ago",
-            status: "shortlisted",
-            rating: 4.2,
-            skills: ["Strategy", "Analytics", "Leadership"],
-          },
-        ],
-        openPositions: [
-          {
-            title: "Frontend Developer",
-            applications: 24,
-            salary: "$20-25/hr",
-          },
-          { title: "Backend Developer", applications: 18, salary: "$23-28/hr" },
-          { title: "Product Manager", applications: 5, salary: "$22-27/hr" },
-        ],
-      };
+      const { data } = await api.get("/company/dashboard");
+      return data;
     },
   });
 };
@@ -116,90 +31,8 @@ export const useSupervisorDashboard = () => {
   return useQuery({
     queryKey: ["supervisor-dashboard"],
     queryFn: async () => {
-      await delay(600);
-      return {
-        stats: {
-          assignedStudents: 30,
-          activeInternships: 17,
-          interviewing: 8,
-          noInternship: 5,
-        },
-        students: [
-          {
-            id: 1,
-            name: "Sarah Johnson",
-            company: "Tech Corp",
-            internship: "Frontend Dev",
-            progress: 65,
-            status: "active",
-            startDate: "2 months ago",
-          },
-          {
-            id: 2,
-            name: "Michael Chen",
-            company: "CloudTech",
-            internship: "Backend Dev",
-            progress: 45,
-            status: "active",
-            startDate: "1 month ago",
-          },
-          {
-            id: 3,
-            name: "Emma Davis",
-            company: "DataCorp",
-            internship: "Data Science",
-            progress: 0,
-            status: "interviewing",
-            startDate: "Pending",
-          },
-          {
-            id: 4,
-            name: "James Wilson",
-            company: "Tech Corp",
-            internship: "Frontend Dev",
-            progress: 75,
-            status: "active",
-            startDate: "2 months ago",
-          },
-          {
-            id: 6,
-            name: "David Martinez",
-            company: "CloudTech",
-            internship: "DevOps",
-            progress: 30,
-            status: "active",
-            startDate: "3 weeks ago",
-          },
-        ],
-        departments: [
-          { dept: "Computer Science", total: 15, active: 10, completed: 3 },
-          { dept: "Business Admin", total: 10, active: 5, completed: 2 },
-          { dept: "Engineering", total: 5, active: 2, completed: 0 },
-        ],
-        pendingActions: [
-          {
-            id: 1,
-            action: "Review 2 new applications",
-            count: 2,
-            priority: "high",
-            href: "/supervisor/approvals",
-          },
-          {
-            id: 2,
-            action: "Review 3 monthly reports",
-            count: 8,
-            priority: "medium",
-            href: "/supervisor/monitoring",
-          },
-          {
-            id: 3,
-            action: "5 students without internship",
-            count: 5,
-            priority: "low",
-            href: "/supervisor/students",
-          },
-        ],
-      };
+      const { data } = await api.get("/supervisor/dashboard");
+      return data;
     },
   });
 };

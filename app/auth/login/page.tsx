@@ -6,7 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { Mail, Lock, ArrowRight, Eye, EyeOff, GraduationCap, Building2, User } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Building2,
+  User,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +24,10 @@ import { toast } from "sonner";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function fieldCls(invalid: boolean, extra = "") {
-  return [extra, invalid ? "border-destructive focus-visible:ring-destructive" : ""]
+  return [
+    extra,
+    invalid ? "border-destructive focus-visible:ring-destructive" : "",
+  ]
     .filter(Boolean)
     .join(" ");
 }
@@ -87,7 +99,11 @@ function LoginForm({
             className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showPassword ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -109,8 +125,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"student" | "company" | "supervisor">("student");
-  const [errors, setErrors] = useState<{ email?: boolean; password?: boolean }>({});
+  const [selectedRole, setSelectedRole] = useState<
+    "student" | "company" | "supervisor"
+  >("student");
+  const [errors, setErrors] = useState<{ email?: boolean; password?: boolean }>(
+    {},
+  );
 
   const handleEmailChange = (val: string) => {
     setEmail(val);
@@ -143,20 +163,45 @@ export default function LoginPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      const msg = !email || !password
-        ? "Please fill in all required fields."
-        : "Please enter a valid email address.";
+      const msg =
+        !email || !password
+          ? "Please fill in all required fields."
+          : "Please enter a valid email address.";
       toast.error("Invalid Input", { description: msg });
       return;
     }
 
     try {
-      const user = await login(selectedRole, { email, password });
+      const responseData = await login(selectedRole, { email, password });
+
+      // Handle JWT token if present
+      if (responseData.token) {
+        localStorage.setItem("token", responseData.token);
+      }
+
+      const user = responseData.user || responseData;
 
       if (selectedRole === "student") {
-        authLogin({ id: user.id, name: user.name, email: user.email, type: selectedRole });
+        authLogin({
+          id: user.id || user.studentId,
+          name: user.name,
+          email: user.email,
+          type: selectedRole,
+        });
       } else if (selectedRole === "company") {
-        authLogin({ id: user.id, name: user.hrName, email: user.hrEmail, type: selectedRole });
+        authLogin({
+          id: user.id,
+          name: user.name || user.hrName,
+          email: user.email || user.hrEmail,
+          type: selectedRole,
+        });
+      } else if (selectedRole === "supervisor") {
+        authLogin({
+          id: user.id || user.supervisorId,
+          name: user.name,
+          email: user.email,
+          type: selectedRole,
+        });
       }
 
       const redirectMap = {
@@ -166,12 +211,17 @@ export default function LoginPage() {
       };
 
       toast.success("Login Successful!", {
-        description: "Welcome back, " + user.name + "! Redirecting to your dashboard...",
+        description:
+          "Welcome back, " +
+          (user.name || user.hrName || "User") +
+          "! Redirecting to your dashboard...",
       });
 
       router.push(redirectMap[selectedRole]);
     } catch (error) {
-      toast.error("Login Failed", { description: "Invalid email or password. Please try again." });
+      toast.error("Login Failed", {
+        description: "Invalid email or password. Please try again.",
+      });
       console.error(error);
     }
   };
@@ -214,22 +264,37 @@ export default function LoginPage() {
                 <Building2 className="w-4 h-4" />
                 <span>Company</span>
               </TabsTrigger>
-              <TabsTrigger value="supervisor" className="flex items-center gap-2">
+              <TabsTrigger
+                value="supervisor"
+                className="flex items-center gap-2"
+              >
                 <User className="w-4 h-4" />
                 <span>Supervisor</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="student">
-              <LoginForm role="student" emailPlaceholder="john.student@university.edu" {...formProps} />
+              <LoginForm
+                role="student"
+                emailPlaceholder="john.student@university.edu"
+                {...formProps}
+              />
             </TabsContent>
 
             <TabsContent value="company">
-              <LoginForm role="company" emailPlaceholder="hr@techcorp.com" {...formProps} />
+              <LoginForm
+                role="company"
+                emailPlaceholder="hr@techcorp.com"
+                {...formProps}
+              />
             </TabsContent>
 
             <TabsContent value="supervisor">
-              <LoginForm role="supervisor" emailPlaceholder="supervisor@ucsy.com" {...formProps} />
+              <LoginForm
+                role="supervisor"
+                emailPlaceholder="supervisor@ucsy.com"
+                {...formProps}
+              />
             </TabsContent>
           </Tabs>
 
@@ -237,7 +302,10 @@ export default function LoginPage() {
           <div className="text-center pt-4">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/auth/register" className="text-primary hover:underline font-semibold">
+              <Link
+                href="/auth/register"
+                className="text-primary hover:underline font-semibold"
+              >
                 Register here
               </Link>
             </p>

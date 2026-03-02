@@ -100,3 +100,60 @@ export interface ApplicationWithDetails extends Application {
   };
   cv: CV;
 }
+
+export interface Review {
+  id: number;
+  reviewer: string;
+  role: 'Supervisor' | 'HR';
+  feedback: string;
+  rating: number;
+  date: string;
+}
+
+export interface StudentDashboardStats {
+  openInternships: number;
+  totalApplications: number;
+  pendingApplications: number;
+  weeklyReports: number;
+}
+
+export interface MonthlyApplication {
+  month: string;
+  applications: number;
+}
+
+export interface StudentDashboardResponse {
+  stats: StudentDashboardStats;
+  applications: ApplicationWithDetails[];
+  reviews: Review[];
+  monthlyApplications: MonthlyApplication[];
+}
+
+
+export interface PaginatedResponse<T> {
+  content: T[];
+  pageNo: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
+
+export interface SuccessResponse<T> {
+  data: T;
+  message: string;
+}
+
+export interface InternshipReportResponse {
+  id: number;
+  weekNumber: number;
+  startDate: string;
+  endDate: string;
+  tasksCompleted: string;
+  skillsLearned: string;
+  challengesFaced: string;
+  supervisorFeedback?: string;
+  supervisorRating?: number;
+  status: string;
+}
+

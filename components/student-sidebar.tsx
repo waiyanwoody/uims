@@ -20,13 +20,14 @@ import ThemeToggle from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useStudentApplications } from "@/hooks/StudentHook/useStudentApplications";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/student/dashboard" },
   { icon: User, label: "My Profile", href: "/student/profile" },
   { icon: ClipboardList, label: "Browse Internships", href: "/student/browse" },
   { icon: FileText, label: "My Applications", href: "/student/applications" },
-  { icon: ClipboardList, label: "My Montly Reports", href: "/student/monitoring" },
+  { icon: ClipboardList, label: "My Monthly Reports", href: "/student/monitoring" },
   { icon: Briefcase, label: "My CVs", href: "/student/cvs" },
   { icon: Settings, label: "Settings", href: "/student/settings" },
 ];
@@ -36,6 +37,17 @@ export function StudentSidebar() {
   const pathname = usePathname();
   const { user,logout } = useAuth();
   const router = useRouter();
+  
+  const { applications } = useStudentApplications(user?.id, 1, 100);
+  // Safely check if applications exist and find an approved one
+  const hasInternship = applications && applications.length > 0 && applications.some((app) => app.status === "APPROVED");
+
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.label === "My Monthly Reports") {
+      return hasInternship;
+    }
+    return true;
+  });
 
   useEffect(() => {
     if (!user) {
@@ -82,7 +94,7 @@ export function StudentSidebar() {
 
         {/* Navigation Menu */}
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (

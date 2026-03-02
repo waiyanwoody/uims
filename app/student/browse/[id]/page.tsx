@@ -58,6 +58,11 @@ export default function InternshipPostDetails() {
   const { application: fullApplicationDetails, loading: applicationLoading } =
     useApplicationDetails(existingApplication?.id);
 
+  // Check if student has any active internship (APPROVED status)
+  const hasActiveInternship = applications?.some(
+    (app) => app.status === "APPROVED" || app.status === "approved",
+  );
+
   useEffect(() => {
     const fetchInternship = async () => {
       try {
@@ -209,6 +214,13 @@ export default function InternshipPostDetails() {
                     </span>
                   </div>
                 </>
+              ) : hasActiveInternship ? (
+                <Button
+                  disabled
+                  className="w-full md:w-auto bg-muted text-muted-foreground px-8 py-6 text-base font-semibold shadow-none cursor-not-allowed"
+                >
+                  Active Internship Exists
+                </Button>
               ) : (
                 <Button
                   onClick={() => setIsApplyModalOpen(true)}
