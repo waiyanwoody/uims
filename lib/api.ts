@@ -12,6 +12,22 @@ const api = axios.create({
   withCredentials: true, // important: send cookies automatically
 });
 
+api.interceptors.request.use(
+  (config) => {
+    // Add Authorization header if token exists
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
 /**
  * You can still keep interceptors for logging or error handling
  */

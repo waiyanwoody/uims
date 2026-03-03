@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSupervisorDashboard } from "@/lib/api-hooks";
+import { useAuth } from "@/contexts/AuthContext";
 
 function CountUp({ end }: { end: number }) {
   const [count, setCount] = useState(0);
@@ -46,6 +47,7 @@ function CountUp({ end }: { end: number }) {
 }
 
 export default function SupervisorDashboard() {
+  const { user } = useAuth()
   const { data: dashboardData, isLoading } = useSupervisorDashboard();
 
   const stats = dashboardData?.stats
@@ -103,32 +105,21 @@ export default function SupervisorDashboard() {
     }
   };
 
-  const trendingPosts = [
-    {
-      id: 1,
-      title: "Frontend Developer",
-      company: "Tech Corp",
-      category: "Engineering",
-      slots: 5,
-      deadline: "15 Mar",
+  const departments = dashboardData?.departments || [];
+
+  // Calculate top companies from active students
+  const companyStats = (dashboardData?.students || []).reduce(
+    (acc: Record<string, number>, student: any) => {
+      acc[student.company] = (acc[student.company] || 0) + 1;
+      return acc;
     },
-    {
-      id: 2,
-      title: "Data Science",
-      company: "Data Solutions Inc.",
-      category: "Data Science",
-      slots: 3,
-      deadline: "28 Feb",
-    },
-    {
-      id: 4,
-      title: "Backend Developer",
-      company: "CloudTech",
-      category: "Engineering",
-      slots: 4,
-      deadline: "10 Mar",
-    },
-  ];
+    {}
+  );
+
+  const topCompanies = Object.entries(companyStats)
+    .map(([name, count]) => ({ name, students: count }))
+    .sort((a, b) => b.students - a.students)
+    .slice(0, 5);
 
   return (
     <div className="p-6 md:p-8 space-y-8">
@@ -136,7 +127,7 @@ export default function SupervisorDashboard() {
         {/* Header */}
         <div className="space-y-4 animate-fadeIn">
           <div>
-            <h1 className="text-4xl font-bold text-foreground">
+            <hWelcome back, {user?.name || 'Supervisor'}!l font-bold text-foreground">
               Supervisor Dashboard
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -282,35 +273,30 @@ export default function SupervisorDashboard() {
               </div>
             </Card>
 
-            {/* Trending Internship Posts */}
+            {/* Departments Overview */}
             <Card className="p-6 border-border bg-card animate-slideInLeft">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-primary" />
-                  Trending Internship Posts
+                  <Building2 className="w-5 h-5 text-primary" />
+                  Department Performance
                 </h3>
-                <Link href="/supervisor/internship-posts">
-                  <Button variant="ghost" size="sm" className="text-xs h-8">
-                    View All
-                  </Button>
-                </Link>
               </div>
               <div className="space-y-4">
-                {trendingPosts.map((post, idx) => (
+                {departments.map((dept: any, idx: number) => (
                   <div
-                    key={post.id}
+                    key={idx}
                     className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/10 hover:bg-secondary/20 transition-all group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                        <Building2 className="w-5 h-5" />
+                        <BookOpen className="w-5 h-5" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-foreground leading-tight">
-                          {post.title}
+                          {dept.dept}
                         </p>
                         <p className="text-[10px] text-muted-foreground font-medium">
-                          {post.company} • {post.category}
+                          {dept.active} Active Interns
                         </p>
                       </div>
                     </div>
@@ -318,11 +304,11 @@ export default function SupervisorDashboard() {
                       <div className="flex items-center gap-1 justify-end">
                         <Users className="w-3 h-3 text-primary" />
                         <span className="text-xs font-bold text-foreground">
-                          {post.slots} slots
+                          {dept.total} Total
                         </span>
                       </div>
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
-                        Ends: {post.deadline}
+                        {dept.completed} Completed
                       </p>
                     </div>
                   </div>
@@ -339,54 +325,32 @@ export default function SupervisorDashboard() {
                 <Building2 className="w-5 h-5 text-primary" />
                 Active Partners
               </h3>
-              <div className="space-y-3">
-                {[
-                  {
-                    name: "Tech Corp",
-                    students: 8,
-                    rating: "4.8/5",
-                  },
-                  {
-                    name: "CloudTech",
-                    students: 5,
-                    rating: "4.5/5",
-                  },
-                  {
-                    name: "Data Solutions Inc.",
-                    students: 3,
-                    rating: "4.9/5",
-                  },
-                ].map((company, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center p-3 bg-white/40 dark:bg-white/5 rounded-lg border border-border/50 animate-slideInRight"
-                    style={{ animationDelay: `${idx * 50}ms` }}
-                  >
-                    <div>
-                      <p className="text-sm font-bold text-foreground">
-                        {company.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase">
-                        {company.students} Assigned Students
-                      </p>
+            {topCompanies.length > 0 && (
+              <Card className="p-6 border-border bg-card animate-slideInRight">
+                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-primary" />
+                  Top Partners
+                </h3>
+                <div className="space-y-3">
+                  {topCompanies.map((company, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center p-3 bg-white/40 dark:bg-white/5 rounded-lg border border-border/50 animate-slideInRight"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-foreground">
+                          {company.name}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground font-medium uppercase">
+                          {company.students} Active Students
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-black text-primary">
-                        {company.rating}
-                      </p>
-                      <p className="text-[9px] text-muted-foreground font-bold italic">
-                        Highly Rated
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Pending Actions */}
-            <Card className="p-6 border-border animate-slideInRight">
-              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" />
+                  ))}
+                </div>
+              </Card>
+            )}ock className="w-5 h-5 text-primary" />
                 Pending Actions
               </h3>
               <div className="space-y-2">
