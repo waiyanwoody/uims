@@ -19,7 +19,6 @@ import {
   Building2,
 } from "lucide-react";
 import Link from "next/link";
-import { useSupervisorDashboard } from "@/lib/api-hooks";
 import { useAuth } from "@/contexts/AuthContext";
 
 function CountUp({ end }: { end: number }) {
@@ -47,8 +46,63 @@ function CountUp({ end }: { end: number }) {
 }
 
 export default function SupervisorDashboard() {
-  const { user } = useAuth()
-  const { data: dashboardData, isLoading } = useSupervisorDashboard();
+  const { user } = useAuth();
+
+  // Hardcoded data
+  const isLoading = false;
+  const dashboardData = {
+    stats: {
+      assignedStudents: 12,
+      activeInternships: 8,
+      interviewing: 3,
+      noInternship: 1,
+    },
+    students: [
+      {
+        id: "1",
+        name: "John Doe",
+        startDate: "2024-01-15",
+        internship: "Software Engineer",
+        company: "Tech Corp",
+        progress: 75,
+        status: "active",
+      },
+      {
+        id: "2",
+        name: "Jane Smith",
+        startDate: "2024-02-01",
+        internship: "Data Analyst",
+        company: "Data Inc",
+        progress: 40,
+        status: "active",
+      },
+      {
+        id: "3",
+        name: "Alice Johnson",
+        startDate: "2024-01-20",
+        internship: "Product Manager",
+        company: "Product Co",
+        progress: 90,
+        status: "completing",
+      },
+    ],
+    departments: [
+      { dept: "Computer Science", active: 5, total: 10, completed: 3 },
+      { dept: "Information Technology", active: 3, total: 8, completed: 2 },
+    ],
+    pendingActions: [
+      {
+        action: "Approve Internship Proposal",
+        priority: "high",
+        href: "/supervisor/approvals",
+      },
+      {
+        action: "Review Weekly Report",
+        priority: "medium",
+        href: "/supervisor/monitoring",
+      },
+    ],
+  };
 
   const stats = dashboardData?.stats
     ? [
@@ -113,7 +167,7 @@ export default function SupervisorDashboard() {
       acc[student.company] = (acc[student.company] || 0) + 1;
       return acc;
     },
-    {}
+    {},
   );
 
   const topCompanies = Object.entries(companyStats)
@@ -127,8 +181,8 @@ export default function SupervisorDashboard() {
         {/* Header */}
         <div className="space-y-4 animate-fadeIn">
           <div>
-            <hWelcome back, {user?.name || 'Supervisor'}!l font-bold text-foreground">
-              Supervisor Dashboard
+            <h1 className="text-3xl font-bold text-foreground">
+              Welcome back, {user?.name || "Supervisor"}!
             </h1>
             <p className="text-muted-foreground mt-1">
               Monitor student internships and progress
@@ -320,11 +374,6 @@ export default function SupervisorDashboard() {
           {/* Right Sidebar */}
           <div className="space-y-6">
             {/* Partner Companies Highlights */}
-            <Card className="p-6 border-border bg-card animate-slideInRight">
-              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-primary" />
-                Active Partners
-              </h3>
             {topCompanies.length > 0 && (
               <Card className="p-6 border-border bg-card animate-slideInRight">
                 <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
@@ -350,7 +399,11 @@ export default function SupervisorDashboard() {
                   ))}
                 </div>
               </Card>
-            )}ock className="w-5 h-5 text-primary" />
+            )}
+
+            <Card className="p-6 border-border bg-card animate-slideInRight">
+              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary" />
                 Pending Actions
               </h3>
               <div className="space-y-2">

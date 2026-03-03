@@ -16,7 +16,9 @@ import {
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import ThemeToggle from "@/components/theme-toggle";
 
 const menuItems = [
@@ -36,6 +38,17 @@ const menuItems = [
 export function SupervisorSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    toast.message("Logged out successfully", {
+      description: "You have been logged out."
+    });
+    router.push("/auth/login");
+    setIsOpen(false);
+  }
 
   return (
     <>
@@ -91,6 +104,7 @@ export function SupervisorSidebar() {
           <Button
             variant="outline"
             className="w-full justify-start gap-3 border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent bg-transparent"
+            onClick={handleLogout}
           >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>

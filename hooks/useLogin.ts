@@ -22,8 +22,8 @@ export const useLogin = () => {
         type === "student"
           ? "students"
           : type === "company"
-          ? "companies"
-          : "supervisor";
+            ? "companies"
+            : "supervisors";
       const res = await api.post(`/${endpoint}/login`, data);
 
       return res.data.data;
