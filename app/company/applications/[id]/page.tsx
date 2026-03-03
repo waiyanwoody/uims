@@ -24,8 +24,6 @@ export default function ApplicationViewDetails() {
   const { reviewApplication, isSubmitting } = useReviewApplication();
 
   const [mode, setMode] = useState<null | "ACCEPT" | "REJECT">(null);
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
   const [message, setMessage] = useState("");
 
   if (loading) {
@@ -45,12 +43,12 @@ export default function ApplicationViewDetails() {
   }
 
   const accept = async () => {
-    const result = await reviewApplication(id, {
-      status: "INTERVIEW",
-      interviewDate: `${date}T${time}`,
-      message,
-    });
-    if (result.success) router.back();
+    // const result = await reviewApplication(id, {
+    //   status: "INTERVIEW",
+    //   interviewDate: `${date}T${time}`,
+    //   message,
+    // });
+    // if (result.success) router.back();
   };
 
   const reject = async () => {
@@ -118,7 +116,7 @@ export default function ApplicationViewDetails() {
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
           >
             <CheckCircle />
-            Accept to Interview
+            Accept 
           </Button>
 
           <Button
@@ -132,77 +130,6 @@ export default function ApplicationViewDetails() {
         </div>
       </Card>
 
-      {/* ACCEPT FORM */}
-      {mode === "ACCEPT" && (
-        <Card className="p-6 space-y-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200">
-          <h3 className="text-lg font-semibold text-blue-600">Interview Setup</h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <label className="font-medium mb-1">Interview Date</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-2 text-gray-400" />
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="font-medium mb-1">Interview Time</label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-2 text-gray-400" />
-                <Input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="font-medium mb-1">Message to Student</label>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="You are invited to interview..."
-            />
-          </div>
-
-          <Button
-            onClick={accept}
-            disabled={isSubmitting || !date || !time}
-            className="flex items-center gap-2"
-          >
-            {isSubmitting && <Loader2 className="animate-spin h-4 w-4" />}
-            Confirm Accept
-          </Button>
-        </Card>
-      )}
-
-      {/* REJECT CONFIRM */}
-      {mode === "REJECT" && (
-        <Card className="p-6 space-y-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200">
-          <h3 className="text-lg font-semibold text-red-600">Reject Application?</h3>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to reject this application? This action cannot be undone.
-          </p>
-          <Button
-            variant="destructive"
-            onClick={reject}
-            disabled={isSubmitting}
-            className="flex items-center gap-2"
-          >
-            {isSubmitting && <Loader2 className="animate-spin h-4 w-4" />}
-            Reject Now
-          </Button>
-        </Card>
-      )}
     </div>
   );
 }
