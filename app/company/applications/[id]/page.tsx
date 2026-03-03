@@ -92,10 +92,10 @@ export default function ApplicationViewDetails() {
           <p>
             <span className="font-semibold">Internship:</span> {application.internship.title}
           </p>
-          <p className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="font-semibold">Status:</span>
             <Badge className={statusColor[application.status]}>{application.status}</Badge>
-          </p>
+          </div>
         </div>
 
         <a
