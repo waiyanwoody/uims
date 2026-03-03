@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,79 +14,45 @@ import {
   Calendar,
   Layers,
   Mail,
+  Loader2,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useInternshipDetails } from "@/hooks/StudentHook/useInternshipDetails";
 
 export default function InternshipPostDetails() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params.id);
 
-  // Mock internships data matching the previous page
-  const internships = [
-    {
-      id: 1,
-      company_id: 1,
-      title: "Frontend Developer Internship",
-      category: "Engineering",
-      description:
-        "We are seeking a passionate Frontend Developer intern to join our dynamic team. You will work on building responsive web applications. This is an excellent opportunity to gain hands-on experience while working on real-world projects.",
-      requirements: ["React", "TypeScript", "Tailwind CSS"],
-      status: "OPEN" as const,
-      slots: 5,
-      deadline: "2024-03-15",
-      created_at: "2024-01-01",
-      company: {
-        id: 1,
-        name: "Tech Corp",
-        location: "San Francisco, CA",
-        industry: "Technology",
-        contact_email: "hr@techcorp.com",
-      },
-    },
-    {
-      id: 2,
-      company_id: 2,
-      title: "Data Science Internship",
-      category: "Data Science",
-      description:
-        "Join our data science team and work on cutting-edge machine learning projects. You will analyze large datasets, build predictive models, and contribute to data-driven decision making.",
-      requirements: ["Python", "Machine Learning", "SQL"],
-      status: "OPEN" as const,
-      slots: 3,
-      deadline: "2024-02-28",
-      created_at: "2024-01-01",
-      company: {
-        id: 2,
-        name: "Data Solutions Inc.",
-        location: "New York, NY",
-        industry: "Data Analytics",
-        contact_email: "careers@datasolutions.com",
-      },
-    },
-    {
-      id: 3,
-      company_id: 3,
-      title: "UX Design Internship",
-      category: "Design",
-      description:
-        "Create beautiful and functional user experiences for our products. Work with designers and developers to craft intuitive interfaces. Learn industry-standard tools like Figma and participate in user research sessions to understand customer needs.",
-      requirements: ["Figma", "UI/UX", "Prototyping"],
-      status: "CLOSED" as const,
-      slots: 2,
-      deadline: "2024-02-20",
-      created_at: "2024-01-01",
-      company: {
-        id: 3,
-        name: "Design Studio",
-        location: "Los Angeles, CA",
-        industry: "Design",
-        contact_email: "jobs@designstudio.com",
-      },
-    },
-  ];
+  const { internship, loading, error } = useInternshipDetails(id);
 
-  const internship = internships.find((i) => i.id === id) || internships[0];
+  const parseRequirements = (requirements: string) => {
+    try {
+      return JSON.parse(requirements);
+    } catch {
+      return requirements.split(",").map((r) => r.trim());
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading details...</p>
+      </div>
+    );
+  }
+
+  if (error || !internship) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <p className="text-red-500 font-medium">
+          {error || "Internship not found"}
+        </p>
+        <Button onClick={() => router.back()}>Go Back</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
@@ -101,19 +66,57 @@ export default function InternshipPostDetails() {
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">{internship.title}</h1>
-          <p className="text-muted-foreground">{internship.company.name}</p>
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold">{internship.title}</h1>
+              <p className="text-muted-foreground">{internship.company.name}</p>
+            </div>
+            {(internship.company.contact_email ||
+              internship.company.email ||
+              internship.company.hrEmail) && (
+              <div className="flex items-center gap-2 text-sm text-primary bg-primary/5 px-3 py-1.5 rounded-full border border-primary/20">
+                <Mail className="w-4 h-4" />
+                <a
+                  href={`mailto:${
+                    internship.company.contact_email ||
+                    internship.company.email ||
+                    internship.company.hrEmail
+                  }`}
+                  className="font-medium hover:underline"
+                >
+                  {internship.company.contact_email ||
+                    internship.company.email ||
+                    internship.company.hrEmail}
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="space-y-6">
         {/* Main Role Overview Card */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Role Overview</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6 whitespace-pre-wrap leading-relaxed">
-            {internship.description}
-          </p>
+        <Card className="p-6 relative">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-xl font-semibold">Role Overview</h2>
+                <Badge
+                  className={
+                    internship.status === "OPEN"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-rose-100 text-rose-800"
+                  }
+                >
+                  {internship.status}
+                </Badge>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 mb-6 whitespace-pre-wrap leading-relaxed">
+                {internship.description}
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
@@ -175,7 +178,9 @@ export default function InternshipPostDetails() {
                   <p className="text-xs text-muted-foreground uppercase font-semibold">
                     Deadline
                   </p>
-                  <p className="font-medium">{internship.deadline}</p>
+                  <p className="font-medium">
+                    {new Date(internship.deadline).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 
@@ -187,7 +192,9 @@ export default function InternshipPostDetails() {
                   <p className="text-xs text-muted-foreground uppercase font-semibold">
                     Posted On
                   </p>
-                  <p className="font-medium">{internship.created_at}</p>
+                  <p className="font-medium">
+                    {new Date(internship.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -200,44 +207,13 @@ export default function InternshipPostDetails() {
             Key Requirements
           </h3>
           <div className="flex flex-wrap gap-2">
-            {internship.requirements.map((req) => (
-              <Badge key={req} variant="secondary" className="px-3 py-1">
-                {req}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-
-        {/* Company Card */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 text-primary">
-            About Company
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold">{internship.company.name}</h3>
-                <p className="text-muted-foreground">
-                  {internship.company.industry || "Software & Technology"}
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className="border-primary/20 bg-primary/5 text-primary"
-              >
-                Verified Company
-              </Badge>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-              A leading company in the industry, committed to providing
-              excellent training and mentorship to aspiring professionals. We
-              foster a culture of innovation, collaboration, and continuous
-              learning.
-            </p>
-            <div className="flex items-center gap-2 text-sm text-primary hover:underline cursor-pointer">
-              <Mail className="w-4 h-4" />
-              <span>{internship.company.contact_email}</span>
-            </div>
+            {parseRequirements(internship.requirements || "[]").map(
+              (req: string, idx: number) => (
+                <Badge key={idx} variant="secondary" className="px-3 py-1">
+                  {req}
+                </Badge>
+              ),
+            )}
           </div>
         </Card>
       </div>

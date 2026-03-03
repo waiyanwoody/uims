@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useInternship } from "@/hooks/StudentHook/useInternship";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCategories } from "@/hooks/SupervisorHook/useCategories";
 
 export default function BrowseInternships() {
   const { user } = useAuth();
@@ -27,32 +28,38 @@ export default function BrowseInternships() {
   const pageSize = isMobile ? 5 : 9;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [expandedDescriptions, setExpandedDescriptions] = useState<Set<number>>(
     new Set(),
   );
 
-  const {
-    internships,
-    loading: isLoading,
-    pagination,
-  } = useInternship(currentPage, pageSize, "OPEN");
+  // Fetch all OPEN internships (page 1, size 1000)
+  const { internships: allInternships, loading: isLoading } = useInternship(
+    1,
+    1000,
+    "OPEN",
+  );
 
-  // Extract unique categories from all fetched internships
-  const categories = [
-    "All",
-    ...Array.from(new Set(internships.map((i) => i.category))).sort(),
-  ];
+  const { categories: backendCategories } = useCategories();
 
-  const filteredInternships = internships.filter((internship) => {
+  // Client-side filtering
+  const filteredInternships = allInternships.filter((internship) => {
     const matchesSearch =
       internship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       internship.company.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
-      selectedCategory === "all" ||
-      internship.category.toLowerCase() === selectedCategory.toLowerCase();
+      selectedCategory === "All" || internship.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Client-side pagination
+  const totalPages = Math.ceil(filteredInternships.length / pageSize);
+  const currentInternships = filteredInternships.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  const categories = ["All", ...(backendCategories || []).sort()];
 
   const parseRequirements = (requirements: string): string[] => {
     try {
@@ -84,8 +91,6 @@ export default function BrowseInternships() {
     }
     setExpandedDescriptions(newExpanded);
   };
-
-  const totalPages = pagination?.totalPages || 1;
 
   return (
     <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
@@ -119,18 +124,14 @@ export default function BrowseInternships() {
           {categories.map((category) => (
             <Button
               key={category}
-              variant={
-                selectedCategory === category.toLowerCase()
-                  ? "default"
-                  : "outline"
-              }
+              variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => {
-                setSelectedCategory(category.toLowerCase());
+                setSelectedCategory(category);
                 setCurrentPage(1);
               }}
               className={
-                selectedCategory === category.toLowerCase()
+                selectedCategory === category
                   ? "bg-primary hover:bg-primary/90"
                   : "border-border hover:bg-secondary"
               }
@@ -144,8 +145,8 @@ export default function BrowseInternships() {
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
         Showing {(currentPage - 1) * pageSize + 1} -{" "}
-        {Math.min(currentPage * pageSize, pagination?.totalElements || 0)} of{" "}
-        {pagination?.totalElements || 0} internships
+        {Math.min(currentPage * pageSize, filteredInternships.length)} of{" "}
+        {filteredInternships.length} internships
       </div>
 
       {/* Loading state */}
@@ -160,7 +161,7 @@ export default function BrowseInternships() {
         <>
           {/* Internship Cards Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-            {filteredInternships.map((internship) => {
+            {currentInternships.map((internship) => {
               const isExpanded = expandedDescriptions.has(internship.id);
               const shouldShowSeeMore = internship.description.length > 150;
 
@@ -320,7 +321,7 @@ export default function BrowseInternships() {
             </div>
           )}
 
-          {filteredInternships.length === 0 && (
+          {!isLoading && filteredInternships.length === 0 && (
             <Card className="p-12 border border-border text-center">
               <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
               <h3 className="text-lg font-semibold text-foreground mb-2">

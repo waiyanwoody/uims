@@ -14,6 +14,8 @@ export const useInternship = (
   page: number = 1,
   size: number = 10,
   status?: string,
+  search?: string,
+  category?: string,
 ) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -33,6 +35,8 @@ export const useInternship = (
           page,
           size,
           ...(status && { status }),
+          ...(search && { search }),
+          ...(category && { category }),
         },
       });
 
@@ -53,7 +57,7 @@ export const useInternship = (
 
   useEffect(() => {
     fetchInternships();
-  }, [page, size, status]);
+  }, [page, size, status, search, category]);
 
   return {
     internships,

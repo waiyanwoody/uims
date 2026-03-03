@@ -34,9 +34,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ManageInternships() {
-  const companyId = 11;
+  const { user } = useAuth();
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -56,14 +57,14 @@ export default function ManageInternships() {
     isLoading,
     refetch,
   } = useCompanyInternships(
-    companyId,
+    user?.id,
     page,
     size,
     search,
     filterStatus,
     filterCategory,
     sortField,
-    sortOrder
+    sortOrder,
   );
 
   const { deleteInternship, isDeleting } = useDeleteInternship();

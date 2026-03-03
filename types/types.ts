@@ -21,6 +21,10 @@ export interface Company {
   location: string;
   status: string;
   createdAt: string;
+  contact_email?: string;
+  email?: string;
+  hrEmail?: string;
+  description?: string;
 }
 
 export interface Internship {
@@ -104,7 +108,7 @@ export interface ApplicationWithDetails extends Application {
 export interface Review {
   id: number;
   reviewer: string;
-  role: 'Supervisor' | 'HR';
+  role: "Supervisor" | "HR";
   feedback: string;
   rating: number;
   date: string;
@@ -128,7 +132,6 @@ export interface StudentDashboardResponse {
   reviews: Review[];
   monthlyApplications: MonthlyApplication[];
 }
-
 
 export interface PaginatedResponse<T> {
   content: T[];
@@ -156,4 +159,3 @@ export interface InternshipReportResponse {
   supervisorRating?: number;
   status: string;
 }
-

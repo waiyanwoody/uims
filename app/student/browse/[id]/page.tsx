@@ -151,9 +151,32 @@ export default function InternshipPostDetails() {
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">{internship.title}</h1>
-          <p className="text-muted-foreground">{internship.company.name}</p>
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold">{internship.title}</h1>
+              <p className="text-muted-foreground">{internship.company.name}</p>
+            </div>
+            {(internship.company.contact_email ||
+              internship.company.email ||
+              internship.company.hrEmail) && (
+              <div className="flex items-center gap-2 text-sm text-primary bg-primary/5 px-3 py-1.5 rounded-full border border-primary/20">
+                <Mail className="w-4 h-4" />
+                <a
+                  href={`mailto:${
+                    internship.company.contact_email ||
+                    internship.company.email ||
+                    internship.company.hrEmail
+                  }`}
+                  className="font-medium hover:underline"
+                >
+                  {internship.company.contact_email ||
+                    internship.company.email ||
+                    internship.company.hrEmail}
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -329,42 +352,6 @@ export default function InternshipPostDetails() {
                 {req}
               </Badge>
             ))}
-          </div>
-        </Card>
-
-        {/* Company Card */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4 text-primary">
-            About Company
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold">{internship.company.name}</h3>
-                <p className="text-muted-foreground">
-                  {internship.company.industry || "Software & Technology"}
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className="border-primary/20 bg-primary/5 text-primary"
-              >
-                Verified Company
-              </Badge>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-              A leading company in the industry, committed to providing
-              excellent training and mentorship to aspiring professionals. We
-              foster a culture of innovation, collaboration, and continuous
-              learning.
-            </p>
-            <div className="flex items-center gap-2 text-sm text-primary hover:underline cursor-pointer">
-              <Mail className="w-4 h-4" />
-              <span>
-                contact@
-                {internship.company.name.toLowerCase().replace(/ /g, "")}.com
-              </span>
-            </div>
           </div>
         </Card>
 
