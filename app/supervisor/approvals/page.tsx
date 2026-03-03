@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useCompanyApprovals } from "@/lib/api-hooks";
+import {
+  useSupervisorApprovals,
+  PendingCompanyHrResponse,
+} from "@/hooks/SupervisorHook/useSupervisorApprovals";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -36,52 +39,62 @@ import {
 } from "@/components/ui/dialog";
 
 export default function CompanyApprovals() {
-  const { data: initialCompanies, isLoading } = useCompanyApprovals();
-  const [companies, setCompanies] = useState<any[]>([]);
+  const {
+    approvals,
+    pagination,
+    loading,
+    fetchPendingApprovals,
+    approveCompanyHr,
+    rejectCompanyHr,
+  } = useSupervisorApprovals();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [selectedApproval, setSelectedApproval] =
+    useState<PendingCompanyHrResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  // Initialize companies state once data is loaded
-  React.useEffect(() => {
-    if (initialCompanies) {
-      setCompanies(initialCompanies);
-    }
-  }, [initialCompanies]);
-
   const itemsPerPage = isMobile ? 5 : 10;
 
-  const filteredCompanies = useMemo(() => {
-    return companies.filter(
-      (company: any) =>
-        company.status === "PENDING" &&
-        (company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.industry.toLowerCase().includes(searchQuery.toLowerCase())),
-    );
-  }, [companies, searchQuery]);
+  useEffect(() => {
+    // Send 0-based page index to the backend (Spring PageRequest defaults are usually 0-based)
+    fetchPendingApprovals(currentPage - 1, itemsPerPage);
+  }, [fetchPendingApprovals, currentPage, itemsPerPage]);
 
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
-
-  const currentItems = useMemo(() => {
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return filteredCompanies.slice(indexOfFirstItem, indexOfLastItem);
-  }, [filteredCompanies, currentPage, itemsPerPage]);
-
-  const handleStatusChange = (id: number, newStatus: "ACTIVE" | "PENDING") => {
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
-    );
+  const handleApprove = async (id: number) => {
+    await approveCompanyHr(id);
+    fetchPendingApprovals(currentPage - 1, itemsPerPage); // Refresh list
   };
 
-  const handleCardClick = (company: any) => {
-    setSelectedCompany(company);
+  const handleReject = async (id: number) => {
+    await rejectCompanyHr(id);
+    fetchPendingApprovals(currentPage - 1, itemsPerPage); // Refresh list
+  };
+
+  const handleCardClick = (approval: PendingCompanyHrResponse) => {
+    setSelectedApproval(approval);
     setIsModalOpen(true);
   };
 
-  if (isLoading) {
+  const totalPages = pagination?.totalPages || 1;
+
+  // Since backend handles filtering by status=PENDING, we just filter by search query locally if needed,
+  // or ideally backend handles search. The provided backend code doesn't show search params.
+  // So we filter the current page results locally for now, or just show them all.
+  // Given pagination is server-side, client-side filtering on just one page is weird.
+  // I'll filter the current `approvals` array by search query.
+  const filteredApprovals = approvals.filter(
+    (approval) =>
+      (approval.companyName || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (approval.industry || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (approval.hrName || "").toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  if (loading && approvals.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -117,35 +130,35 @@ export default function CompanyApprovals() {
           <Clock className="w-4 h-4 text-amber-500" />
           <h2 className="text-base font-bold">Pending Requests</h2>
           <Badge variant="outline" className="ml-2 font-bold h-5 text-[10px]">
-            {filteredCompanies.filter((c) => c.status === "PENDING").length}
+            {pagination?.totalElements || 0}
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {currentItems.length > 0 ? (
-            currentItems.map((company) => (
+          {filteredApprovals.length > 0 ? (
+            filteredApprovals.map((approval) => (
               <Card
-                key={company.id}
-                onClick={() => handleCardClick(company)}
+                key={approval.hrId}
+                onClick={() => handleCardClick(approval)}
                 className="group relative flex flex-col md:flex-row md:items-center justify-between p-3.5 sm:p-3 rounded-xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 animate-slideInUp cursor-pointer"
               >
                 <div className="flex items-center gap-3.5 flex-1 min-w-0">
                   {/* Left Section: Logo and Basic Info */}
                   <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shadow-sm font-bold text-lg uppercase flex-shrink-0">
-                    {company.logo}
+                    {(approval.companyName || "?").charAt(0)}
                   </div>
                   <div className="space-y-0.5 min-w-0">
                     <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                      {company.name}
+                      {approval.companyName || "Unknown Company"}
                     </h3>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-1.5 align-middle text-primary font-bold uppercase tracking-wider">
                         <Building2 className="w-3" />
-                        {company.industry}
+                        {approval.industry}
                       </div>
                       <div className="flex items-center gap-1.5 align-middle font-medium">
                         <MapPin className="w-3" />
-                        {company.location}
+                        {approval.location}
                       </div>
                     </div>
                   </div>
@@ -157,7 +170,7 @@ export default function CompanyApprovals() {
                     <div className="flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="text-[11px] font-medium text-muted-foreground truncate max-w-[180px]">
-                        {company.contact_email}
+                        {approval.hrEmail}
                       </span>
                     </div>
                   </div>
@@ -165,58 +178,40 @@ export default function CompanyApprovals() {
                   <div className="flex items-center gap-3 sm:gap-6 justify-end ml-auto">
                     <Badge
                       className={
-                        company.status === "ACTIVE"
+                        approval.companyStatus === "ACTIVE"
                           ? "bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
                           : "bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider"
                       }
                       variant="outline"
                     >
-                      {company.status}
+                      {approval.companyStatus}
                     </Badge>
 
                     <div className="flex gap-2">
-                      {company.status === "PENDING" ? (
-                        <>
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(company.id, "ACTIVE");
-                            }}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-none h-8 px-4 text-xs rounded-lg"
-                            size="sm"
-                          >
-                            <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
-                            Accept
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            className="font-bold h-8 px-4 text-xs rounded-lg"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCompanies((prev) =>
-                                prev.filter((c) => c.id !== company.id),
-                              );
-                            }}
-                          >
-                            <XCircle className="w-3.5 h-3.5 mr-1.5" />
-                            Decline
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(company.id, "PENDING");
-                          }}
-                          className="font-bold text-amber-600 border-amber-200 h-8 px-4 text-xs rounded-lg"
-                          size="sm"
-                        >
-                          <Clock className="w-3.5 h-3.5 mr-1.5" />
-                          Mark Pending
-                        </Button>
-                      )}
+                      {/* Since we are fetching pending approvals, status should be PENDING */}
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApprove(approval.hrId);
+                        }}
+                        className=" text-white font-bold shadow-none h-8 px-4 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700"
+                        size="sm"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                        Accept
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="font-bold h-8 px-4 text-xs rounded-lg"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReject(approval.hrId);
+                        }}
+                      >
+                        <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                        Decline
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -226,7 +221,7 @@ export default function CompanyApprovals() {
             <div className="flex flex-col items-center justify-center py-20 bg-muted/20 rounded-2xl border-2 border-dashed border-muted">
               <Building2 className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
               <p className="text-muted-foreground font-medium">
-                No company registrations found.
+                No pending company registrations found.
               </p>
             </div>
           )}
@@ -288,22 +283,22 @@ export default function CompanyApprovals() {
               Detailed information about the company.
             </DialogDescription>
           </DialogHeader>
-          {selectedCompany && (
+          {selectedApproval && (
             <div className="space-y-0">
               <div className="p-5 sm:p-6 border-border overflow-hidden relative group rounded-2xl">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500"></div>
 
                 <div className="relative z-10 space-y-5">
                   <div className="flex flex-col items-center text-center space-y-2.5 pb-5 border-b border-border">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg border-2 border-white dark:border-card">
-                      {selectedCompany.logo}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg border-2 border-white dark:border-card uppercase">
+                      {(selectedApproval.companyName || "?").charAt(0)}
                     </div>
                     <div>
                       <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                        {selectedCompany.name}
+                        {selectedApproval.companyName || "Unknown Company"}
                       </h1>
                       <p className="text-primary font-bold text-[10px] sm:text-xs uppercase tracking-widest">
-                        {selectedCompany.industry}
+                        {selectedApproval.industry}
                       </p>
                     </div>
                   </div>
@@ -319,12 +314,12 @@ export default function CompanyApprovals() {
                           Person in Charge
                         </p>
                         <p className="text-foreground text-xs font-bold">
-                          {selectedCompany.hr_name}
+                          {selectedApproval.hrName}
                         </p>
                         <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
                           <Phone className="w-2.5 h-2.5 text-primary/70" />
                           <span className="font-medium">
-                            {selectedCompany.phone}
+                            {selectedApproval.hrPhone}
                           </span>
                         </div>
                       </div>
@@ -337,7 +332,7 @@ export default function CompanyApprovals() {
                           Corporate Email
                         </p>
                         <p className="text-foreground text-xs truncate font-medium">
-                          {selectedCompany.contact_email}
+                          {selectedApproval.hrEmail}
                         </p>
                       </div>
                     </div>
@@ -349,7 +344,7 @@ export default function CompanyApprovals() {
                           Headquarters
                         </p>
                         <p className="text-foreground text-xs font-medium">
-                          {selectedCompany.location}
+                          {selectedApproval.location}
                         </p>
                       </div>
                     </div>
@@ -361,7 +356,11 @@ export default function CompanyApprovals() {
                           Registration Date
                         </p>
                         <p className="text-foreground text-xs font-medium">
-                          {selectedCompany.registered_at}
+                          {selectedApproval.createdAt
+                            ? new Date(
+                                selectedApproval.createdAt,
+                              ).toLocaleDateString()
+                            : "N/A"}
                         </p>
                       </div>
                     </div>
@@ -371,12 +370,33 @@ export default function CompanyApprovals() {
                     <div className="flex items-center gap-2 mb-2.5">
                       <Clock className="w-3.5 h-3.5 text-amber-500" />
                       <h3 className="text-[11px] font-bold text-foreground uppercase tracking-tight">
-                        Verification Status
+                        Actions
                       </h3>
                     </div>
-                    <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 font-bold px-3 py-0.5 text-[9px] uppercase tracking-wider">
-                      Pending Review
-                    </Badge>
+
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <Button
+                        onClick={() => {
+                          handleApprove(selectedApproval.hrId);
+                          setIsModalOpen(false);
+                        }}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Approve
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          handleReject(selectedApproval.hrId);
+                          setIsModalOpen(false);
+                        }}
+                        className="w-full font-bold h-9"
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Reject
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
