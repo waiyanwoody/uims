@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Download, Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Download, Loader2, ChevronLeft, ChevronRight, Search, Eye } from "lucide-react";
 
 import { useCompanyApplications } from "@/hooks/CompanyHook/useCompanyApplications";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,7 +110,19 @@ export default function CompanyApplications() {
                   </TableCell>
 
                   <TableCell>
-                    <Badge>
+                    <Badge
+                      className={
+                        app.status === "APPROVED"
+                          ? "bg-green-500 text-white"
+                          : app.status === "PENDING"
+                          ? "bg-yellow-500 text-white"
+                          : app.status === "INTERVIEWING"
+                          ? "bg-blue-500 text-white"
+                          : app.status === "REJECTED"
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-500 text-white"
+                      }
+                    >
                       {app.status}
                     </Badge>
                   </TableCell>
@@ -139,7 +151,7 @@ export default function CompanyApplications() {
                           )
                         }
                       >
-                        <Search/>Review
+                        <Eye/>Review
                       </Button>
                       
                     </div>

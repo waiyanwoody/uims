@@ -18,13 +18,26 @@ import {
   Star,
   Loader,
   UserCheck,
+  Badge,
+  Eye,
 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Link from "next/link";
 import { useCompanyDashboard } from "@/hooks/CompanyHook/useCompanyDashboard";
+import { useRouter } from "next/navigation";
 
 export default function CompanyDashboard() {
   const { data, isLoading, error } = useCompanyDashboard();
+  console.log("data", data);
   console.log(data);
+  const router = useRouter();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -37,6 +50,22 @@ export default function CompanyDashboard() {
       default:
         return "bg-secondary border-border text-foreground";
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const s = status.toUpperCase();
+    const badgeClass =
+      s === "APPROVED"
+        ? "bg-green-500 text-white"
+        : s === "PENDING"
+        ? "bg-yellow-500 text-white"
+        : s === "INTERVIEWING"
+        ? "bg-blue-500 text-white"
+        : s === "REJECTED"
+        ? "bg-red-500 text-white"
+        : "bg-gray-500 text-white";
+
+    return <span className={`px-2 py-1 rounded text-xs font-semibold ${badgeClass}`}>{status}</span>;
   };
 
   return (
@@ -55,11 +84,12 @@ export default function CompanyDashboard() {
         </div>
 
         <div className="space-y-6">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-6 border border-border rounded-2xl">
                   <div className="space-y-3">
+                    <div className="h-5 bg-secondary rounded animate-shimmer"></div>
                     <div className="h-5 bg-secondary rounded animate-shimmer"></div>
                     <div className="h-8 bg-secondary rounded animate-shimmer"></div>
                   </div>
@@ -71,36 +101,29 @@ export default function CompanyDashboard() {
                 {[
                   {
                     icon: Briefcase,
-                    label: "Active Interns",
-                    value: data?.activeInterns,
+                    label: "Active Postings",
+                    value: data?.activePostings,
                     color: "from-blue-500/20",
                     textColor: "text-blue-600",
                   },
                   {
                     icon: Clock,
-                    label: "Pending Applications",
-                    value: data?.pendingApplications,
+                    label: "New Applications",
+                    value: data?.newApplicationsCount,
                     color: "from-emerald-500/20",
                     textColor: "text-emerald-600",
                   },
                   {
                     icon: FileText,
                     label: "Reports Awaiting Evaluation",
-                    value: data?.reportsAwaitingEvaluation,
+                    value: data?.pendingEvaluationsCount,
                     color: "from-amber-500/20",
                     textColor: "text-amber-600",
                   },
                   {
-                    icon: Users,
-                    label: "Total Applications",
-                    value: data?.totalApplications,
-                    color: "from-red-500/20",
-                    textColor: "text-red-600",
-                  },
-                  {
                     icon: UserCheck,
-                    label: "Total Internships",
-                    value: data?.totalInternships,
+                    label: "Active Internships",
+                    value: data?.activeInternsCount,
                     color: "from-purple-500/20",
                     textColor: "text-purple-600",
                   },
@@ -132,66 +155,102 @@ export default function CompanyDashboard() {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Recent Applications */}
-            <Card className="p-6 border-border">
-              <div className="flex items-center justify-between mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Table Section */}
+          <div className="lg:col-span-3">
+            <Card className="bg-zinc-900 border-zinc-800 shadow-xl">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-800 pb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground">
-                    Applications
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Latest submissions from candidates
-                  </p>
+                  <CardTitle className="text-xl font-bold text-white">Recent Applications</CardTitle>
+                  <p className="text-sm text-zinc-500 mt-1">Review your most recent candidate submissions.</p>
                 </div>
                 <Link href="/company/applications">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:bg-primary/5"
-                  >
-                    View All
-                    <ArrowRight className="ml-2 w-4 h-4" />
+                  <Button variant="outline" size="sm" className="border-zinc-700 hover:bg-zinc-800 gap-2">
+                    View All <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-              </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader className="bg-zinc-950/50">
+                    <TableRow className="border-zinc-800 hover:bg-transparent">
+                      <TableHead className="text-zinc-400">Application ID</TableHead>
+                      <TableHead className="text-zinc-400">Applied Date</TableHead>
+                      <TableHead className="text-zinc-400">Status</TableHead>
+                      <TableHead className="text-zinc-400">CV</TableHead>
+                      <TableHead className="text-right text-zinc-400">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(data?.recentApplications ?? []).length > 0 ? (
+                      data?.recentApplications.map((app: any) => (
+                        <TableRow key={app.id} className="border-zinc-800 hover:bg-zinc-800/30 transition-colors">
+                          <TableCell className="font-medium text-zinc-200">#{app.id}</TableCell>
+                          <TableCell className="text-zinc-400 text-xs">
+                            {new Date(app.appliedAt).toLocaleDateString(undefined, {
+                              month: 'short', day: 'numeric', year: 'numeric'
+                            })}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(app.status)}</TableCell>
+                          <TableCell>
+                            <a href={app.presignedCvUrl} target="_blank" className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 text-xs">
+                              <FileText className="w-3 h-3" /> CV Link
+                            </a>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="text-indigo-400 hover:text-white hover:bg-indigo-600 transition-all gap-2"
+                              onClick={() => router.push(`/company/applications/${app.id}`)}
+                            >
+                              <Eye className="w-4 h-4" /> Review
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-32 text-center text-zinc-500">
+                          No recent applications found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
             </Card>
           </div>
 
-          {/* Quick Actions */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Actions
-            </p>
-            <div className="space-y-2">
-              <Link href="/company/manage-internships">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start border-border hover:bg-primary/5 bg-transparent"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Manage Internships
-                </Button>
-              </Link>
-              <Link href="/company/applications">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start border-border hover:bg-primary/5 bg-transparent"
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Review Applications
-                </Button>
-              </Link>
-              <Link href="/company/profile">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start border-border hover:bg-primary/5 bg-transparent"
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Company Profile
-                </Button>
-              </Link>
+          {/* Quick Actions Sidebar */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Management</h3>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { label: "Manage Postings", icon: Briefcase, href: "/company/manage-internships" },
+                { label: "Evaluate Reports", icon: MessageSquare, href: "/company/applications" },
+                { label: "Company Profile", icon: Users, href: "/company/profile" },
+              ].map((action, i) => (
+                <Link key={i} href={action.href}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start border-zinc-800 bg-zinc-900/50 hover:bg-indigo-600 hover:border-indigo-600 hover:text-white transition-all group h-12"
+                  >
+                    <action.icon className="w-4 h-4 mr-3 text-zinc-500 group-hover:text-white" />
+                    {action.label}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+            
+            <div className="p-4 rounded-2xl bg-indigo-600/10 border border-indigo-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-bold text-indigo-400 uppercase">Hiring Tip</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Applications with a &quot;Pending&quot; status for more than 3 days usually see a 40% higher candidate drop-off. Review them today!
+              </p>
             </div>
           </div>
         </div>

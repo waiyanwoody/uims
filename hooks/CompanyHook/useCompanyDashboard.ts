@@ -2,11 +2,11 @@ import api from "@/lib/api";
 import { useEffect, useState, useCallback } from "react";
 
 interface CompanyDashboardData {
-  totalInternships: number;
-  totalApplications: number;
-  activeInterns: number;
-  pendingApplications: number;
-  reportsAwaitingEvaluation: number;
+  activePostings: number;
+  newApplicationsCount: number;
+  activeInternsCount: number;
+  pendingEvaluationsCount: number;
+  recentApplications: [];
 }
 
 interface ApiResponse<T> {
@@ -26,7 +26,7 @@ export const useCompanyDashboard = () => {
       setError(null);
 
       const response = await api.get<ApiResponse<CompanyDashboardData>>(
-        "/companies/dashboard"
+        "/company/dashboard"
       );
 
       if (response.data.success) {
