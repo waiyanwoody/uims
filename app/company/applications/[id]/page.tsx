@@ -133,7 +133,7 @@ export default function ApplicationViewDetails() {
               </Button>
             )}
 
-            {application.status !== "REJECTED" && (
+            {application.status !== "REJECTED" && application.status !== "APPROVED" && (
               <Button
                 variant="destructive"
                 onClick={handleReject}
@@ -142,7 +142,23 @@ export default function ApplicationViewDetails() {
               >
                 <XCircle /> Reject
               </Button>
-            )}
+              )}
+              
+                {application.status === "REJECTED" && (
+                <Badge className={getStatusColor(application.status)}>
+                  Rejected
+                </Badge>
+                )}
+                {application.status === "INTERVIEWING" && (
+                <Badge className={getStatusColor(application.status)}>
+                  Interviewing
+                </Badge>
+                )}
+                {application.status === "APPROVED" && (
+                <Badge className={getStatusColor(application.status)}>
+                  Approved
+                </Badge>
+                )}
           </div>
           </div>
         </div>

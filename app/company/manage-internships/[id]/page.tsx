@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Download, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react";
 
 import { useCompanyApplications } from "@/hooks/CompanyHook/useCompanyApplications";
 import { useAuth } from "@/contexts/AuthContext";
@@ -132,15 +132,16 @@ export default function CompanyApplications() {
 
                       <Button
                         size="sm"
+                        variant={"outline"}
                         onClick={() =>
                           router.push(
                             `/company/applications/${app.id}`
                           )
                         }
                       >
-                        Review
+                        <Search/>Review
                       </Button>
-
+                      
                     </div>
 
                   </TableCell>

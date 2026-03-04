@@ -81,7 +81,7 @@ export interface Application {
   student_id: number;
   internship_id: number;
   cv_id: number;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "INTERVIEWING" | "APPROVED" | "REJECTED";
   appliedAt: Date;
   student?: Student;
   internship?: Internship;
