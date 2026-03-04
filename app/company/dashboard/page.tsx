@@ -68,79 +68,66 @@ export default function CompanyDashboard() {
             ) : (
               <>
                 {/* Total Internships */}
-                <Card className="rounded-2xl shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Internship Posts
-                    </CardTitle>
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {data?.totalInternships}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Total Applications */}
-                <Card className="rounded-2xl shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Applications
-                    </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {data?.totalApplications}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Active Interns */}
-                <Card className="rounded-2xl shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Active Interns
-                    </CardTitle>
-                    <UserCheck className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {data?.activeInterns}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Pending Applications */}
-                <Card className="rounded-2xl shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Pending Applications
-                    </CardTitle>
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {data?.pendingApplications}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Reports Awaiting Evaluation */}
-                <Card className="rounded-2xl shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Reports Awaiting
-                    </CardTitle>
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {data?.reportsAwaitingEvaluation}
-                    </div>
-                  </CardContent>
-                </Card>
+                {[
+                  {
+                    icon: Briefcase,
+                    label: "Active Interns",
+                    value: data?.activeInterns,
+                    color: "from-blue-500/20",
+                    textColor: "text-blue-600",
+                  },
+                  {
+                    icon: Clock,
+                    label: "Pending Applications",
+                    value: data?.pendingApplications,
+                    color: "from-emerald-500/20",
+                    textColor: "text-emerald-600",
+                  },
+                  {
+                    icon: FileText,
+                    label: "Reports Awaiting Evaluation",
+                    value: data?.reportsAwaitingEvaluation,
+                    color: "from-amber-500/20",
+                    textColor: "text-amber-600",
+                  },
+                  {
+                    icon: Users,
+                    label: "Total Applications",
+                    value: data?.totalApplications,
+                    color: "from-red-500/20",
+                    textColor: "text-red-600",
+                  },
+                  {
+                    icon: UserCheck,
+                    label: "Total Internships",
+                    value: data?.totalInternships,
+                    color: "from-purple-500/20",
+                    textColor: "text-purple-600",
+                  },
+                ].map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <Card
+                      key={index}
+                      className={`relative p-6 border border-border hover:border-primary/40 transition-all duration-300 bg-gradient-to-br ${stat.color} to-transparent overflow-hidden group animate-slideInUp`}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/5 to-transparent rounded-full -mr-10 -mt-10 group-hover:scale-150 transition-transform duration-300"></div>
+                      <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-3">
+                          <Icon className={`w-5 h-5 ${stat.textColor}`} />
+                          <TrendingUp className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                          {stat.label}
+                        </p>
+                        <h3 className="text-4xl font-bold text-foreground mt-2">
+                          {stat.value}
+                        </h3>
+                      </div>
+                    </Card>
+                  );
+                })}
               </>
             )}
           </div>
@@ -152,7 +139,7 @@ export default function CompanyDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-foreground">
-                    Applications 
+                    Applications
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
                     Latest submissions from candidates
