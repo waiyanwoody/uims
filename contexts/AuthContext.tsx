@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('user')
+    localStorage.removeItem('token') // Clear JWT token
     setUser(null)
   }
 

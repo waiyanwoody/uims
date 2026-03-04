@@ -174,7 +174,7 @@ export default function LoginPage() {
     try {
       const responseData = await login(selectedRole, { email, password });
 
-      // Handle JWT token if present
+      // Store JWT token in localStorage
       if (responseData.token) {
         localStorage.setItem("token", responseData.token);
       }

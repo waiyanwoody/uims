@@ -2,19 +2,20 @@ import axios from "axios";
 
 /**
  * Axios instance for your app
- * Will automatically send HTTP-only JWT cookie to backend
+ * Uses localStorage for JWT token storage
  */
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: "http://13.212.37.15:8080/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // important: send cookies automatically
+  // Remove withCredentials if not using cookies
+  // withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config) => {
-    // Add Authorization header if token exists
+    // Add Authorization header from localStorage
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       if (token && config.headers) {
