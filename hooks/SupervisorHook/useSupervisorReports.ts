@@ -12,9 +12,11 @@ export interface InternshipReportResponse {
   hrValidated: boolean;
   status: string;
   createdAt: string;
+  reportFileUrl?: string;
 }
 
 export interface InternshipReportDetailResponse {
+  reportFileUrl: string | undefined;
   id: number;
   internshipId: number;
   studentId: number;
@@ -30,6 +32,8 @@ export interface InternshipReportDetailResponse {
   supervisorFeedback: string | null;
   supervisorValidated: boolean | null;
   presignedUrl: string;
+  filePath?: string;
+  file_path?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -122,31 +126,18 @@ export const useSupervisorReports = () => {
     [],
   );
 
-  // Placeholder for review submission if needed
+  // Submit Supervisor Review
   const submitReview = useCallback(
-    async (
-      reportId: number,
-      score: number,
-      feedback: string,
-      status:
-        | "APPROVED"
-        | "REJECTED"
-        | "SUPERVISOR_VALIDATED" = "SUPERVISOR_VALIDATED",
-    ) => {
+    async (reportId: number, score: number, feedback: string) => {
       setLoading(true);
       try {
-        // This endpoint is hypothetical based on typical patterns.
-        // If the backend for this isn't provided, this might need adjustment.
-        // However, to "finish review", we likely need to PUT/PATCH somewhere.
-        // For now, I'll assume an endpoint or just log it.
-        // If the user didn't provide it, maybe they just want the fetch part working for now.
-        // But I'll add a structured call assuming a standard update endpoint.
-        const response = await api.patch(
-          `/internship-reports/${reportId}/supervisor-review`,
+        // Endpoint: POST /internship-reports/{id}/supervisor-evaluate
+        // Payload: { score, feedback }
+        const response = await api.post(
+          `/internship-reports/${reportId}/supervisor-evaluate`,
           {
             score,
             feedback,
-            status, // or valid boolean
           },
         );
         toast.success("Review submitted successfully");

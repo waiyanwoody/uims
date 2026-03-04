@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useCompanyApprovals } from "@/lib/api-hooks";
+import { useCompanyApprovals, useCompanyInternships } from "@/lib/api-hooks";
+import { InternshipResponse } from "@/types/types";
+import { formatDate } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -61,13 +63,18 @@ import { useParams } from "next/navigation";
 export default function CompanyProfilePage() {
   const params = useParams();
   const id = Number(params?.id);
-  const { data: companies, isLoading } = useCompanyApprovals();
+  const { data: companies, isLoading: isLoadingCompany } =
+    useCompanyApprovals();
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedInternship, setSelectedInternship] = useState<any>(null);
+  const [selectedInternship, setSelectedInternship] =
+    useState<InternshipResponse | null>(null);
   const isMobile = useIsMobile();
 
-  const handleViewApplication = (internship: any) => {
+  const { data: internshipData, isLoading: isLoadingInternships } =
+    useCompanyInternships(id, 1, 100, undefined, "OPEN");
+
+  const handleViewApplication = (internship: InternshipResponse) => {
     setSelectedInternship(internship);
     setIsModalOpen(true);
   };
@@ -76,17 +83,18 @@ export default function CompanyProfilePage() {
     return companies?.find((c: any) => c.id === id);
   }, [companies, id]);
 
+  const allInternships = internshipData?.data || [];
   const itemsPerPage = 5;
-  const internships = company?.internships || [];
-  const totalPages = Math.ceil(internships.length / itemsPerPage);
+  const totalPages = Math.ceil(allInternships.length / itemsPerPage);
 
   const currentInternships = useMemo(() => {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return internships.slice(indexOfFirstItem, indexOfLastItem);
-  }, [internships, currentPage]);
+    return allInternships.slice(indexOfFirstItem, indexOfLastItem);
+  }, [allInternships, currentPage]);
 
-  if (isLoading) {
+  // if (isLoadingCompany || isLoadingInternships) { // Let's simplify loading
+  if (isLoadingCompany) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-lg"></div>
@@ -196,7 +204,7 @@ export default function CompanyProfilePage() {
                         Registration Date
                       </p>
                       <p className="text-foreground text-sm font-medium">
-                        {company.registered_at}
+                        {formatDate(company.registered_at)}
                       </p>
                     </div>
                   </div>
@@ -238,13 +246,17 @@ export default function CompanyProfilePage() {
                   variant="secondary"
                   className="px-4 py-1.5 h-auto text-xs font-bold rounded-lg shadow-sm border border-border"
                 >
-                  {internships.length} Active Posts
+                  {allInternships.length} Active Posts
                 </Badge>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
-                {currentInternships.length > 0 ? (
-                  currentInternships.map((internship: any, idx) => (
+                {isLoadingInternships ? (
+                  <div className="flex h-[200px] items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-lg"></div>
+                  </div>
+                ) : currentInternships.length > 0 ? (
+                  currentInternships.map((internship: InternshipResponse) => (
                     <Card
                       key={internship.id}
                       className="p-4 border-border bg-muted/10 hover:bg-muted/20 hover:border-primary/20 transition-all duration-300 group rounded-2xl relative overflow-hidden"
@@ -257,23 +269,29 @@ export default function CompanyProfilePage() {
                             <h4 className="font-bold text-foreground text-base group-hover:text-primary transition-colors">
                               {internship.title}
                             </h4>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] px-2 py-0.5 h-auto uppercase tracking-wider font-bold"
+                            >
+                              {internship.status}
+                            </Badge>
                           </div>
                           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <MapPin className="w-3.5 h-3.5 text-primary/60" />
+                              <Briefcase className="w-3.5 h-3.5 text-primary/60" />
                               <span className="font-medium">
-                                {internship.location}
+                                {internship.category}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Clock className="w-3.5 h-3.5 text-primary/60" />
+                              <Users className="w-3.5 h-3.5 text-primary/60" />
                               <span className="font-medium">
-                                {internship.type}
+                                {internship.slots} Slots
                               </span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                              <DollarSign className="w-3.5 h-3.5" />
-                              <span>{internship.stipend}</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>{formatDate(internship.deadline)}</span>
                             </div>
                           </div>
                         </div>
@@ -283,7 +301,7 @@ export default function CompanyProfilePage() {
                           onClick={() => handleViewApplication(internship)}
                           className="h-9 px-4 text-xs font-bold gap-2 hover:bg-primary/10 hover:text-primary rounded-xl"
                         >
-                          View Application
+                          View Details
                         </Button>
                       </div>
                     </Card>
@@ -393,22 +411,14 @@ export default function CompanyProfilePage() {
                     <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                       {selectedInternship.title}
                     </h2>
-                    <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-card border border-border flex items-center justify-center font-bold text-primary shadow-sm">
-                        {company.logo}
-                      </div>
-                      <span className="font-semibold text-sm">
-                        {company.name}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
                       <Users className="w-4 h-4" />
@@ -422,35 +432,13 @@ export default function CompanyProfilePage() {
                   </div>
                   <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
-                        Type
-                      </span>
-                    </div>
-                    <p className="text-lg font-bold text-foreground">
-                      {selectedInternship.type}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                      <DollarSign className="w-4 h-4 text-emerald-500" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
-                        Stipend
-                      </span>
-                    </div>
-                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                      {selectedInternship.stipend}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
                       <Calendar className="w-4 h-4 text-rose-500" />
                       <span className="text-[10px] font-bold uppercase tracking-wider">
                         Deadline
                       </span>
                     </div>
                     <p className="text-lg font-bold text-foreground">
-                      {selectedInternship.deadline}
+                      {formatDate(selectedInternship.deadline)}
                     </p>
                   </div>
                 </div>
@@ -485,19 +473,12 @@ export default function CompanyProfilePage() {
                     <h3>Requirements</h3>
                   </div>
                   <div className="grid grid-cols-1 gap-3">
-                    {selectedInternship.requirements.map(
-                      (req: string, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 group hover:bg-primary/10 transition-colors"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-primary mt-0.5" />
-                          <span className="text-sm font-medium text-foreground">
-                            {req}
-                          </span>
-                        </div>
-                      ),
-                    )}
+                    <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 group hover:bg-primary/10 transition-colors">
+                      <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span className="text-sm font-medium text-foreground whitespace-pre-wrap leading-relaxed">
+                        {selectedInternship.requirements}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -510,9 +491,6 @@ export default function CompanyProfilePage() {
                   className="rounded-xl font-bold h-11 px-6 text-sm"
                 >
                   Close Detail
-                </Button>
-                <Button className="rounded-xl font-bold h-11 px-8 text-sm shadow-lg shadow-primary/20">
-                  Contact HR
                 </Button>
               </div>
             </div>

@@ -72,8 +72,7 @@ export default function InternshipMonitoring() {
   }, [fetchReports, currentPage, itemsPerPage]);
 
   // Dialog states
-  const [selectedReport, setSelectedReport] =
-    useState<InternshipReportDetailResponse | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
@@ -98,6 +97,8 @@ export default function InternshipMonitoring() {
     }
   };
 
+  console.log("selectedReport", selectedReport);
+
   const getMonthName = (monthNumber: number) => {
     const date = new Date();
     date.setMonth(monthNumber - 1);
@@ -115,11 +116,22 @@ export default function InternshipMonitoring() {
     try {
       const details = await fetchReportDetails(report.id);
       if (details) {
-        setSelectedReport(details);
+        console.log("Report Details:", details);
+        // Merge details with report to ensure we have the URL if it's missing in details but present in report
+        setSelectedReport({
+          ...details,
+          presignedUrl:
+            details.reportFileUrl ||
+            details.filePath ||
+            details.file_path ||
+            report.presignedUrl ||
+            "",
+        });
       } else {
         setIsDetailDialogOpen(false);
       }
     } catch (error) {
+      console.error("Error fetching report details:", error);
       setIsDetailDialogOpen(false);
     } finally {
       setIsFetchingDetails(false);
@@ -152,7 +164,10 @@ export default function InternshipMonitoring() {
     }
   };
 
-  const handleDownloadReport = async (reportUrl: string, fileName: string) => {
+  const handleDownloadReport = async (
+    reportUrl: string | undefined | null,
+    fileName: string,
+  ) => {
     if (!reportUrl) {
       toast.error("File URL not available");
       return;
@@ -192,11 +207,8 @@ export default function InternshipMonitoring() {
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Monthly Reports
           </h1>
-          <p className="text-muted-foreground text-xs font-medium">
-            Total reports:{" "}
-            <span className="text-foreground font-bold">
-              {pagination?.totalElements || 0}
-            </span>
+          <p className="text-muted-foreground text-sm font-medium">
+            Review and provide feedback on your students' monthly progress.
           </p>
         </div>
 
@@ -444,14 +456,10 @@ export default function InternshipMonitoring() {
                     </AccordionItem>
                   )}
                 </Accordion>
-
                 <div
                   className="flex items-center justify-between p-2.5 rounded-xl border border-border/60 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/30 transition-all cursor-pointer group/file"
                   onClick={() =>
-                    handleDownloadReport(
-                      selectedReport.presignedUrl || "",
-                      `Report_${selectedReport.studentName}_${selectedReport.monthNumber}`,
-                    )
+                    window.open(`${selectedReport.presignedUrl}`, "_blank")
                   }
                 >
                   <div className="flex items-center gap-3">
@@ -475,7 +483,9 @@ export default function InternshipMonitoring() {
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDownloadReport(
-                          selectedReport.presignedUrl || "",
+                          selectedReport.presignedUrl ||
+                            selectedReport.filePath ||
+                            selectedReport.file_path,
                           `Report_${selectedReport.studentName}_${selectedReport.monthNumber}`,
                         );
                       }}
@@ -544,7 +554,7 @@ export default function InternshipMonitoring() {
               <Input
                 id="marks"
                 type="text"
-                placeholder="0-50"
+                placeholder="1-50"
                 className="bg-secondary/10 border-border focus-visible:ring-primary/20 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={marks || ""}
                 onChange={(e) => {
@@ -555,8 +565,8 @@ export default function InternshipMonitoring() {
                   }
                   const num = parseInt(val);
                   if (!isNaN(num)) {
-                    // Limit the number to 0-50
-                    if (num >= 0 && num <= 50) {
+                    // Limit the number to 1-50
+                    if (num >= 1 && num <= 50) {
                       setMarks(num);
                     }
                   }

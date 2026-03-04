@@ -61,7 +61,7 @@ export default function InternshipMonitoring() {
 
   // Filter reports to only show HR_VALIDATED status
   const filteredReports = reports.filter(
-    (report) => report.status === "PENDING"
+    (report) => report.status === "PENDING",
   );
 
   useEffect(() => {
@@ -69,80 +69,11 @@ export default function InternshipMonitoring() {
   }, [fetchReports, currentPage, itemsPerPage]);
 
   // Mock data for monthly reports with status: Pending (waiting HR), Verify (ready for supervisor), Review (done)
-  const [reportsData, setReportsData] = useState([
-    {
-      id: 1,
-      student: "Alex Johnson",
-      company: "Google",
-      position: "Frontend Developer",
-      month: "February",
-      submittedDate: "2024-03-01",
-      submissionTime: "16:45",
-      status: "Verify",
-      description:
-        "Completed the frontend integration of the new dashboard widgets. Focused on performance optimization and accessibility.",
-      attachmentName: "monthly_report_alex_feb.pdf",
-    },
-    {
-      id: 2,
-      student: "Sarah Chen",
-      company: "Meta",
-      position: "Backend Developer",
-      month: "February",
-      submittedDate: "2024-03-01",
-      submissionTime: "17:30",
-      status: "Verify",
-      description:
-        "Managed database migrations for the user profile service. Implemented rate limiting for API endpoints.",
-      attachmentName: "Sarah_Report_Feb.docx",
-    },
-    {
-      id: 3,
-      student: "Michael Rodriguez",
-      company: "Amazon",
-      position: "UI/UX Designer",
-      month: "February",
-      submittedDate: "2024-03-02",
-      submissionTime: "09:15",
-      status: "Verify",
-      description:
-        "Redesigned the checkout workflow. Conducted user testing sessions and incorporated feedback into high-fidelity prototypes.",
-      attachmentName: "Michael_Monthly_Feb.pdf",
-    },
-    {
-      id: 4,
-      student: "Emily Wilson",
-      company: "Microsoft",
-      position: "Software Engineer",
-      month: "January",
-      submittedDate: "2024-02-01",
-      submissionTime: "17:10",
-      status: "Review",
-      description:
-        "Set up the initial development environment and started exploring the microservices architecture.",
-      attachmentName: "Emily_Jan.zip",
-      marks: 85,
-      feedback: "Good initial progress, keep it up!",
-    },
-    {
-      id: 5,
-      student: "Thor Odinson",
-      company: "Tesla",
-      position: "QA Engineer",
-      month: "February",
-      submittedDate: "2024-03-01",
-      submissionTime: "16:45",
-      status: "Pending",
-      description:
-        "Working on automotive testing procedures. Reports ready for HR verification.",
-      attachmentName: "Thor_Feb_Data.xlsx",
-    },
-  ]);
 
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
   const currentReports = filteredReports.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const handleReviewClick = (report: any) => {
@@ -166,7 +97,7 @@ export default function InternshipMonitoring() {
           description: result.success
             ? "The report has been evaluated."
             : "There was an error submitting the evaluation.",
-        }
+        },
       );
       await fetchReports(currentPage - 1, itemsPerPage);
       setIsConfirmDialogOpen(false);
@@ -410,10 +341,7 @@ export default function InternshipMonitoring() {
               <div
                 className="flex items-center justify-between p-2.5 rounded-xl border border-border/60 bg-secondary/10 hover:bg-secondary/20 hover:border-primary/30 transition-all cursor-pointer group/file"
                 onClick={() =>
-                  window.open(
-                    `${selectedReport.presignedReportUrl}`,
-                    "_blank"
-                  )
+                  window.open(`${selectedReport.presignedReportUrl}`, "_blank")
                 }
               >
                 <div className="flex items-center gap-3">
@@ -427,7 +355,10 @@ export default function InternshipMonitoring() {
                     <p className="text-[9px] text-muted-foreground font-medium flex items-center gap-1.5">
                       PDF • 2.4 MB
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/30"></span>
-                      <a href={selectedReport.presignedReportUrl} className="text-primary/70 font-bold">
+                      <a
+                        href={selectedReport.presignedReportUrl}
+                        className="text-primary/70 font-bold"
+                      >
                         Click to view
                       </a>
                     </p>
@@ -441,7 +372,7 @@ export default function InternshipMonitoring() {
                     onClick={() =>
                       window.open(
                         `${selectedReport.presignedReportUrl}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                   >

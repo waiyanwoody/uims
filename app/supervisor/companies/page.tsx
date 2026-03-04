@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useCompanyApprovals } from "@/lib/api-hooks";
+import { useCompanies } from "@/lib/api-hooks";
 import {
   Card,
   CardContent,
@@ -36,37 +36,28 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 
 export default function SupervisorCompaniesPage() {
-  const { data: initialCompanies, isLoading } = useCompanyApprovals();
-  const [companies, setCompanies] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const isMobile = useIsMobile();
-
-  // Initialize companies state once data is loaded
-  React.useEffect(() => {
-    if (initialCompanies) {
-      setCompanies(initialCompanies);
-    }
-  }, [initialCompanies]);
-
   const itemsPerPage = isMobile ? 5 : 10;
 
-  const filteredCompanies = useMemo(() => {
-    return companies.filter(
-      (company: any) =>
-        company.status === "ACTIVE" &&
-        (company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.industry.toLowerCase().includes(searchQuery.toLowerCase())),
-    );
-  }, [companies, searchQuery]);
-
-  const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+  const { data: companiesData, isLoading } = useCompanies(
+    "ACTIVE",
+    currentPage,
+    itemsPerPage,
+  );
 
   const currentItems = useMemo(() => {
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    return filteredCompanies.slice(indexOfFirstItem, indexOfLastItem);
-  }, [filteredCompanies, currentPage, itemsPerPage]);
+    const content = companiesData?.data || [];
+    if (!searchQuery) return content;
+    return content.filter(
+      (company: any) =>
+        company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        company.industry.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [companiesData, searchQuery]);
+
+  const totalPages = companiesData?.totalPages || 0;
 
   if (isLoading) {
     return (
@@ -119,7 +110,7 @@ export default function SupervisorCompaniesPage() {
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   {/* Logo/Initial */}
                   <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shadow-sm font-bold text-lg uppercase flex-shrink-0">
-                    {company.logo}
+                    {company.logo || company.name?.charAt(0)}
                   </div>
 
                   <div className="space-y-0.5 min-w-0">
@@ -137,20 +128,13 @@ export default function SupervisorCompaniesPage() {
                       </span>
                       <span className="flex items-center gap-1.5 align-middle font-medium">
                         <Calendar className="w-3" />
-                        {company.registered_at}
+                        {new Date(company.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 sm:mt-0 flex items-center justify-between sm:justify-end gap-4 md:gap-12 w-full sm:w-auto px-1 sm:px-4">
-                  <div className="hidden lg:flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-[11px] font-medium text-muted-foreground">
-                      {company.contact_email}
-                    </span>
-                  </div>
-
                   <div className="flex items-center gap-3 sm:gap-6 justify-end ml-auto">
                     <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap uppercase tracking-wider">
                       <CheckCircle2 className="w-3 h-3" />
