@@ -37,30 +37,34 @@ export default function StudentDashboard() {
       REJECTED: 0,
     };
 
-  const recentApplications: any[] = dashboardData?.applications || [];
+  const recentApplications: any[] = dashboardData?.latestApplications || [];
   const reviews: any[] = dashboardData?.reviews || [];
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "approved":
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
       case "pending":
         return "bg-amber-50 text-amber-700 border-amber-200";
       case "rejected":
         return "bg-red-50 text-red-700 border-red-200";
+      case "interviewing":
+        return "bg-blue-50 text-blue-700 border-blue-200";
       default:
         return "bg-secondary text-foreground";
     }
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "approved":
         return <CheckCircle className="w-4 h-4" />;
       case "pending":
         return <Clock className="w-4 h-4" />;
       case "rejected":
         return <AlertCircle className="w-4 h-4" />;
+      case "interviewing":
+        return <Calendar className="w-4 h-4" />;
       default:
         return null;
     }
@@ -156,10 +160,10 @@ export default function StudentDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-foreground">
-                    My Internships
+                    Last 3 Applications
                   </h2>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your application timeline
+                    Your recent application timeline
                   </p>
                 </div>
                 <Link href="/student/applications">
@@ -182,48 +186,56 @@ export default function StudentDashboard() {
                         className="p-4 rounded-lg bg-secondary animate-shimmer"
                       ></div>
                     ))
-                  : recentApplications.slice(0, 3).map((app, index) => (
-                      <div
+                  : recentApplications.map((app, index) => (
+                      <Link
                         key={app.id}
-                        className={`group p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md cursor-pointer animate-slideInUp ${getStatusColor(
-                          app.status
-                        )}`}
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        href={`/student/applications/${app.id}`}
+                        className="block w-full"
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 mt-1">
-                            {getStatusIcon(app.status)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-bold text-foreground">
-                                {app.internship?.company?.name || app.company}
-                              </h3>
-                              <span className="text-xs font-semibold opacity-70">
-                                {app.appliedAt
-                                  ? new Date(app.appliedAt).toLocaleDateString()
-                                  : app.appliedDate}
-                              </span>
+                        <div
+                          className={`group p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md cursor-pointer animate-slideInUp ${getStatusColor(
+                            app.status,
+                          )}`}
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 mt-1">
+                              {getStatusIcon(app.status)}
                             </div>
-                            <p className="text-sm font-medium text-foreground/80">
-                              {app.internship?.title || app.position}
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-xs text-foreground/60">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {app.internship?.company?.location ||
-                                  app.location}
-                              </span>
-                              {(app.salary || app.internship?.stipend) && (
-                                <span className="font-bold text-primary">
-                                  {app.salary || app.internship?.stipend}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <div>
+                                  <h3 className="font-bold text-foreground">
+                                    {app.internship?.company?.name ||
+                                      "Company Name"}
+                                  </h3>
+                                  <p className="text-sm font-medium text-foreground/80">
+                                    {app.internship?.title ||
+                                      "Internship Title"}
+                                  </p>
+                                </div>
+                                <span className="text-xs font-semibold opacity-70  px-2 py-1 rounded">
+                                  {app.appliedAt
+                                    ? new Date(
+                                        app.appliedAt,
+                                      ).toLocaleDateString()
+                                    : "Date"}
                                 </span>
-                              )}
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-foreground/60">
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {app.internship?.company?.location ||
+                                    "Location"}
+                                </span>
+                              </div>
                             </div>
+
+                            <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 self-center" />
                           </div>
                         </div>
-                        <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                      </div>
+                      </Link>
                     ))}
               </div>
             </Card>

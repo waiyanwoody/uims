@@ -83,29 +83,67 @@ export default function SupervisorDashboard() {
   // Fallback data for UI sections not yet provided by the API summary
   const dashboardData = {
     students: [
-      { id: "1", name: "John Doe", startDate: "2024-01-15", internship: "Software Engineer", company: "Tech Corp", progress: 75, status: "active" },
-      { id: "2", name: "Jane Smith", startDate: "2024-02-01", internship: "Data Analyst", company: "Data Inc", progress: 40, status: "active" },
-      { id: "3", name: "Alice Johnson", startDate: "2024-01-20", internship: "Product Manager", company: "Product Co", progress: 90, status: "completing" },
+      {
+        id: "1",
+        name: "John Doe",
+        startDate: "2024-01-15",
+        internship: "Software Engineer",
+        company: "Tech Corp",
+        progress: 75,
+        status: "active",
+      },
+      {
+        id: "2",
+        name: "Jane Smith",
+        startDate: "2024-02-01",
+        internship: "Data Analyst",
+        company: "Data Inc",
+        progress: 40,
+        status: "active",
+      },
+      {
+        id: "3",
+        name: "Alice Johnson",
+        startDate: "2024-01-20",
+        internship: "Product Manager",
+        company: "Product Co",
+        progress: 90,
+        status: "completing",
+      },
     ],
     departments: [
       { dept: "Computer Science", active: 5, total: 10, completed: 3 },
       { dept: "Information Technology", active: 3, total: 8, completed: 2 },
     ],
     pendingActions: [
-      { action: "Review Pending Grades", priority: "high", href: "/supervisor/monitoring" },
-      { action: "Approve Internship Proposal", priority: "medium", href: "/supervisor/approvals" },
+      {
+        action: "Review Pending Grades",
+        priority: "high",
+        href: "/supervisor/monitoring",
+      },
+      {
+        action: "Approve Internship Proposal",
+        priority: "medium",
+        href: "/supervisor/approvals",
+      },
     ],
   };
 
   const topStudents = dashboardData.students.slice(0, 3);
   const departments = dashboardData.departments;
-  const topCompanies = [{ name: "Tech Corp", students: 12 }, { name: "Data Inc", students: 8 }];
+  const topCompanies = [
+    { name: "Tech Corp", students: 12 },
+    { name: "Data Inc", students: 8 },
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/20 text-blue-700 dark:text-blue-400";
-      case "completing": return "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/20 text-emerald-700 dark:text-emerald-400";
-      default: return "bg-secondary border-border text-foreground";
+      case "active":
+        return "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/20 text-blue-700 dark:text-blue-400";
+      case "completing":
+        return "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/20 text-emerald-700 dark:text-emerald-400";
+      default:
+        return "bg-secondary border-border text-foreground";
     }
   };
 
@@ -116,7 +154,7 @@ export default function SupervisorDashboard() {
         <div className="space-y-4 animate-fadeIn">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {user?.name || "Supervisor"}
+              Welcome back{typeof window !== "undefined" && user?.name ? `, ${user.name}` : ""}
             </h1>
             <p className="text-muted-foreground mt-1">
               Monitor student internships and progress
@@ -168,10 +206,16 @@ export default function SupervisorDashboard() {
             <Card className="p-6 border-border animate-slideInLeft">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground">Top Students Progress</h2>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Top Students Progress
+                  </h2>
                 </div>
                 <Link href="/supervisor/students">
-                  <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary hover:bg-primary/5"
+                  >
                     View All <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
@@ -190,15 +234,26 @@ export default function SupervisorDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-bold text-foreground truncate">{student.name}</h3>
+                          <h3 className="font-bold text-foreground truncate">
+                            {student.name}
+                          </h3>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm font-medium text-foreground/80">
-                           <div className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5 text-primary" /> {student.internship}</div>
-                           <div className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-accent" /> {student.company}</div>
+                          <div className="flex items-center gap-1.5">
+                            <Briefcase className="w-3.5 h-3.5 text-primary" />{" "}
+                            {student.internship}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="w-3.5 h-3.5 text-accent" />{" "}
+                            {student.company}
+                          </div>
                         </div>
                         <div className="mt-4 space-y-1.5">
                           <div className="w-full h-1.5 bg-background/50 rounded-full overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${student.progress}%` }}></div>
+                            <div
+                              className="h-full bg-primary"
+                              style={{ width: `${student.progress}%` }}
+                            ></div>
                           </div>
                         </div>
                       </div>
@@ -210,20 +265,28 @@ export default function SupervisorDashboard() {
 
             <Card className="p-6 border-border bg-card animate-slideInLeft">
               <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-primary" /> Department Performance
+                <Building2 className="w-5 h-5 text-primary" /> Department
+                Performance
               </h3>
               <div className="space-y-4">
                 {departments.map((dept, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/10">
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-secondary/10"
+                  >
                     <div className="flex items-center gap-3">
                       <BookOpen className="w-5 h-5 text-primary" />
                       <div>
                         <p className="text-sm font-bold">{dept.dept}</p>
-                        <p className="text-[10px] text-muted-foreground">{dept.active} Active</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {dept.active} Active
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                       <span className="text-xs font-bold">{dept.total} Total</span>
+                      <span className="text-xs font-bold">
+                        {dept.total} Total
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -234,7 +297,9 @@ export default function SupervisorDashboard() {
           {/* Right Sidebar */}
           <div className="space-y-6">
             <Card className="p-6 border-border bg-card animate-slideInRight">
-              <h3 className="text-lg font-bold text-foreground mb-4">Pending Actions</h3>
+              <h3 className="text-lg font-bold text-foreground mb-4">
+                Pending Actions
+              </h3>
               <div className="space-y-2">
                 {dashboardData.pendingActions.map((item, idx) => (
                   <Link key={idx} href={item.href}>

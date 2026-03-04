@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { useEffect, useState, useCallback } from "react";
+import { Application } from "@/types/types";
 
 // Matches your new JSON structure
 export interface ApplicationSummary {
@@ -10,9 +11,14 @@ export interface ApplicationSummary {
   REJECTED: number;
 }
 
-interface StudentDashboardData {
+export interface ApplicationResponse extends Application {
+  presignedCvUrl?: string; // URL to the CV
+}
+
+export interface StudentDashboardData {
   applicationSummary: ApplicationSummary;
   cvUploaded: boolean;
+  latestApplications: ApplicationResponse[];
 }
 
 interface ApiResponse<T> {
@@ -32,9 +38,8 @@ export const useStudentDashboard = () => {
       setError(null);
 
       // Changed endpoint to student dashboard
-      const response = await api.get<ApiResponse<StudentDashboardData>>(
-        "/student/dashboard"
-      );
+      const response =
+        await api.get<ApiResponse<StudentDashboardData>>("/student/dashboard");
 
       if (response.data.success) {
         setData(response.data.data);
@@ -43,7 +48,7 @@ export const useStudentDashboard = () => {
       }
     } catch (err: any) {
       setError(
-        err.response?.data?.message || "Failed to fetch student dashboard"
+        err.response?.data?.message || "Failed to fetch student dashboard",
       );
     } finally {
       setIsLoading(false);
