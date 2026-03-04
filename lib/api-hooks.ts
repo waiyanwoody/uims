@@ -1,5 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "./api";
+import {
+  Company,
+  InternshipResponse,
+  PaginatedResponse,
+  SuccessResponse,
+} from "@/types/types";
 
 // Mock delay function
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -73,6 +79,55 @@ export const useInternships = () => {
         },
       ];
     },
+  });
+};
+
+// Get Companies
+export const useCompanies = (status?: string, page = 1, size = 10) => {
+  return useQuery({
+    queryKey: ["companies", status, page, size],
+    queryFn: async () => {
+      const response = await api.get<
+        SuccessResponse<PaginatedResponse<Company>>
+      >("/companies", {
+        params: { status, page, size },
+      });
+      return response.data.data;
+    },
+  });
+};
+
+// Get Internships by Company
+export const useCompanyInternships = (
+  companyId: number,
+  page = 1,
+  size = 5,
+  search?: string,
+  filterStatus?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "company-internships",
+      companyId,
+      page,
+      size,
+      search,
+      filterStatus,
+    ],
+    queryFn: async () => {
+      const { data } = await api.get<
+        SuccessResponse<PaginatedResponse<InternshipResponse>>
+      >(`/companies/${companyId}/internships`, {
+        params: {
+          page,
+          size,
+          search,
+          filterStatus,
+        },
+      });
+      return data.data;
+    },
+    enabled: !!companyId,
   });
 };
 

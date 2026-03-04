@@ -25,6 +25,7 @@ export interface Company {
   email?: string;
   hrEmail?: string;
   description?: string;
+  logo?: string;
 }
 
 export interface Internship {
@@ -134,12 +135,11 @@ export interface StudentDashboardResponse {
 }
 
 export interface PaginatedResponse<T> {
-  content: T[];
-  pageNo: number;
-  pageSize: number;
+  data: T[];
+  currentPage: number;
+  size: number;
   totalElements: number;
   totalPages: number;
-  last: boolean;
 }
 
 export interface SuccessResponse<T> {
@@ -158,4 +158,18 @@ export interface InternshipReportResponse {
   supervisorFeedback?: string;
   supervisorRating?: number;
   status: string;
+}
+
+export interface InternshipResponse {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  requirements: string;
+
+  status: string;
+  slots: number;
+  deadline: string;
+  createdAt: string;
+  applicationCount: number;
 }

@@ -207,11 +207,8 @@ export default function InternshipMonitoring() {
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
             Monthly Reports
           </h1>
-          <p className="text-muted-foreground text-xs font-medium">
-            Total reports:{" "}
-            <span className="text-foreground font-bold">
-              {pagination?.totalElements || 0}
-            </span>
+          <p className="text-muted-foreground text-sm font-medium">
+            Review and provide feedback on your students' monthly progress.
           </p>
         </div>
 
