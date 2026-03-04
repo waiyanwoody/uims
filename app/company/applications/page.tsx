@@ -84,7 +84,21 @@ export default function CompanyApplications() {
                   <TableCell>{app.internship?.title}</TableCell>
 
                   <TableCell>
-                    <Badge>{app.status}</Badge>
+                    <Badge
+                      className={
+                        app.status === "APPROVED"
+                          ? "bg-green-500 text-white"
+                          : app.status === "PENDING"
+                          ? "bg-yellow-500 text-white"
+                          : app.status === "INTERVIEWING"
+                          ? "bg-blue-500 text-white"
+                          : app.status === "REJECTED"
+                          ? "bg-red-500 text-white"
+                          : "bg-gray-500 text-white"
+                      }
+                    >
+                      {app.status}
+                    </Badge>
                   </TableCell>
 
                   <TableCell>

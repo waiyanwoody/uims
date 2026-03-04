@@ -1,12 +1,11 @@
 import api from "@/lib/api";
 import { useEffect, useState, useCallback } from "react";
 
-interface CompanyDashboardData {
-  activePostings: number;
-  newApplicationsCount: number;
-  activeInternsCount: number;
-  pendingEvaluationsCount: number;
-  recentApplications: [];
+interface SupervisorDashboardData {
+  totalStudents: number;
+  studentsInInternship: number;
+  uniqueCompaniesCount: number;
+  pendingGradingCount: number;
 }
 
 interface ApiResponse<T> {
@@ -15,8 +14,8 @@ interface ApiResponse<T> {
   message: string;
 }
 
-export const useCompanyDashboard = () => {
-  const [data, setData] = useState<CompanyDashboardData | null>(null);
+export const useSupervisorDashboard = () => {
+  const [data, setData] = useState<SupervisorDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,12 +24,12 @@ export const useCompanyDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get<ApiResponse<CompanyDashboardData>>(
-        "/company/dashboard"
+      const response = await api.get<ApiResponse<SupervisorDashboardData>>(
+        "/supervisor/dashboard"
       );
 
       if (response.data.success) {
-        setData(response.data.data); // 👈 IMPORTANT (extract nested data)
+        setData(response.data.data);
       } else {
         setError(response.data.message);
       }

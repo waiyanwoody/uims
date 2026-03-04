@@ -15,21 +15,27 @@ import {
   Zap,
   Sparkles,
   Loader,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useStudentDashboard } from "@/lib/api-hooks";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  ApplicationSummary,
+  useStudentDashboard,
+} from "@/hooks/StudentHook/useStudentDashboard";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
   const { data: dashboardData, isLoading } = useStudentDashboard();
 
-  const applicationStats = dashboardData?.stats || {
-    openInternships: 0,
-    totalApplications: 0,
-    pendingApplications: 0,
-    weeklyReports: 0,
-  };
+  const applicationStats: ApplicationSummary =
+    dashboardData?.applicationSummary || {
+      TOTAL: 0,
+      INTERVIEWING: 0,
+      PENDING: 0,
+      APPROVED: 0,
+      REJECTED: 0,
+    };
 
   const recentApplications: any[] = dashboardData?.applications || [];
   const reviews: any[] = dashboardData?.reviews || [];
@@ -67,7 +73,7 @@ export default function StudentDashboard() {
         <div className="space-y-4 animate-fadeIn">
           <div>
             <h1 className="text-4xl font-bold text-foreground">
-              Welcome back, {user?.name || "Student"}!
+              Welcome back, {user?.name || "Student"}
             </h1>
             <p className="text-muted-foreground mt-1">
               Track your internship journey in real-time
@@ -88,29 +94,29 @@ export default function StudentDashboard() {
               : [
                   {
                     icon: Briefcase,
-                    label: "All Internship Posts",
-                    value: applicationStats.openInternships,
+                    label: "My Applications",
+                    value: applicationStats.TOTAL,
                     color: "from-blue-500/20",
                     textColor: "text-blue-600",
                   },
                   {
                     icon: CheckCircle,
-                    label: "My Applications",
-                    value: applicationStats.totalApplications,
+                    label: "Approved Applications",
+                    value: applicationStats.APPROVED,
                     color: "from-emerald-500/20",
                     textColor: "text-emerald-600",
                   },
                   {
                     icon: Clock,
                     label: "Pending Applications",
-                    value: applicationStats.pendingApplications,
+                    value: applicationStats.PENDING,
                     color: "from-amber-500/20",
                     textColor: "text-amber-600",
                   },
                   {
                     icon: AlertCircle,
-                    label: "Weekly Reports",
-                    value: applicationStats.weeklyReports,
+                    label: "Interviewing Applications",
+                    value: applicationStats.INTERVIEWING,
                     color: "from-red-500/20",
                     textColor: "text-red-600",
                   },
@@ -179,7 +185,9 @@ export default function StudentDashboard() {
                   : recentApplications.slice(0, 3).map((app, index) => (
                       <div
                         key={app.id}
-                        className={`group p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md cursor-pointer animate-slideInUp ${getStatusColor(app.status)}`}
+                        className={`group p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md cursor-pointer animate-slideInUp ${getStatusColor(
+                          app.status
+                        )}`}
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <div className="flex items-start gap-4">
@@ -227,7 +235,7 @@ export default function StudentDashboard() {
             <Card className="p-6 border-border animate-slideInRight">
               <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                Review Feedback
+                CV Form
               </h3>
               <div className="space-y-4">
                 {isLoading ? (
@@ -237,42 +245,50 @@ export default function StudentDashboard() {
                       className="h-14 bg-secondary rounded animate-shimmer"
                     ></div>
                   ))
-                ) : reviews && reviews.length > 0 ? (
-                  reviews.map((review, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg bg-secondary/50 border border-border space-y-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-sm">
-                          {review.reviewer}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {review.role}
-                        </span>
-                      </div>
-                      <p className="text-sm text-foreground/90 italic">
-                        &quot;{review.feedback}&quot;
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Sparkles
-                              key={i}
-                              className={`w-3 h-3 ${i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground"}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {review.date}
-                        </span>
-                      </div>
-                    </div>
-                  ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No reviews yet.
-                  </p>
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    {dashboardData?.cvUploaded ? (
+                      /* Success State: Clean, subtle, and reassuring */
+                      <div className="group relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-50/50 p-5 dark:bg-emerald-950/10">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <CheckCircle className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-emerald-900 dark:text-emerald-400">
+                              CV Verified
+                            </h3>
+                            <p className="text-sm text-emerald-700/80 dark:text-emerald-500/80">
+                              Your profile is complete and ready for
+                              applications.
+                            </p>
+                          </div>
+                        </div>
+                        {/* Decorative background element */}
+                        <div className="absolute -right-4 -top-4 h-16 w-16 rotate-12 bg-emerald-500/5 transition-transform group-hover:scale-110" />
+                      </div>
+                    ) : (
+                      /* Empty/Warning State: Encouraging and Action-Oriented */
+                      <div className="rounded-xl border border-dashed border-muted-foreground/20 bg-card p-8 text-center shadow-sm">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/20">
+                          <AlertCircle className="h-7 w-7" />
+                        </div>
+                        <h3 className="mb-2 text-lg font-bold tracking-tight">
+                          Boost your chances!
+                        </h3>
+                        <p className="mx-auto max-w-[280px] text-sm text-muted-foreground mb-6">
+                          No CV uploaded yet. Upload your resume to unlock
+                          personalized feedback and start applying.
+                        </p>
+                        <Link href="/student/cvs">
+                          <Button className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all">
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload CV Now
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </Card>

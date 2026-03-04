@@ -1,12 +1,18 @@
 import api from "@/lib/api";
 import { useEffect, useState, useCallback } from "react";
 
-interface CompanyDashboardData {
-  activePostings: number;
-  newApplicationsCount: number;
-  activeInternsCount: number;
-  pendingEvaluationsCount: number;
-  recentApplications: [];
+// Matches your new JSON structure
+export interface ApplicationSummary {
+  TOTAL: number;
+  INTERVIEWING: number;
+  PENDING: number;
+  APPROVED: number;
+  REJECTED: number;
+}
+
+interface StudentDashboardData {
+  applicationSummary: ApplicationSummary;
+  cvUploaded: boolean;
 }
 
 interface ApiResponse<T> {
@@ -15,8 +21,8 @@ interface ApiResponse<T> {
   message: string;
 }
 
-export const useCompanyDashboard = () => {
-  const [data, setData] = useState<CompanyDashboardData | null>(null);
+export const useStudentDashboard = () => {
+  const [data, setData] = useState<StudentDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,17 +31,20 @@ export const useCompanyDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get<ApiResponse<CompanyDashboardData>>(
-        "/company/dashboard"
+      // Changed endpoint to student dashboard
+      const response = await api.get<ApiResponse<StudentDashboardData>>(
+        "/student/dashboard"
       );
 
       if (response.data.success) {
-        setData(response.data.data); // 👈 IMPORTANT (extract nested data)
+        setData(response.data.data);
       } else {
         setError(response.data.message);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch dashboard");
+      setError(
+        err.response?.data?.message || "Failed to fetch student dashboard"
+      );
     } finally {
       setIsLoading(false);
     }

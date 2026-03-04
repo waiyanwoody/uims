@@ -45,7 +45,7 @@ export const useUpdateApplicationStatus = () => {
   const rejectApplication = async (id: number) => {
     try {
       setIsUpdating(true);
-      await api.post(`/applications/${id}/status`, { status: "REJECTED" });
+      await api.post(`/companies/applications/${id}/reject`);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message };
