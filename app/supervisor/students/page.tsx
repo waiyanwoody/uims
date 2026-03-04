@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAllStudents } from "@/lib/api-hooks";
+import { StudentResponse } from "@/types/types";
 import {
   User,
   Mail,
@@ -36,287 +38,21 @@ export default function AssignedStudents() {
   const [statusFilter, setStatusFilter] = useState("all");
   const studentsPerPage = isMobile ? 5 : 10;
 
-  const students = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      email: "sarah@uni.edu",
-      major: "CS",
-      role: "Frontend Dev",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      email: "michael@uni.edu",
-      major: "CS",
-      role: "Backend Dev",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Emma Davis",
-      email: "emma@uni.edu",
-      major: "Data Science",
-      role: "Data Science",
-      company: "DataCorp",
-      status: "interviewing",
-    },
-    {
-      id: 4,
-      name: "James Wilson",
-      email: "james@uni.edu",
-      major: "CS",
-      role: "Frontend Dev",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 5,
-      name: "Lisa Anderson",
-      email: "lisa@uni.edu",
-      major: "CS",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 6,
-      name: "David Martinez",
-      email: "david@uni.edu",
-      major: "IT",
-      role: "DevOps",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 7,
-      name: "Rachel Green",
-      email: "rachel@uni.edu",
-      major: "Marketing",
-      role: "Social Media",
-      company: "AdAgency",
-      status: "active",
-    },
-    {
-      id: 8,
-      name: "Ross Geller",
-      email: "ross@uni.edu",
-      major: "History",
-      role: "Researcher",
-      company: "Museum",
-      status: "interviewing",
-    },
-    {
-      id: 9,
-      name: "Joey Tribbiani",
-      email: "joey@uni.edu",
-      major: "Arts",
-      role: "Actor",
-      company: "Studio",
-      status: "active",
-    },
-    {
-      id: 10,
-      name: "Chandler Bing",
-      email: "chandler@uni.edu",
-      major: "Finance",
-      role: "Data Transmuter",
-      company: "Corp",
-      status: "active",
-    },
-    {
-      id: 11,
-      name: "Monica Geller",
-      email: "monica@uni.edu",
-      major: "Culinary",
-      role: "Chef",
-      company: "Restaurant",
-      status: "active",
-    },
-    {
-      id: 12,
-      name: "Phoebe Buffay",
-      email: "phoebe@uni.edu",
-      major: "Music",
-      role: "Musician",
-      company: "Central Perk",
-      status: "interviewing",
-    },
-    {
-      id: 13,
-      name: "William Smith",
-      email: "william@uni.edu",
-      major: "CS",
-      role: "Fullstack",
-      company: "Tech Corp",
-      status: "active",
-    },
-    {
-      id: 14,
-      name: "John Doe",
-      email: "john@uni.edu",
-      major: "IT",
-      role: "Network",
-      company: "CloudTech",
-      status: "active",
-    },
-    {
-      id: 15,
-      name: "Jane Roe",
-      email: "jane@uni.edu",
-      major: "BA",
-      role: "Analyst",
-      company: "DataCorp",
-      status: "active",
-    },
-    {
-      id: 16,
-      name: "Bob Builder",
-      email: "bob@uni.edu",
-      major: "CS",
-      role: "QA",
-      company: "InnoSoft",
-      status: "active",
-    },
-    {
-      id: 17,
-      name: "Alice Wong",
-      email: "alice@uni.edu",
-      major: "CS",
-      role: "Software Eng",
-      company: "Google",
-      status: "active",
-    },
-    {
-      id: 18,
-      name: "Bob Martinez",
-      email: "bob.m@uni.edu",
-      major: "BA",
-      role: "Product Manager",
-      company: "Apple",
-      status: "active",
-    },
-    {
-      id: 19,
-      name: "Carol Davis",
-      email: "carol@uni.edu",
-      major: "DS",
-      role: "Data Science",
-      company: "Meta",
-      status: "active",
-    },
-    {
-      id: 20,
-      name: "Carl Davis",
-      email: "carl@uni.edu",
-      major: "DS",
-      role: "Data Science",
-      company: "Huawei",
-      status: "active",
-    },
-    {
-      id: 21,
-      name: "Diana Prince",
-      email: "diana@uni.edu",
-      major: "CS",
-      role: "Security",
-      company: "Amazon",
-      status: "active",
-    },
-    {
-      id: 22,
-      name: "Peter Parker",
-      email: "peter@uni.edu",
-      major: "CS",
-      role: "Photographer",
-      company: "Daily Bugle",
-      status: "interviewing",
-    },
-    {
-      id: 23,
-      name: "Bruce Wayne",
-      email: "bruce@uni.edu",
-      major: "Finance",
-      role: "CEO Assistant",
-      company: "Wayne Ent",
-      status: "interviewing",
-    },
-    {
-      id: 24,
-      name: "Clark Kent",
-      email: "clark@uni.edu",
-      major: "Journalism",
-      role: "Reporter",
-      company: "Daily Planet",
-      status: "interviewing",
-    },
-    {
-      id: 25,
-      name: "Barry Allen",
-      email: "barry@uni.edu",
-      major: "Forensics",
-      role: "Lab Tech",
-      company: "CCPD",
-      status: "interviewing",
-    },
-    {
-      id: 26,
-      name: "Arthur Curry",
-      email: "arthur@uni.edu",
-      major: "Marine Bio",
-      role: "Researcher",
-      company: "Aquarium",
-      status: "interviewing",
-    },
-    {
-      id: 27,
-      name: "Tony Stark",
-      email: "tony@uni.edu",
-      major: "Engineering",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 28,
-      name: "Steve Rogers",
-      email: "steve@uni.edu",
-      major: "History",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 29,
-      name: "Natasha Romanoff",
-      email: "natasha@uni.edu",
-      major: "BA",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-    {
-      id: 30,
-      name: "Thor Odinson",
-      email: "thor@uni.edu",
-      major: "Astro",
-      role: "Unassigned",
-      company: "N/A",
-      status: "pending",
-    },
-  ];
+  const { data: paginatedData, isLoading } = useAllStudents(1, 100);
+  const students = paginatedData?.data || [];
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.role.toLowerCase().includes(searchTerm.toLowerCase());
+      student.studentNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.companyName &&
+        student.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
+
     const matchesStatus =
-      statusFilter === "all" || student.status === statusFilter;
+      statusFilter === "all" ||
+      (student.enrollmentStatus?.toUpperCase() || "PENDING") === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -327,6 +63,36 @@ export default function AssignedStudents() {
     indexOfFirstStudent,
     indexOfLastStudent,
   );
+
+  const getStatusColor = (status?: string) => {
+    const s = status?.toUpperCase() || "PENDING";
+    switch (s) {
+      case "COMPLETED":
+        return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800";
+      case "IN_PROGRESS":
+        return "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800";
+      case "PENDING":
+        return "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800";
+      default:
+        return "bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-800";
+    }
+  };
+
+  const formatStatus = (status?: string) => {
+    if (!status) return "Pending";
+    return status
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-lg"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -370,9 +136,9 @@ export default function AssignedStudents() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="interviewing">Interviewing</SelectItem>
-                  <SelectItem value="pending">No Internship</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -389,7 +155,7 @@ export default function AssignedStudents() {
                 style={{ animationDelay: `${idx * 40}ms` }}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {/* Avatar/Initial - Even More Compact */}
+                  {/* Avatar/Initial */}
                   <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-500 shadow-sm font-bold text-base uppercase flex-shrink-0">
                     {student.name.charAt(0)}
                   </div>
@@ -403,6 +169,10 @@ export default function AssignedStudents() {
                         <Mail className="w-3" />
                         {student.email}
                       </span>
+                      <span className="flex items-center gap-1.5 align-middle">
+                        <User className="w-3" />
+                        {student.studentNumber}
+                      </span>
                       <span className="flex items-center gap-1.5 font-medium text-foreground/70 align-middle">
                         <GraduationCap className="w-3" />
                         {student.major}
@@ -412,43 +182,40 @@ export default function AssignedStudents() {
                 </div>
 
                 <div className="mt-4 sm:mt-0 flex items-center justify-between sm:justify-end gap-4 md:gap-12 w-full sm:w-auto">
-                  {/* Internship Info - Standard text style */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 min-w-0">
+                  {/* Internship Info */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 min-w-0">
                     <div className="flex items-center gap-2 sm:w-[160px] flex-shrink-0">
                       <Briefcase className="w-3.5 h-3.5 text-primary opacity-60 flex-shrink-0" />
                       <span className="text-xs font-semibold text-foreground truncate">
-                        {student.role}
+                        {student.internshipTitle || "\u00A0"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 sm:w-[140px] flex-shrink-0">
                       <TrendingUp className="w-3.5 h-3.5 text-accent opacity-60 flex-shrink-0" />
                       <span className="text-xs font-medium text-muted-foreground truncate">
-                        {student.company}
+                        {student.companyName || "\u00A0"}
                       </span>
                     </div>
                   </div>
 
-                  {/* Status and Action - perfectly centered */}
-                  <div className="flex items-center gap-3 sm:gap-6 sm:w-[200px] justify-end">
-                    {student.status === "active" ? (
-                      <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
+                  {/* Status and Action */}
+                  <div className="flex items-center gap-3 sm:gap-6 sm:w-[150px] justify-end">
+                    <Badge
+                      className={`${getStatusColor(student.enrollmentStatus)} h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap`}
+                    >
+                      {student.enrollmentStatus?.toUpperCase() ===
+                        "COMPLETED" ||
+                      student.enrollmentStatus?.toUpperCase() ===
+                        "IN_PROGRESS" ? (
                         <CheckCircle2 className="w-3 h-3" />
-                        Active
-                      </Badge>
-                    ) : student.status === "interviewing" ? (
-                      <Badge className="bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
-                        <Clock className="w-3 h-3" />
-                        Interviewing
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 h-7 flex items-center justify-center gap-1.5 px-3 text-[10px] font-bold shadow-none whitespace-nowrap">
+                      ) : (
                         <AlertCircle className="w-3 h-3" />
-                        No Internship
-                      </Badge>
-                    )}
+                      )}
+                      {formatStatus(student.enrollmentStatus)}
+                    </Badge>
 
                     <div className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0 whitespace-nowrap">
-                      View Profile
+                      View
                       <ChevronRight className="w-4 h-4" />
                     </div>
 

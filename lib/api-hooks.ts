@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import api from "./api";
 import {
   Company,
+  CompanyDetailResponse,
   InternshipResponse,
   PaginatedResponse,
+  StudentResponse,
   SuccessResponse,
 } from "@/types/types";
 
@@ -82,6 +84,21 @@ export const useInternships = () => {
   });
 };
 
+// Get All Students (Supervisor)
+export const useAllStudents = (page = 1, size = 10) => {
+  return useQuery({
+    queryKey: ["all-students", page, size],
+    queryFn: async () => {
+      const response = await api.get<
+        SuccessResponse<PaginatedResponse<StudentResponse>>
+      >("/students", {
+        params: { page, size },
+      });
+      return response.data.data;
+    },
+  });
+};
+
 // Get Companies
 export const useCompanies = (status?: string, page = 1, size = 10) => {
   return useQuery({
@@ -94,6 +111,20 @@ export const useCompanies = (status?: string, page = 1, size = 10) => {
       });
       return response.data.data;
     },
+  });
+};
+
+// Get Company Details
+export const useCompanyDetails = (companyId: number) => {
+  return useQuery({
+    queryKey: ["company-details", companyId],
+    queryFn: async () => {
+      const response = await api.get<SuccessResponse<CompanyDetailResponse>>(
+        `/companies/${companyId}`,
+      );
+      return response.data.data;
+    },
+    enabled: !!companyId,
   });
 };
 

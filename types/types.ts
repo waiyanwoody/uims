@@ -21,11 +21,24 @@ export interface Company {
   location: string;
   status: string;
   createdAt: string;
-  contact_email?: string;
+  contact_email?: string; // These might be redundant if we have separate HR list, but keeping for compatibility
   email?: string;
   hrEmail?: string;
   description?: string;
   logo?: string;
+  website?: string; // Add website if it's common
+}
+
+export interface CompanyHr {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  role?: string;
+}
+
+export interface CompanyDetailResponse extends Company {
+  hrList: CompanyHr[];
 }
 
 export interface Internship {
@@ -62,6 +75,19 @@ export interface Student {
   major: string;
   created_at: Date;
   profile?: StudentProfile;
+}
+
+export interface StudentResponse {
+  id: number;
+  name: string;
+  gender: string;
+  studentNumber: string;
+  email: string;
+  major: string;
+  companyName?: string;
+  internshipTitle?: string;
+  enrollmentStatus?: string;
+  createdAt: string;
 }
 
 export interface StudentExpertise {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useCompanyApprovals, useCompanyInternships } from "@/lib/api-hooks";
+import { useCompanyDetails, useCompanyInternships } from "@/lib/api-hooks";
 import { InternshipResponse } from "@/types/types";
 import { formatDate } from "@/lib/utils";
 import {
@@ -63,8 +63,17 @@ import { useParams } from "next/navigation";
 export default function CompanyProfilePage() {
   const params = useParams();
   const id = Number(params?.id);
-  const { data: companies, isLoading: isLoadingCompany } =
-    useCompanyApprovals();
+
+  const {
+    data: companyDetails,
+    isLoading: isLoadingCompany,
+    isError,
+    error,
+  } = useCompanyDetails(id);
+
+  const company = companyDetails;
+  const hrs = companyDetails?.hrList || [];
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInternship, setSelectedInternship] =
@@ -78,10 +87,6 @@ export default function CompanyProfilePage() {
     setSelectedInternship(internship);
     setIsModalOpen(true);
   };
-
-  const company = useMemo(() => {
-    return companies?.find((c: any) => c.id === id);
-  }, [companies, id]);
 
   const allInternships = internshipData?.data || [];
   const itemsPerPage = 5;
@@ -102,11 +107,17 @@ export default function CompanyProfilePage() {
     );
   }
 
-  if (!company) {
+  if (isError || !company) {
+    if (isLoadingCompany) return null;
     return (
       <div className="flex h-[400px] flex-col items-center justify-center gap-4">
         <Building2 className="h-16 w-16 text-muted-foreground/30" />
         <h2 className="text-2xl font-bold">Company not found</h2>
+        <p className="text-muted-foreground text-center max-w-md">
+          {isError
+            ? `Error fetching company details (ID: ${id}): ${(error as any)?.response?.data?.message || (error as Error)?.message || "Unknown error"}`
+            : `Could not find company with ID: ${id}`}
+        </p>
         <Link href="/supervisor/companies">
           <Button variant="outline" className="gap-2 rounded-xl">
             <ArrowLeft className="w-4 h-4" /> Back to Directory
@@ -164,24 +175,14 @@ export default function CompanyProfilePage() {
                         Person in Charge
                       </p>
                       <p className="text-foreground text-sm font-bold">
-                        {company.hr_name}
+                        {hrs.length > 0 ? hrs[0].name : "N/A"}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-                        <Phone className="w-3 h-3 text-primary/70" />
-                        <span className="font-medium">{company.phone}</span>
+                        <Mail className="w-3 h-3 text-primary/70" />
+                        <span className="font-medium">
+                          {hrs.length > 0 ? hrs[0].email : "N/A"}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 pl-1 pt-2">
-                    <Mail className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                        Corporate Email
-                      </p>
-                      <p className="text-foreground text-sm truncate font-medium">
-                        {company.contact_email}
-                      </p>
                     </div>
                   </div>
 
@@ -193,18 +194,6 @@ export default function CompanyProfilePage() {
                       </p>
                       <p className="text-foreground text-sm font-medium">
                         {company.location}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 pl-1">
-                    <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                        Registration Date
-                      </p>
-                      <p className="text-foreground text-sm font-medium">
-                        {formatDate(company.registered_at)}
                       </p>
                     </div>
                   </div>
