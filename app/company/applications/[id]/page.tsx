@@ -6,25 +6,21 @@ import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
-import { ChevronLeft, Loader2, CheckCircle, XCircle, Calendar, Clock } from "lucide-react";
+import { ChevronLeft, Loader2, CheckCircle, XCircle } from "lucide-react";
 
 import { useApplicationDetails } from "@/hooks/StudentHook/useApplicationDetails";
-import { useReviewApplication } from "@/hooks/CompanyHook/useReviewApplication";
+import { useUpdateApplicationStatus } from "@/hooks/CompanyHook/useUpdateApplicationStatus";
+import { toast } from "sonner";
 
 export default function ApplicationViewDetails() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params.id);
 
-  const { application, loading, error } = useApplicationDetails(id);
-  const { reviewApplication, isSubmitting } = useReviewApplication();
-
-  const [mode, setMode] = useState<null | "ACCEPT" | "REJECT">(null);
-  const [message, setMessage] = useState("");
+  const { application, loading, error, refetch } = useApplicationDetails(id);
+  const { moveToNextStep, rejectApplication, isUpdating } = useUpdateApplicationStatus();
 
   if (loading) {
     return (
@@ -42,26 +38,37 @@ export default function ApplicationViewDetails() {
     );
   }
 
-  const accept = async () => {
-    // const result = await reviewApplication(id, {
-    //   status: "INTERVIEW",
-    //   interviewDate: `${date}T${time}`,
-    //   message,
-    // });
-    // if (result.success) router.back();
+  const handleNextStep = async () => {
+    const result = await moveToNextStep(id, application.status);
+    if (result.success) {
+      toast.success("Application moved to next step");
+      refetch()
+    };
   };
 
-  const reject = async () => {
-    const result = await reviewApplication(id, { status: "REJECTED" });
-    if (result.success) router.back();
+  const handleReject = async () => {
+    const result = await rejectApplication(id);
+    if (result.success) refetch();
   };
 
-  const statusColor = {
-    PENDING: "bg-yellow-100 text-yellow-800",
-    INTERVIEW: "bg-blue-100 text-blue-800",
-    APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-  } as const;
+  // Status stepper
+  const steps = ["PENDING", "INTERVIEWING", "APPROVED"];
+  const currentStepIndex = steps.indexOf(application.status);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800";
+      case "INTERVIEWING":
+        return "bg-blue-100 text-blue-800";
+      case "APPROVED":
+        return "bg-green-100 text-green-800";
+      case "REJECTED":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-6">
@@ -76,7 +83,7 @@ export default function ApplicationViewDetails() {
 
       {/* Application Info */}
       <Card className="p-6 space-y-4 shadow-lg hover:shadow-xl transition-all duration-200">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold">
           Application Review
         </h2>
 
@@ -90,46 +97,56 @@ export default function ApplicationViewDetails() {
           <p>
             <span className="font-semibold">Internship:</span> {application.internship.title}
           </p>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">Status:</span>
-            <Badge className={statusColor[application.status]}>{application.status}</Badge>
+
+          <div className="flex flex-col space-y-4">
+            {/* Stepper */}
+          <div className="flex items-center gap-4 mt-4">
+            {steps.map((step, index) => (
+              <div key={step} className="flex items-center gap-2">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    index <= currentStepIndex ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+                  }`}
+                >
+                  {index + 1}
+                </div>
+                <span
+                  className={`text-sm font-medium ${
+                    index <= currentStepIndex ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {step}
+                </span>
+                {index < steps.length - 1 && <div className="w-8 h-[2px] bg-gray-300"></div>}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex items-center gap-4">
+            {application.status !== "APPROVED" && application.status !== "REJECTED" && (
+              <Button
+                onClick={handleNextStep}
+                disabled={isUpdating}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <CheckCircle /> Move to Next Step
+              </Button>
+            )}
+
+            {application.status !== "REJECTED" && (
+              <Button
+                variant="destructive"
+                onClick={handleReject}
+                disabled={isUpdating}
+                className="flex items-center gap-2"
+              >
+                <XCircle /> Reject
+              </Button>
+            )}
+          </div>
           </div>
         </div>
-
-        <a
-          href={application.cvForm.filePath}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-block mt-2"
-        >
-          <Button variant="outline">View CV</Button>
-        </a>
       </Card>
-
-      {/* Decision Buttons */}
-      <Card className="p-6 space-y-4 shadow-lg  hover:shadow-xl transition-all duration-200">
-        <h3 className="text-lg font-bold">Decision</h3>
-
-        <div className="flex flex-wrap gap-4">
-          <Button
-            onClick={() => setMode("ACCEPT")}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <CheckCircle />
-            Accept 
-          </Button>
-
-          <Button
-            variant="destructive"
-            className="flex items-center gap-2"
-            onClick={() => setMode("REJECT")}
-          >
-            <XCircle />
-            Reject
-          </Button>
-        </div>
-      </Card>
-
     </div>
   );
 }

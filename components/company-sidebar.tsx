@@ -14,6 +14,7 @@ import {
   X,
   GraduationCap,
   FileText,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,6 +36,7 @@ const menuItems = [
     label: "View Applications",
     href: "/company/applications",
   },
+  { icon: Users, label: "Active Interns", href: "/company/active-interns" },
   { icon: FileText, label: "Monthly Reports", href: "/company/monitoring" },
   { icon: Building2, label: "Company Profile", href: "/company/profile" },
   { icon: Settings, label: "Settings", href: "/company/settings" },
