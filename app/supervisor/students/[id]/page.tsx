@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,297 +38,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-
-interface Student {
-  name: string;
-  studentNumber: string;
-  email: string;
-  major: string;
-  assignedInternship: string;
-  address: string;
-  skills: string[];
-}
+import { useStudentFullDetail } from "@/hooks/SupervisorHook/useStudentFullDetail";
+import { InternshipMonthlyReport } from "@/types/types";
+import api from "@/lib/api";
+import { toast } from "sonner";
 
 export default function StudentProfile() {
   const params = useParams();
   const id = Number(params.id);
-
-  // Mock database of students to match the list in /students/page.tsx
-  const studentsDB: Record<number, Student> = {
-    1: {
-      name: "Sarah Johnson",
-      studentNumber: "2021CS001",
-      email: "sarah@uni.edu",
-      major: "CS",
-      assignedInternship: "Frontend Dev - Tech Corp",
-      address: "123 University Ave, Tech City",
-      skills: ["React", "TypeScript", "Tailwind CSS", "UI/UX Design"],
-    },
-    2: {
-      name: "Michael Chen",
-      studentNumber: "2021CS042",
-      email: "michael@uni.edu",
-      major: "CS",
-      assignedInternship: "Backend Dev - CloudTech",
-      address: "456 Silicon Valley, Innovation Way",
-      skills: ["Node.js", "PostgreSQL", "AWS", "Docker"],
-    },
-    3: {
-      name: "Emma Davis",
-      studentNumber: "2021DS012",
-      email: "emma@uni.edu",
-      major: "Data Science",
-      assignedInternship: "Data Science - DataCorp",
-      address: "789 Analytics Blvd, Data Center",
-      skills: ["Python", "R", "SQL", "Machine Learning"],
-    },
-    4: {
-      name: "James Wilson",
-      studentNumber: "2021CS088",
-      email: "james@uni.edu",
-      major: "CS",
-      assignedInternship: "Frontend Dev - Tech Corp",
-      address: "101 Web Street, Browser Town",
-      skills: ["Vue.js", "Javascript", "SCSS", "Jest"],
-    },
-    5: {
-      name: "Lisa Anderson",
-      studentNumber: "2021CS055",
-      email: "lisa@uni.edu",
-      major: "CS",
-      assignedInternship: "Pending assignment",
-      address: "202 Waiting Cir, Student Plaza",
-      skills: ["Java", "C++", "Algorithms"],
-    },
-    6: {
-      name: "David Martinez",
-      studentNumber: "2021IT023",
-      email: "david@uni.edu",
-      major: "IT",
-      assignedInternship: "DevOps - CloudTech",
-      address: "303 Server Farm, Network City",
-      skills: ["Linux", "Kubernetes", "Shell Scripting", "Azure"],
-    },
-    7: {
-      name: "Rachel Green",
-      studentNumber: "2021MK001",
-      email: "rachel@uni.edu",
-      major: "Marketing",
-      assignedInternship: "Social Media - AdAgency",
-      address: "New York, NY",
-      skills: ["Marketing", "Content Writing", "Social Media"],
-    },
-    8: {
-      name: "Ross Geller",
-      studentNumber: "2021HS001",
-      email: "ross@uni.edu",
-      major: "History",
-      assignedInternship: "Researcher - Museum",
-      address: "New York, NY",
-      skills: ["Paleontology", "Research", "Archiving"],
-    },
-    9: {
-      name: "Joey Tribbiani",
-      studentNumber: "2021AR001",
-      email: "joey@uni.edu",
-      major: "Arts",
-      assignedInternship: "Actor - Studio",
-      address: "New York, NY",
-      skills: ["Acting", "Performance", "Casting"],
-    },
-    10: {
-      name: "Chandler Bing",
-      studentNumber: "2021FN001",
-      email: "chandler@uni.edu",
-      major: "Finance",
-      assignedInternship: "Data Transmuter - Corp",
-      address: "New York, NY",
-      skills: ["Analysis", "Reporting", "Excel"],
-    },
-    11: {
-      name: "Monica Geller",
-      studentNumber: "2021CU001",
-      email: "monica@uni.edu",
-      major: "Culinary",
-      assignedInternship: "Chef - Restaurant",
-      address: "New York, NY",
-      skills: ["Cooking", "Kitchen Management"],
-    },
-    12: {
-      name: "Phoebe Buffay",
-      studentNumber: "2021MU001",
-      email: "phoebe@uni.edu",
-      major: "Music",
-      assignedInternship: "Musician - Central Perk",
-      address: "New York, NY",
-      skills: ["Songwriting", "Guitar", "Performance"],
-    },
-    13: {
-      name: "William Smith",
-      studentNumber: "2021CS013",
-      email: "william@uni.edu",
-      major: "CS",
-      assignedInternship: "Fullstack - Tech Corp",
-      address: "Philadelphia, PA",
-      skills: ["MERN Stack", "Firebase"],
-    },
-    14: {
-      name: "John Doe",
-      studentNumber: "2021IT014",
-      email: "john@uni.edu",
-      major: "IT",
-      assignedInternship: "Network - CloudTech",
-      address: "Los Angeles, CA",
-      skills: ["Cisco", "Routing", "Switching"],
-    },
-    15: {
-      name: "Jane Roe",
-      studentNumber: "2021BA015",
-      email: "jane@uni.edu",
-      major: "BA",
-      assignedInternship: "Analyst - DataCorp",
-      address: "Chicago, IL",
-      skills: ["PowerBI", "Tableau", "Strategy"],
-    },
-    16: {
-      name: "Bob Builder",
-      studentNumber: "2021CS016",
-      email: "bob@uni.edu",
-      major: "CS",
-      assignedInternship: "QA - InnoSoft",
-      address: "Houston, TX",
-      skills: ["Selenium", "Cypress", "Appium"],
-    },
-    17: {
-      name: "Alice Wong",
-      studentNumber: "2021CS017",
-      email: "alice@uni.edu",
-      major: "CS",
-      assignedInternship: "Software Eng - Google",
-      address: "Mountain View, CA",
-      skills: ["Go", "Kubernetes", "C++"],
-    },
-    18: {
-      name: "Bob Martinez",
-      studentNumber: "2021BA018",
-      email: "bob.m@uni.edu",
-      major: "BA",
-      assignedInternship: "Product Manager - Apple",
-      address: "Cupertino, CA",
-      skills: ["Product Strategy", "Agile"],
-    },
-    19: {
-      name: "Carol Davis",
-      studentNumber: "2021DS019",
-      email: "carol@uni.edu",
-      major: "DS",
-      assignedInternship: "Data Science - Meta",
-      address: "Menlo Park, CA",
-      skills: ["PyTorch", "NLP"],
-    },
-    20: {
-      name: "Carl Davis",
-      studentNumber: "2021DS020",
-      email: "carl@uni.edu",
-      major: "DS",
-      assignedInternship: "Data Science - Huawei",
-      address: "Shenzhen, China",
-      skills: ["5G Tech", "Big Data"],
-    },
-    21: {
-      name: "Diana Prince",
-      studentNumber: "2021CS021",
-      email: "diana@uni.edu",
-      major: "CS",
-      assignedInternship: "Security - Amazon",
-      address: "Seattle, WA",
-      skills: ["Cybersecurity", "IAM"],
-    },
-    22: {
-      name: "Peter Parker",
-      studentNumber: "2021CS022",
-      email: "peter@uni.edu",
-      major: "CS",
-      assignedInternship: "Photographer - Daily Bugle",
-      address: "Queens, NY",
-      skills: ["Photography", "Web Design"],
-    },
-    23: {
-      name: "Bruce Wayne",
-      studentNumber: "2021FN023",
-      email: "bruce@uni.edu",
-      major: "Finance",
-      assignedInternship: "CEO Assistant - Wayne Ent",
-      address: "Gotham, NJ",
-      skills: ["Corporate Finance", "Management"],
-    },
-    24: {
-      name: "Clark Kent",
-      studentNumber: "2021JU024",
-      email: "clark@uni.edu",
-      major: "Journalism",
-      assignedInternship: "Reporter - Daily Planet",
-      address: "Metropolis, NY",
-      skills: ["Writing", "Investigation"],
-    },
-    25: {
-      name: "Barry Allen",
-      studentNumber: "2021FO025",
-      email: "barry@uni.edu",
-      major: "Forensics",
-      assignedInternship: "Lab Tech - CCPD",
-      address: "Central City, MO",
-      skills: ["Chemistry", "Evidence Analysis"],
-    },
-    26: {
-      name: "Arthur Curry",
-      studentNumber: "2021MB026",
-      email: "arthur@uni.edu",
-      major: "Marine Bio",
-      assignedInternship: "Researcher - Aquarium",
-      address: "Amnesty Bay, ME",
-      skills: ["Marine Ecology", "Marine Biology"],
-    },
-    27: {
-      name: "Tony Stark",
-      studentNumber: "2021EN027",
-      email: "tony@uni.edu",
-      major: "Engineering",
-      assignedInternship: "Pending assignment",
-      address: "Malibu, CA",
-      skills: ["Mechanical Eng", "AI"],
-    },
-    28: {
-      name: "Steve Rogers",
-      studentNumber: "2021HS028",
-      email: "steve@uni.edu",
-      major: "History",
-      assignedInternship: "Pending assignment",
-      address: "Brooklyn, NY",
-      skills: ["Leadership", "History"],
-    },
-    29: {
-      name: "Natasha Romanoff",
-      studentNumber: "2021BA029",
-      email: "natasha@uni.edu",
-      major: "BA",
-      assignedInternship: "Pending assignment",
-      address: "Moscow, Russia",
-      skills: ["Intelligence", "Strategy"],
-    },
-    30: {
-      name: "Thor Odinson",
-      studentNumber: "2021AS030",
-      email: "thor@uni.edu",
-      major: "Astro",
-      assignedInternship: "Pending assignment",
-      address: "Asgard",
-      skills: ["Astrophysics", "Meteorology"],
-    },
-  };
-
-  const studentInfo: Student = studentsDB[id] || studentsDB[1]; // Fallback to Sarah if ID not found
+  const { studentFullDetail, isLoading, error } = useStudentFullDetail(id);
 
   const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
@@ -338,53 +63,87 @@ export default function StudentProfile() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [marks, setMarks] = useState(0);
+  const [localReports, setLocalReports] = useState<any[]>([]);
 
-  // Only active students have reports
-  const hasReports =
-    studentInfo.assignedInternship !== "Pending assignment" &&
-    ![
-      "Bruce Wayne",
-      "Clark Kent",
-      "Barry Allen",
-      "Arthur Curry",
-      "Peter Parker",
-    ].includes(studentInfo.name);
+  useEffect(() => {
+    if (studentFullDetail?.reports) {
+      const mapped = studentFullDetail.reports.map((r) => {
+        // Map backend status to UI status
+        let uiStatus = "Pending";
+        if (
+          r.status === "HR_AND_SUPERVISOR_VALIDATED" ||
+          r.status === "VERIFIED"
+        ) {
+          uiStatus = "Verified";
+        } else if (r.status === "HR_VALIDATED") {
+          uiStatus = "HR_Verify";
+        }
 
-  const [monthlyReports, setMonthlyReports] = useState(
-    hasReports
-      ? [
-          {
-            id: 1,
-            month: "February",
-            submittedDate: "2024-03-01",
-            status: "Verify",
-            description: `Working on implementing the new features for ${studentInfo.assignedInternship.split(" - ")[1]}.`,
-            attachmentName: `monthly_report_feb_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
-            feedback: null,
-            supervisorMarks: null,
-            hrMarks: 44, // Mock HR mark already given
-            marks: null,
-          },
-          {
-            id: 2,
-            month: "January",
-            submittedDate: "2024-02-01",
-            status: "Review",
-            description:
-              "Completed the initial project setup and started working on the core modules.",
-            attachmentName: `monthly_report_jan_${studentInfo.name.split(" ")[0].toLowerCase()}.pdf`,
-            feedback:
-              "Good start on the project. The implementation follows the required standards.",
-            supervisorMarks: 43,
-            hrMarks: 42,
-            marks: 85,
-          },
-        ]
-      : [],
-  );
+        return {
+          ...r,
+          status: uiStatus,
+          submittedDate: r.createdAt
+            ? new Date(r.createdAt).toISOString().split("T")[0]
+            : "N/A",
+          attachmentName: r.reportFilePath
+            ? r.reportFilePath.split("/").pop()
+            : "report.pdf",
+          description: r.summary,
+          supervisorFeedback: r.supervisorFeedback,
+          hrFeedback: r.hrFeedback,
+          supervisorMarks: r.supervisorScore,
+          hrMarks: r.hrScore,
+          marks: (r.hrScore || 0) + (r.supervisorScore || 0),
+          month: `Month ${r.monthNumber}`,
+        };
+      });
+      setLocalReports(mapped);
+    }
+  }, [studentFullDetail]);
 
-  // Calculate Progression based on monthly reports
-  const progressionProgress = Math.min((monthlyReports.length / 6) * 100, 100); // Assuming 6-month internship
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Ensure we have student details
+  if (error || !studentFullDetail) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[500px] gap-4">
+        <AlertCircle className="w-10 h-10 text-destructive" />
+        <p className="text-lg font-medium">
+          {error || "Student not found or incomplete data"}
+        </p>
+        <Link href="/supervisor/students">
+          <Button>Back to Students</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const studentInfo = {
+    name: studentFullDetail.name || "N/A",
+    studentNumber: studentFullDetail.studentNumber || "N/A",
+    email: studentFullDetail.email || "N/A",
+    major: studentFullDetail.major || "N/A",
+    assignedInternship:
+      studentFullDetail.reports?.[0]?.internshipTitle || "Internship", // Get from first report as placeholder
+    address: studentFullDetail.profile?.address || "N/A",
+    skills: studentFullDetail.skills || [],
+  };
+
+  const monthlyReports = localReports;
+  const hasReports = monthlyReports.length > 0;
+
+  // Calculate Progression based on valid reports (HR_AND_SUPERVISOR_VALIDATED which is mapped to "Verified")
+  const verifiedReportsCount = monthlyReports.filter(
+    (r) => r.status === "Verified",
+  ).length;
+  const progressionProgress = Math.min((verifiedReportsCount / 3) * 100, 100); // Assuming 3-month internship
 
   const totalPages = Math.ceil(monthlyReports.length / reportsPerPage);
   const indexOfLastReport = currentPage * reportsPerPage;
@@ -399,21 +158,35 @@ export default function StudentProfile() {
     setIsDialogOpen(true);
   };
 
+  const handleDownload = async (reportId: number) => {
+    try {
+      const response = await api.get(`/internship-reports/${reportId}`);
+      if (response.data.success && response.data.data.presignedUrl) {
+        window.open(response.data.data.presignedUrl, "_blank");
+      } else {
+        toast.error("Download URL not available");
+      }
+    } catch (error) {
+      console.error("Failed to download report:", error);
+      toast.error("Failed to download report");
+    }
+  };
+
   const handleFinishReviewed = () => {
     setIsConfirmDialogOpen(true);
   };
 
   const handleConfirmReview = () => {
     if (selectedReport) {
-      setMonthlyReports((prev) =>
+      setLocalReports((prev) =>
         prev.map((r) =>
           r.id === selectedReport.id
             ? {
                 ...r,
-                status: "Review",
-                feedback,
+                status: "Verified",
+                supervisorFeedback: feedback,
                 supervisorMarks: marks,
-                marks: (r.hrMarks || 0) + marks, // Combine with HR marks for total 100
+                marks: (r.hrMarks || 0) + marks,
               }
             : r,
         ),
@@ -426,20 +199,18 @@ export default function StudentProfile() {
     setMarks(0);
   };
 
-  const [marks, setMarks] = useState(0);
-
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Review":
+      case "Verified":
         return (
           <Badge className="bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/20 flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Reviewed
+            <CheckCircle2 className="w-3 h-3" /> Verified
           </Badge>
         );
-      case "Verify":
+      case "HR_Verify":
         return (
           <Badge className="bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/20 flex items-center gap-1">
-            <Clock className="w-3 h-3" /> Ready for Review
+            <Clock className="w-3 h-3" /> HR Verified
           </Badge>
         );
       case "Pending":
@@ -552,7 +323,7 @@ export default function StudentProfile() {
                       <Badge
                         key={index}
                         variant="secondary"
-                        className="bg-secondary/50 hover:bg-primary/10 transition-colors text-[9px] py-0"
+                        className="transition-colors text-[9px] py-0"
                       >
                         {skill}
                       </Badge>
@@ -591,7 +362,7 @@ export default function StudentProfile() {
                     </div>
                     <div className="flex justify-between items-center text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
                       <span>Start</span>
-                      <span>Month 06</span>
+                      <span>Month 03</span>
                     </div>
                   </div>
                 </div>
@@ -728,7 +499,7 @@ export default function StudentProfile() {
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              {selectedReport?.status === "Verify"
+              {selectedReport?.status === "HR_Verify"
                 ? "Monthly Report Review"
                 : `MONTHLY REPORT DETAILS`}
             </DialogTitle>
@@ -799,7 +570,7 @@ export default function StudentProfile() {
                       {selectedReport.attachmentName}
                     </p>
                     <p className="text-[9px] text-muted-foreground font-medium">
-                      PDF • 2.4 MB
+                      PDF
                     </p>
                   </div>
                 </div>
@@ -807,55 +578,69 @@ export default function StudentProfile() {
                   variant="outline"
                   size="icon"
                   className="h-6 w-6 border-border hover:bg-primary hover:text-white transition-colors"
+                  onClick={() => handleDownload(selectedReport.id)}
                 >
                   <Download className="w-3 h-3" />
                 </Button>
               </div>
 
-              {selectedReport.status === "Review" &&
-                selectedReport.feedback && (
-                  <div className="space-y-3 animate-fadeIn">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-2">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Final Evaluation
+              {selectedReport.status === "Verified" && (
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Final Evaluation
+                    </p>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-black bg-emerald-500/5 text-emerald-600 border-emerald-500/20"
+                    >
+                      TOTAL: {selectedReport.marks || 0}/100
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2 rounded-lg bg-secondary/10 border border-border/50 text-center">
+                      <p className="text-[8px] uppercase font-bold text-muted-foreground mb-1">
+                        HR Score (50%)
                       </p>
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] font-black bg-emerald-500/5 text-emerald-600 border-emerald-500/20"
-                      >
-                        TOTAL: {selectedReport.marks || 0}/100
-                      </Badge>
+                      <p className="text-sm font-bold text-foreground">
+                        {selectedReport.hrMarks}/50
+                      </p>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2 rounded-lg bg-secondary/10 border border-border/50 text-center">
-                        <p className="text-[8px] uppercase font-bold text-muted-foreground mb-1">
-                          HR Score (50%)
-                        </p>
-                        <p className="text-sm font-bold text-foreground">
-                          {selectedReport.hrMarks}/50
-                        </p>
-                      </div>
-                      <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
-                        <p className="text-[8px] uppercase font-bold text-primary mb-1">
-                          Supervisor (50%)
-                        </p>
-                        <p className="text-sm font-bold text-primary">
-                          {selectedReport.supervisorMarks}/50
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                      <p className="text-[11px] leading-relaxed text-foreground/90 font-medium">
-                        {selectedReport.feedback}
+                    <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
+                      <p className="text-[8px] uppercase font-bold text-primary mb-1">
+                        Supervisor (50%)
+                      </p>
+                      <p className="text-sm font-bold text-primary">
+                        {selectedReport.supervisorMarks}/50
                       </p>
                     </div>
                   </div>
-                )}
 
-              {selectedReport.status === "Verify" && (
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="hr-feedback">
+                      <AccordionTrigger className="text-[10px] uppercase font-bold text-muted-foreground">
+                        HR Feedback
+                      </AccordionTrigger>
+                      <AccordionContent className="text-[11px] text-foreground/90 font-medium p-2 bg-secondary/10 rounded-md">
+                        {selectedReport.hrFeedback || "No feedback provided."}
+                      </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="supervisor-feedback">
+                      <AccordionTrigger className="text-[10px] uppercase font-bold text-primary">
+                        Supervisor Feedback
+                      </AccordionTrigger>
+                      <AccordionContent className="text-[11px] text-foreground/90 font-medium p-2 bg-primary/5 rounded-md">
+                        {selectedReport.supervisorFeedback ||
+                          "No feedback provided."}
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              )}
+
+              {selectedReport.status === "HR_Verify" && (
                 <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="text-[9px] uppercase font-bold text-blue-500 tracking-widest">
@@ -877,12 +662,14 @@ export default function StudentProfile() {
                 <Badge
                   variant="outline"
                   className={`${
-                    selectedReport.status === "Review"
+                    selectedReport.status === "Verified"
                       ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                       : "bg-amber-500/10 text-amber-500 border-amber-500/20"
                   } font-bold uppercase tracking-widest text-[9px] px-1.5 py-0`}
                 >
-                  {selectedReport.status}
+                  {selectedReport.status === "HR_Verify"
+                    ? "Ready for Supervisor"
+                    : selectedReport.status}
                 </Badge>
               </div>
             </div>
@@ -897,7 +684,7 @@ export default function StudentProfile() {
               <ArrowLeft className="w-3.5 h-3.5" />
               Close
             </Button>
-            {selectedReport?.status === "Verify" && (
+            {selectedReport?.status === "HR_Verify" && (
               <Button
                 onClick={handleFinishReviewed}
                 className="h-8 font-bold text-[10px] uppercase tracking-wider gap-2 shadow-lg shadow-primary/20 flex-1 sm:flex-none"

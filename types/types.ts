@@ -199,3 +199,49 @@ export interface InternshipResponse {
   createdAt: string;
   applicationCount: number;
 }
+
+export interface InternshipMonthlyReport {
+  id: number;
+  internshipId: number;
+  studentId: number;
+  studentName: string;
+  internshipTitle: string;
+  summary: string;
+  monthNumber: number;
+  reportFilePath: string;
+  hrScore: number | null;
+  hrFeedback: string | null;
+  hrValidated: boolean;
+  supervisorScore: number | null;
+  supervisorFeedback: string | null;
+  supervisorValidated: boolean;
+  status: string;
+  createdAt: string;
+}
+
+export interface StudentFullDetailProfile {
+  studentId: number;
+  name: string;
+  email: string;
+  major: string;
+  studentNumber: string;
+  profileImageUrl: string | null;
+  address: string | null;
+  bio: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  dateOfBirth: string | null;
+  skills: string[] | null;
+}
+
+export interface StudentFullDetailResponse {
+  id: number;
+  name: string;
+  gender: string;
+  studentNumber: string;
+  email: string;
+  major: string;
+  skills: string[];
+  profile: StudentFullDetailProfile;
+  reports: InternshipMonthlyReport[];
+}
